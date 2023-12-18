@@ -1,0 +1,15 @@
+<p><br style="clear:both"></p>
+<p>A mettre dans le fichier functions.php :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+$func = function ($a) {
+global $wp_version;
+return (object) array(
+'last_checked' =&amp;gt; time(),
+'version_checked' =&amp;gt; $wp_version,
+);
+};
+add_filter('pre_site_transient_update_core', $func);
+add_filter('pre_site_transient_update_plugins', $func);
+add_filter('pre_site_transient_update_themes', $func);
+
+</pre>

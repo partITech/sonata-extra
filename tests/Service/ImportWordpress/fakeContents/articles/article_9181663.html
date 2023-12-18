@@ -1,0 +1,269 @@
+
+<p>Si vous utilisez le bundle SonataPage , vous avez du remarquer que les blocks qui sont proposées sont pour certain, inutiles, ou non fonctionnels.<br><br>Nous allons voir comment nous pouvons cacher ces blocs de la liste de manière propre, avec un fichier de configuration, et une surcharge des templates admin de SonataPage.<br><br></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/09/image.png"><img decoding="async" loading="lazy" width="1024" height="416" src="https://www.partitech.com/wp-content/uploads/2023/09/image-1024x416.png" alt="" class="wp-image-2733" srcset="https://www.partitech.com/wp-content/uploads/2023/09/image-1024x416.png 1024w, https://www.partitech.com/wp-content/uploads/2023/09/image-300x122.png 300w, https://www.partitech.com/wp-content/uploads/2023/09/image-768x312.png 768w, https://www.partitech.com/wp-content/uploads/2023/09/image-1536x624.png 1536w, https://www.partitech.com/wp-content/uploads/2023/09/image-1440x585.png 1440w, https://www.partitech.com/wp-content/uploads/2023/09/image-800x325.png 800w, https://www.partitech.com/wp-content/uploads/2023/09/image-550x223.png 550w, https://www.partitech.com/wp-content/uploads/2023/09/image-1478x600.png 1478w, https://www.partitech.com/wp-content/uploads/2023/09/image.png 1867w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<h2>1 &#8211; La configuration</h2>
+
+
+
+<p>Nous allons devoir créer une liste des services que nous ne voulons pas afficher.  Cette liste va aller naturellement dans les parameters de notre fichier services :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+#config/services.yaml
+parameters:
+
+    sonata_page_excluded_blocks:
+        - 'sonata.media.block.gallery_list'
+        - 'sonata.media.block.feature_media'
+        - 'sonata.media.block.gallery'
+
+</pre></div>
+
+
+<p>Pour savoir le nom du service a exclure, c&rsquo;est assez simple, il est dans l&rsquo;url quand on clique dessus dans la vue de création de blocks partagés.</p>
+
+
+
+<h2>2 &#8211; fonction twig pour récupérer notre paramètre</h2>
+
+
+
+<p>Pour cacher les les blocs nous allons surcharger les templates de SonataPage. Nous devons donc récupérer notre configuration directement dans notre template. Nous allons donc créer une extension twig pour notre projet. C&rsquo;est assez classique, il est tres probable que vous en ayez déja un.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+#src/Twig/Extension/AppExtension.php
+&lt;?php
+namespace App\Twig;
+
+use Twig\Extension\AbstractExtension;
+use Twig\TwigFunction;
+
+class AppExtension extends AbstractExtension
+{
+    private $sonata_page_excluded_blocks;
+
+    public function __construct(array $sonata_page_excluded_blocks)
+    {
+        $this-&gt;sonata_page_excluded_blocks = $sonata_page_excluded_blocks;
+    }
+
+    public function getFunctions(): array
+    {
+        return &#91;
+            new TwigFunction('sonata_page_excluded_blocks', &#91;$this, 'getSonataPageExcludedBlocks']),
+        ];
+    }
+
+    public function getSonataPageExcludedBlocks(): array
+    {
+        return $this-&gt;sonata_page_excluded_blocks;
+    }
+}
+</pre></div>
+
+
+<p>Ensuite nous devons le référencer dans les services.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+services:
+    App\Twig\AppExtension:
+        arguments:
+            $sonata_page_excluded_blocks: '%sonata_page_excluded_blocks%'
+</pre></div>
+
+
+<h2>3 &#8211; Surcharge des templates</h2>
+
+
+
+<p>Vous le savez, tous les templates peuvent se surcharger. Il suffit de repérer le template dans votre bundle. Généralement il suffit de regarder la liste des templates twig dans le profiler, c&rsquo;est très souvent le premier.<br></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/09/image-2.png"><img decoding="async" loading="lazy" width="1024" height="484" src="https://www.partitech.com/wp-content/uploads/2023/09/image-2-1024x484.png" alt="" class="wp-image-2741" srcset="https://www.partitech.com/wp-content/uploads/2023/09/image-2-1024x484.png 1024w, https://www.partitech.com/wp-content/uploads/2023/09/image-2-300x142.png 300w, https://www.partitech.com/wp-content/uploads/2023/09/image-2-768x363.png 768w, https://www.partitech.com/wp-content/uploads/2023/09/image-2-800x378.png 800w, https://www.partitech.com/wp-content/uploads/2023/09/image-2-550x260.png 550w, https://www.partitech.com/wp-content/uploads/2023/09/image-2.png 1221w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p><br>On vois que notre template est  stocké dans :<br>vendor/sonata-project/page-bundle/src/Resources/views/<strong>BlockAdmin/select_type.html.twig</strong><br><br>Pour le surcharger, il suffit de le mettre dans notre répertoire template avec le chemin :<br>templates/bundles/NomDuBundle/<strong>RepertoireApresViews/&#8230;../VotreFichier.html.twig</strong><br><br>Ce qui nous donne :<br>templates/bundles/SonataPageBundle/<strong>BlockAdmin/select_type.html.twig</strong></p>
+
+
+
+<p><br>Une fois le fichier dupliqué, si on recharge la page, on devrais trouver le bon fichier dans la liste des templates de notre onglet Twig du profiler.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/09/image-1.png"><img decoding="async" loading="lazy" width="1024" height="483" src="https://www.partitech.com/wp-content/uploads/2023/09/image-1-1024x483.png" alt="" class="wp-image-2740" srcset="https://www.partitech.com/wp-content/uploads/2023/09/image-1-1024x483.png 1024w, https://www.partitech.com/wp-content/uploads/2023/09/image-1-300x142.png 300w, https://www.partitech.com/wp-content/uploads/2023/09/image-1-768x363.png 768w, https://www.partitech.com/wp-content/uploads/2023/09/image-1-800x378.png 800w, https://www.partitech.com/wp-content/uploads/2023/09/image-1-550x260.png 550w, https://www.partitech.com/wp-content/uploads/2023/09/image-1.png 1235w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<h2>4 &#8211; Surcharge de la liste des blocks dans notre template</h2>
+
+
+
+<p>Il nous reste plus qu&rsquo;a récupérer notre liste de blocks configuré dans notre parameters et de recréer la variable utiliser pour créer le tableau, sans nos blocks a exclure.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+        {% set excluded_blocks = sonata_page_excluded_blocks() %}
+        {% set filteredBlockServices = &#91;] %}
+        {% for key, service in blockServices %}
+            {% if key not in excluded_blocks %}
+                {% set filteredBlockServices = filteredBlockServices|merge({(key): service}) %}
+            {% endif %}
+        {% endfor %}
+        {% set blockServices = filteredBlockServices %}
+</pre></div>
+
+
+<p>Ce qui nous donne :<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+{#
+templates/bundles/_SonataPageBundle/BlockAdmin/select_type.html.twig
+
+#}
+
+{% extends '@SonataAdmin/CRUD/action.html.twig' %}
+
+{% block title %}{{ 'title_select_block_type'|trans({}, 'SonataPageBundle') }}{% endblock %}
+
+{% block content %}
+    &lt;div class=&quot;box box-success&quot;&gt;
+        &lt;div class=&quot;box-header&quot;&gt;
+            &lt;h3 class=&quot;box-title&quot;&gt;
+                {{ 'title_select_block_type'|trans({}, 'SonataPageBundle') }}
+            &lt;/h3&gt;
+        &lt;/div&gt;
+
+        {# surcharge pour exclude des blocs #}
+        {% set excluded_blocks = sonata_page_excluded_blocks() %}
+        {% set filteredBlockServices = &#91;] %}
+        {% for key, service in blockServices %}
+            {% if key not in excluded_blocks %}
+                {% set filteredBlockServices = filteredBlockServices|merge({(key): service}) %}
+            {% endif %}
+        {% endfor %}
+        {% set blockServices = filteredBlockServices %}
+        {# fin de surcharge pour exclude des blocs #}
+
+
+        &lt;div class=&quot;box-body&quot;&gt;
+            {% for code, blockService in blockServices %}
+                &lt;div class=&quot;col-lg-2 col-md-3 col-sm-4 col-xs-6&quot;&gt;
+                    &lt;a  href=&quot;{{ admin.generateUrl('create', {'type': code}) }}&quot;
+                        class=&quot;btn btn-app btn-block sonata-block-type&quot;
+                        data-toggle=&quot;tooltip&quot;
+                        data-placement=&quot;top&quot;
+                        {% if blockService.metadata.description %}
+                            title=&quot;{{ blockService.metadata.description|trans({}, blockService.metadata.domain|default('SonataBlockBundle')) }}&quot;
+                        {% endif %}
+                            &gt;
+                        {% if not blockService.metadata.image %}
+                            &lt;i class=&quot;{{ blockService.metadata.option('class') }}&quot; &gt;&lt;/i&gt;
+                        {% else %}
+                            &lt;img src=&quot;{{ asset(blockService.metadata.image) }}&quot; style=&quot;max-height: 20px; max-width: 100px;&quot;/&gt;
+                            &lt;br /&gt;
+                        {% endif %}
+                        &lt;span&gt;{{ blockService.metadata.title|trans({}, blockService.metadata.domain|default('SonataBlockBundle')) }}&lt;/span&gt;
+                    &lt;/a&gt;
+                &lt;/div&gt;
+            {% else %}
+                &lt;span class=&quot;alert alert-info&quot;&gt;{{ 'no_type_available'|trans({}, 'SonataPageBundle') }}&lt;/span&gt;
+            {% endfor %}
+
+            &lt;div class=&quot;clearfix&quot;&gt;&lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+{% endblock %}
+
+</pre></div>
+
+
+<p>Et si on recharge la page, nous devrions avoir la liste, épurée de nos blocks.<br></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/09/Selection_011.png"><img decoding="async" loading="lazy" width="1024" height="414" src="https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-1024x414.png" alt="" class="wp-image-2744" srcset="https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-1024x414.png 1024w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-300x121.png 300w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-768x310.png 768w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-1536x620.png 1536w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-1440x582.png 1440w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-800x323.png 800w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-550x222.png 550w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011-1485x600.png 1485w, https://www.partitech.com/wp-content/uploads/2023/09/Selection_011.png 1869w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Au lieu de </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/11/bloc.png"><img decoding="async" loading="lazy" width="1024" height="415" src="https://www.partitech.com/wp-content/uploads/2023/11/bloc-1024x415.png" alt="" class="wp-image-2796" srcset="https://www.partitech.com/wp-content/uploads/2023/11/bloc-1024x415.png 1024w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-300x122.png 300w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-768x311.png 768w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-1536x622.png 1536w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-1440x583.png 1440w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-800x324.png 800w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-550x223.png 550w, https://www.partitech.com/wp-content/uploads/2023/11/bloc-1481x600.png 1481w, https://www.partitech.com/wp-content/uploads/2023/11/bloc.png 1866w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p></p>
+
+
+
+<h2>6 &#8211; Surcharge de la liste des blocs dans le page composer</h2>
+
+
+
+<p>Pour le page composer c&rsquo;est exactement la meme manipulation. Le fichier a surcharger est :<br>vendor/sonata-project/page-bundle/src/Resources/views/PageAdmin/compose_container_show.html.twig<br><br>Ce qui va nous donner :<br>/templates/bundles/SonataPageBundle/PageAdmin/compose_container_show.html.twig<br><br>On remet exactement le même code, ce qui nous donne un fichier complet suivant :<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+{#
+/templates/bundles/SonataPageBundle/PageAdmin/compose_container_show.html.twig
+#}
+&lt;div class=&quot;page-composer__container__view block-view-{{ container.id }}&quot;
+     data-block-id=&quot;{{ container.id }}&quot;
+&gt;
+    &lt;h2 class=&quot;page-composer__container__view__header&quot;&gt;{{ container.name }}&lt;/h2&gt;
+
+    &lt;span class=&quot;page-composer__container__view__notice&quot;&gt;{{ 'notice'|trans({}, 'SonataPageBundle') }}&lt;/span&gt;
+
+    {# surcharge pour exclude des blocs #}
+    {% set excluded_blocks = sonata_page_excluded_blocks() %}
+    {% set filteredBlockServices = &#91;] %}
+    {% for key, service in blockServices %}
+        {% if key not in excluded_blocks %}
+            {% set filteredBlockServices = filteredBlockServices|merge({(key): service}) %}
+        {% endif %}
+    {% endfor %}
+    {% set blockServices = filteredBlockServices %}
+    {# fin de surcharge pour exclude des blocs #}
+
+    &lt;div class=&quot;page-composer__block-type-selector&quot;&gt;
+        &lt;label&gt;{{ 'composer.block.add.type'|trans({}, 'SonataPageBundle') }}&lt;/label&gt;
+        &lt;select class=&quot;page-composer__block-type-selector__select&quot; style=&quot;width: auto&quot;&gt;
+            {% for blockServiceId, blockService in blockServices %}
+                &lt;option value=&quot;{{ blockServiceId }}&quot;&gt;{{ blockService.metadata.title|trans({}, blockService.metadata.domain|default('SonataBlockBundle')) }}&lt;/option&gt;
+            {% endfor %}
+        &lt;/select&gt;
+        &lt;a class=&quot;btn btn-action btn-small page-composer__block-type-selector__confirm&quot;
+           href=&quot;{{ admin.generateObjectUrl('sonata.page.admin.block.create', page, {'composer': true}) }}&quot;
+        &gt;&lt;i class=&quot;fa fa-plus&quot;&gt;&lt;/i&gt;&lt;/a&gt;
+        &lt;span class=&quot;page-composer__block-type-selector__loader&quot;&gt;{{ 'loading'|trans({}, 'SonataPageBundle') }}&lt;/span&gt;
+
+        &lt;small class=&quot;page-composer__container__child-count pull-right&quot;&gt;
+            {{ 'blocks'|trans({}, 'SonataPageBundle') }} &lt;span class=&quot;badge&quot;&gt;{{ container.children|length }}&lt;/span&gt;
+        &lt;/small&gt;
+    &lt;/div&gt;
+
+    &lt;ul class=&quot;page-composer__container__children&quot;&gt;
+        {% for child in container.children %}
+            {% include '@SonataPage/BlockAdmin/compose_preview.html.twig' with {
+                'blockService': attribute(blockServices, child.type) ?? null
+            } %}
+        {% endfor %}
+    &lt;/ul&gt;
+&lt;/div&gt;
+
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/09/image-3.png"><img decoding="async" loading="lazy" width="1024" height="517" src="https://www.partitech.com/wp-content/uploads/2023/09/image-3-1024x517.png" alt="" class="wp-image-2748" srcset="https://www.partitech.com/wp-content/uploads/2023/09/image-3-1024x517.png 1024w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-300x152.png 300w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-768x388.png 768w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-1536x776.png 1536w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-1440x728.png 1440w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-800x404.png 800w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-550x278.png 550w, https://www.partitech.com/wp-content/uploads/2023/09/image-3-1187x600.png 1187w, https://www.partitech.com/wp-content/uploads/2023/09/image-3.png 1864w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>

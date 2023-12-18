@@ -1,0 +1,27 @@
+<p>Information récupéré a l&rsquo;adresse : http://tomtomtom.org/networkmanager-openconnect/</p>
+<p>Ça a marché du premier coup sur ma machine.</p>
+<p>On supprime les paquets inutilisables :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo apt-get purge network-manager-openconnect network-manager-openconnect-gnome</pre>
+<p>On compile les dépendences :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo apt-get build-dep network-manager-openconnect</pre>
+<p>Les sources dans apt doivent etre actives :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo sed -i s/#deb-src/deb-src/g /etc/apt/sources.list</pre>
+<p>On installe les nouvelles dépendances :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo apt-get install libnm-dev</pre>
+<p>On récupere le code source :</p>
+<pre class="brush: bash; title: ; notranslate" title="">wget http://ftp.gnome.org/pub/GNOME/sources/NetworkManager-openconnect/1.1/NetworkManager-openconnect-1.1.93.tar.xz</pre>
+<p>On se place dans le répertoire :</p>
+<pre class="brush: bash; title: ; notranslate" title="">cd NetworkManager-openconnect-1.1.93</pre>
+<p>On lance le configure :</p>
+<pre class="brush: bash; title: ; notranslate" title="">./configure --prefix=/usr --sysconfdir=/etc --localstatedir=/var --libexecdir=/usr/lib/NetworkManager/ --enable-more-warnings=yes --disable-static</pre>
+<p>On compile:</p>
+<pre class="brush: bash; title: ; notranslate" title="">make</pre>
+<p>On installe :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo make install</pre>
+<p>On install openconnect :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo apt-get install openconnect</pre>
+<p>On compile le package avec checkinstall :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo checkinstall</pre>
+<p>On ajoute un utilisateur systeme :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo adduser --system --quiet --home /var/lib/NetworkManager --no-create-home --gecos &quot;NetworkManager OpenConnect plugin&quot; --group nm-openconnect}</pre>
+<p>Et on redémarre.</p>

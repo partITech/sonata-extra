@@ -1,0 +1,13 @@
+<p>Pour résoudre ce genre de conflit sur une working copie :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn: E155015: Échec de la propagation (commit), détails&amp;nbsp;:
+svn: E155015: Arrêt de la propagation&amp;nbsp;: '/var/www/prj/wp-content/cache' demeure en conflit
+</pre>
+<p>Il suffit de faire :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn resolve --accept=working /var/www/prj/wp-content/cache
+</pre>
+<p>Pour tout un répertoir (accepter tout)</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn resolve  --accept=working --depth  infinity
+</pre>

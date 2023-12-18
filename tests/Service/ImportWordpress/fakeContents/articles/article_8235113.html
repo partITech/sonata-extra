@@ -1,0 +1,199 @@
+
+<p>Il n&rsquo;est pas rare d&rsquo;avoir plusieurs bases de données pour un même projet. Normalement, lorsque 2 bases de données sont utilisées les entités peuvent être rangées dans des répertoires spécifiques qui sont déclarés dans votre configuration. Et dans ce cas le système va utiliser la connexion configurée pour le répertoire de l&rsquo;entité. Vous pouvez voir un exemple de connexion multiple ici <a href="https://www.partitech.com/blog-technique/symfony/sonata/symfony-4-sonata-gerer-une-interface-dadmin-multi-serveur/">Symfony 4 / Sonata : gérer une interface d&rsquo;admin multi serveur</a></p>
+
+
+
+<p>Admettons que nous voulions juste pointer sur une base de données en lecture seule (une réplication), à chaque fois que nous utilisons une entité. Nous aurions plusieurs manières de procéder.</p>
+
+
+
+<p>Commençons par poser une configuration multiple.</p>
+
+
+
+<pre title=".env" class="wp-block-code"><code lang="bash" class="language-bash">DATABASE_MASTER=mysql://login:password@db_master.host:3306/db_master?serverVersion=mariadb-10.10.2
+DATABASE_SLAVE=mysql://login:password@db_slave.host:3306/db_slave?serverVersion=mariadb-10.10.2</code></pre>
+
+
+
+<pre title="config/packages/doctrine.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml">doctrine:
+    dbal:
+        default_connection: db_master
+        types:
+            json: Sonata\Doctrine\Types\JsonType   
+        connections:
+            db_master:
+                url: '%env(resolve:DATABASE_MASTER)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8
+ 
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+                     
+            db_slave:
+                url: '%env(resolve:DATABASE_SLAVE)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8
+ 
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+    orm:
+        auto_generate_proxy_classes: true
+        default_entity_manager: default
+        entity_managers:
+            default:
+                connection: db_master
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                auto_mapping: true
+                mappings:
+                    ApplicationSonataMediaBundle: ~
+                    SonataMediaBundle: ~
+                    Main:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/Entity'
+                        prefix: 'App\Entity\'
+                        alias: Main       
+              
+            slave:
+                connection: db_slave
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                auto_mapping: false
+                mappings:
+                    delef:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/Entity'
+                        prefix: 'App\Entity'
+                        alias: delef</code></pre>
+
+
+
+<p>Pour pointer sur une connexion spécifique, nous pourrions reprendre notre code et pointer sur notre connexion pour chaque requête doctrine.<br><br>Voici déjà 2 méthodes pour pointer sur notre serveur slave à chaque requête :</p>
+
+
+
+<pre title="/src/Repository/whateverRepository.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace App\Repository;
+
+use App\Entity\Whatever;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityRepository;
+use Psr\Container\ContainerInterface;
+
+
+
+class WhateverRepository extends ServiceEntityRepository
+{
+        public function __construct(ContainerInterface $container)
+        {
+             $this-&gt;container = $container;
+        }
+
+        public function selectSlave()
+        {
+            return $this-&gt;container-&gt;get('doctrine')
+            -&gt;getManager('slave')
+            -&gt;createQueryBuilder('w')
+            -&gt;andWhere('w.exampleField = :val')
+            -&gt;setParameter('val', $value)
+            -&gt;orderBy('w.id', 'ASC')
+            -&gt;setMaxResults(10)
+            -&gt;getQuery()
+            -&gt;getResult();
+        }
+}</code></pre>
+
+
+
+<p>Ou bien encore :</p>
+
+
+
+<pre title="/src/Repository/whateverRepository.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace App\Repository;
+
+use App\Entity\Whatever;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Common\Persistence\ManagerRegistry;
+
+
+
+class WhateverRepository extends ServiceEntityRepository
+{
+        public function __construct(ManagerRegistry $registry)
+        {
+             $this-&gt;registry = $registry;
+             
+        }
+
+        public function selectSlave()
+        {
+            return $this-&gt;registry-&gt;
+            -&gt;getManager('slave')
+            -&gt;createQueryBuilder('w')
+            -&gt;andWhere('w.exampleField = :val')
+            -&gt;setParameter('val', $value)
+            -&gt;orderBy('w.id', 'ASC')
+            -&gt;setMaxResults(10)
+            -&gt;getQuery()
+            -&gt;getResult();
+        }
+}</code></pre>
+
+
+
+<p>Mais cela implique de reprendre toutes nos méthodes une à une pour pointer sur notre connexion.<br><br>Une méthode plus globale consiste à définir notre connexion dans notre constructeur pour tout notre repository.</p>
+
+
+
+<pre title="/src/Repository/whateverRepository.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace App\Repository;
+
+use App\Entity\Whatever;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\EntityRepository;
+use Doctrine\Common\Persistence\ManagerRegistry;
+use Doctrine\ORM\EntityRepository;
+
+
+class WhateverRepository extends ServiceEntityRepository
+{
+        public function __construct(ManagerRegistry $registry)
+        {
+             $this-&gt;registry = $registry;
+             $manager = $registry-&gt;getManager('slave');
+             parent::__construct($registry, Whatever::class);
+             EntityRepository::__construct(
+                          $manager, 
+                          $manager-&gt;getClassMetadata(Whatever::class)
+                          );
+        }
+
+        public function selectSlave()
+        {
+            return $this-&gt;createQueryBuilder('w')
+            -&gt;andWhere('w.exampleField = :val')
+            -&gt;setParameter('val', $value)
+            -&gt;orderBy('w.id', 'ASC')
+            -&gt;setMaxResults(10)
+            -&gt;getQuery()
+            -&gt;getResult();
+        }
+}</code></pre>
+
+
+
+<p><br>Au final vous pourrez piocher à votre convenance dans les différentes méthodes possibles selon les besoins de votre application.</p>
+
+
+
+<p><br><br></p>

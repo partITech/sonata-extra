@@ -1,0 +1,163 @@
+
+<p>Aujourd&rsquo;hui, nous allons voir comment créer un transport d&rsquo;e-mail personnalisé avec Symfony Mailer. Pour l&rsquo;exemple, nous créerons un transport nommé « pt ».</p>
+
+
+
+<h2>Prérequis</h2>
+
+
+
+<p>Avant de commencer, assurez-vous d&rsquo;avoir installé et configuré Symfony Mailer et HttpClient dans votre projet. Vous pouvez les ajouter à votre projet avec les commandes suivantes:</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require symfony/mailer
+composer require symfony/http-client
+</pre></div>
+
+
+<h2>Création de la classe de transport</h2>
+
+
+
+<p>La première chose à faire est de créer une nouvelle classe qui implémente <code>Symfony\Component\Mailer\Transport\TransportInterface</code>. Nous l&rsquo;appellerons <code>PtTransport</code>. Voici un exemple de ce à quoi cela pourrait ressembler :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+// src/Mailer/Transport/PtTransport.php
+
+namespace App\Mailer\Transport;
+
+use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\RawMessage;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+class PtTransport implements TransportInterface
+{
+    private $httpClient;
+    private $username;
+    private $password;
+    private $endpointUrl;
+
+    public function __construct(HttpClientInterface $httpClient, string $username, string $password, string $endpointUrl)
+    {
+        $this-&gt;httpClient = $httpClient;
+        $this-&gt;username = $username;
+        $this-&gt;password = $password;
+        $this-&gt;endpointUrl = $endpointUrl;
+    }
+
+    public function send(RawMessage $message, ?Symfony\Component\Mailer\Envelope $envelope = null): ?Symfony\Component\Mailer\SentMessage
+    {
+        // Implémentez ici votre logique d'envoi d'e-mail
+        // Vous pouvez utiliser $this-&gt;httpClient pour faire une requête HTTP à $this-&gt;endpointUrl
+    }
+
+    public function __toString(): string
+    {
+        return sprintf('pt://%s@%s', $this-&gt;username, $this-&gt;endpointUrl);
+    }
+}
+
+</pre></div>
+
+
+<h2>Création de la classe de factory</h2>
+
+
+
+<p>Ensuite, nous devons créer une classe factory qui sera responsable de la création des instances de <code>PtTransport</code>. Nous l&rsquo;appellerons <code>PtTransportFactory</code>. Voici un exemple de ce à quoi cela pourrait ressembler :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+// src/Mailer/Transport/PtTransportFactory.php
+
+namespace App\Mailer\Transport;
+
+use Symfony\Component\Mailer\Exception\UnsupportedSchemeException;
+use Symfony\Component\Mailer\Transport\AbstractTransportFactory;
+use Symfony\Component\Mailer\Transport\Dsn;
+use Symfony\Component\Mailer\Transport\TransportInterface;
+use Symfony\Contracts\HttpClient\HttpClientInterface;
+
+class PtTransportFactory extends AbstractTransportFactory
+{
+    private $httpClient;
+
+    public function __construct(HttpClientInterface $httpClient)
+    {
+        $this-&gt;httpClient = $httpClient;
+    }
+
+    public function supports(Dsn $dsn): bool
+    {
+        return 'pt' === $dsn-&gt;getScheme();
+    }
+
+    public function create(Dsn $dsn): TransportInterface
+    {
+        return new PtTransport(
+            $this-&gt;httpClient,
+            $dsn-&gt;getUser(),
+            $dsn-&gt;getPassword(),
+            $dsn-&gt;getOption('endpoint_url')
+        );
+    }
+}
+
+</pre></div>
+
+
+<h2>Configuration</h2>
+
+
+
+<p>Ensuite, nous devons enregistrer <code>PtTransportFactory</code> comme un service et le marquer avec le tag <code>mailer.transport_factory</code>. Voici comment faire cela dans <code>services.yaml</code> :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+services:
+    App\Mailer\Transport\Pt
+
+</pre></div>
+
+
+<p>Ensuite, nous devons enregistrer <code>PtTransportFactory</code> comme un service et le marquer avec le tag <code>mailer.transport_factory</code>. Voici comment faire cela dans <code>services.yaml</code> :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+services:
+    App\Mailer\Transport\PtTransportFactory:
+        tags: &#91;'mailer.transport_factory']
+        arguments:
+            $httpClient: '@http_client'
+</pre></div>
+
+
+<h2>Utilisation</h2>
+
+
+
+<p>Maintenant, vous pouvez utiliser votre nouveau transport d&rsquo;e-mail personnalisé en configurant votre DSN de messagerie dans votre fichier <code>.env</code> :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+MAILER_DSN=pt://username:password@default?endpoint_url=https://your-endpoint-url
+</pre></div>
+
+
+<p>Et voilà! Vous avez maintenant un transport d&rsquo;e-mail personnalisé avec Symfony Mailer. La prochaine fois que vous enverrez un e-mail, Symfony utilisera votre nouveau transport.</p>
+
+
+
+<h2>Conclusion</h2>
+
+
+
+<p>Symfony Mailer est un outil puissant et flexible pour gérer l&rsquo;envoi d&rsquo;e-mails dans vos applications Symfony. En créant un transport d&rsquo;e-mail personnalisé, vous pouvez facilement intégrer n&rsquo;importe quel service d&rsquo;envoi d&rsquo;e-mails dans votre application, même s&rsquo;il n&rsquo;est pas directement supporté par Symfony Mailer.</p>
+
+
+
+<p>J&rsquo;espère que cet article vous a été utile et que vous avez maintenant une meilleure compréhension de comment utiliser Symfony Mailer pour créer un transport d&rsquo;e-mail personnalisé.</p>

@@ -1,0 +1,30 @@
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo add-apt-repository ppa:ondrej/php
+
+sudo apt-get update
+
+sudo apt-get install php7.1
+
+sudo apt-get install php7.1-cli \
+php7.1-common  \
+php7.1-json  \
+php7.1-opcache  \
+php7.1-mysql  \
+php7.1-mbstring  \
+php7.1-mcrypt  \
+php7.1-zip php7.1-fpm
+
+sudo a2dismod php7.2
+
+sudo a2enmod php7.1
+
+sudo service apache2 restart</code></pre>
+
+
+
+<p>Puis configurer la version active</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash"><code>sudo update-alternatives --set php /usr/bin/php7.
+</code></code></pre>

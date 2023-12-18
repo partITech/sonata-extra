@@ -1,0 +1,62 @@
+{% macro menu(items, admin) %}
+
+{% import _self as self %}
+
+<ol class="items-list dd-list">
+
+    {% for item in items  %}
+        {% set object=item %}
+
+    <li class="menu-item dd-item" data-id="{{ item.id }}">
+        <div class="item-handle dd-handle">Drag</div>
+        <div class="item-content dd-content">
+            <span title="{{ item.name }}">{{ item.name|slice(0, 70) }}{% if item.name|length > 70 %}...{% endif %} <i class="text-muted"></i></span>
+            <div class="btn-group action-dropdown">
+
+                {% for details in object.translations %}
+                    {% set flagClass = 'fi-' ~ details.lang %}
+                    {% set buttonClass = details.entity_id is defined and details.entity_id ? '' : 'btn-disabled' %}
+
+                    {% if details.entity_id is defined and details.entity_id %}
+                        <a class="label pull-left  btn btn-app btn-app-xs mr-2 " href="{{ admin.generateUrl('edit',  {'id': details.entity_id  }) }}" title="{{ 'sonata-extra.page_admin.tree_view.edit'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"><i class="fi {{ flagClass }} fis {{ buttonClass }} "></i></a>
+                    {% else %}
+                        <a class="label pull-left btn btn-app btn-app-xs mr-2 chooseLocaleModalLink{{ object.id  }}" href="#"  title="{{ 'sonata-extra.page_admin.tree_view.create'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}" data-site="{{ details.site }}"><i class="fi {{ flagClass }} fis {{ buttonClass }} "></i></a>
+                    {% endif %}
+                {% endfor %}
+
+
+                <a class="btn btn-xs {% if item.enabled %}btn-warning{% else %}btn-success{% endif %}" href="{{admin.generateUrl('toggle', {'id':item.id})}}">
+                    <strong>
+
+                        {% if item.enabled %}
+                            {{ 'sonata-extra.category.label_disabled'|trans({}, 'PartitechSonataExtraBundle') }}
+                        {% else %}
+                            {{ 'sonata-extra.category.label_enabled'|trans({}, 'PartitechSonataExtraBundle') }}
+                        {% endif %}
+                    </strong>
+                </a>
+                <button class="btn btn-xs btn-primary dropdown-toggle" type="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    {{ 'sonata-extra.category.label_action'|trans({}, 'PartitechSonataExtraBundle') }} <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right">
+                    <li><a class="btn-menuitem" href="{{admin.generateUrl('delete', {'id':item.id})}}"><i class="fa fa-times" aria-hidden="true"></i>  <strong> {{ 'sonata-extra.category.label_delete'|trans({}, 'PartitechSonataExtraBundle') }}</strong></a></li>
+                    <li><a class="btn-menuitem" href="{{admin.generateUrl('edit', {'id':item.id})}}"><i class="fa fa-pencil-square-o" aria-hidden="true"></i>  <strong>{{ 'sonata-extra.category.label_modify'|trans({}, 'PartitechSonataExtraBundle') }}</strong></a></li>
+                </ul>
+
+            </div>
+        </div>
+        {# using modal flag shooser #}
+
+        {% include '@PartitechSonataExtra/Admin/translation/crud_inline_flags_modal.html.twig' %}
+
+        {% if item.children %}
+            {{ self.menu(item.children, admin) }}
+        {% endif %}
+
+    </li>
+        {% if item.enabled %} {% endif %}
+    {% endfor %}
+
+</ol>
+
+{% endmacro %}

@@ -1,0 +1,20 @@
+@import '@wordpress/base-styles/_colors';
+@import '@wordpress/base-styles/_variables';
+@import '@wordpress/base-styles/_mixins';
+@import '@wordpress/base-styles/_breakpoints';
+@import '@wordpress/base-styles/_animations';
+@import '@wordpress/base-styles/_z-index';
+
+.block-editor-block-navigation__popover {
+	.components-popover__content {
+		padding: 0;
+	}
+
+	.edit-post-editor__document-overview-panel .edit-post-sidebar__panel-tabs {
+		flex-direction: row;
+	}
+
+	.edit-post-editor__list-view-container {
+		max-height: 600px;
+	}
+}

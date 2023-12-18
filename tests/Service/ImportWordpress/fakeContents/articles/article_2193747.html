@@ -1,0 +1,136 @@
+
+<p>Nous allons voir comment nous pouvons créer un type de champ personnalisé. <br><br>Dans notre exemple, nous voulons un champ qui a le même rendu qu&rsquo;un type de champ MoneyType mais dans lequel nous pourrons ajouter n&rsquo;importe quel suffixe, car le champ money n&rsquo;accepte que les devises. <br><br>Or dans notre projet nous voulons utiliser des kilogrammes, des mois ou encore des kilomètres. Bref, tout un tas de type de données possibles.</p>
+
+
+
+<p>On commence par créer notre classe Type :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php 
+// src/Form/Type/NumberSuffixType.php
+namespace App\Form\Type;
+
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\IntegerType;
+use Symfony\Component\Form\Extension\Core\Type\NumberType;
+use Symfony\Component\OptionsResolver\Options;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\FormViewInterface;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\Form\FormTypeInterface;
+use Symfony\Component\Form\FormView;
+
+class NumberSuffixType extends AbstractType
+{
+    public function getParent()
+    {
+        return NumberType::class;
+        //return TextType::class;
+    }
+    
+    public function configureOptions(OptionsResolver $resolver)
+    {
+    
+        $resolver-&gt;setDefaults(&#91;
+            'suffix' =&gt; 'suffix',
+            'field_options' =&gt; &#91;],
+        ]);
+    
+    }
+    
+    public function buildView(FormView $view, FormInterface $form, array $options)
+    {
+        $view-&gt;vars&#91;'field_name']=$form-&gt;getName();
+        $view-&gt;vars&#91;'data']=$form-&gt;getData();
+        $view-&gt;vars&#91;'suffix']=$options&#91;'suffix'];
+        $view-&gt;vars&#91;'type'] = 'number';
+        $view-&gt;vars&#91;'attr']&#91;'class'] = 'number_suffix';
+    
+    }
+    
+    public function getBlockPrefix()
+    {
+        return 'number_suffix';
+    }
+    
+    
+}
+
+?&gt;
+</pre></div>
+
+
+<p>Ensuite on rajoute notre template</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{# templates/Adminform/number_suffix_type.html.twig #}
+{% block number_suffix_widget %}
+    {% spaceless %}
+       &lt;div class=&quot;input-group&quot;&gt;
+                {{- block('form_widget_simple') -}}
+                {% if suffix is not empty %}
+                	&lt;span class=&quot;input-group-addon&quot;&gt; {{ suffix }}&lt;/span&gt;
+                {% endif %}
+                
+            &lt;/div&gt;
+    {% endspaceless %}
+{% endblock %}
+</pre></div>
+
+
+<p>Nous devons enregistrer notre template</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+# config/packages/twig.yaml
+twig:
+    form_themes:
+        - 'Admin/form/number_suffix_type.html.twig'
+</pre></div>
+
+
+<p>Accessoirement, on ajoute une directive css pour supprimer les flèches du champ numérique HTML5.<br>Pour cela, nous devons référencer un fichier css dans l&rsquo;admin</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_admin:
+    assets:
+        extra_stylesheets:
+            - css/admin.css
+
+</pre></div>
+
+
+<p>Et on ajoute notre directive dans notre fichier css</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: css; title: ; notranslate" title="">
+input&#91;class*=&quot;number_suffix&quot;] {
+    -moz-appearance: textfield;
+}
+input&#91;class*=&quot;number_suffix&quot;]:hover,
+input&#91;class*=&quot;number_suffix&quot;]:focus {
+    -moz-appearance: number-input;
+}
+</pre></div>
+
+
+<p>Ensuite il suffit de l&rsquo;utiliser ainsi :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+            -&gt;add('dureePossible1', NumberSuffixType::class, &#91;'label'=&gt;'Durée possible 1','suffix'=&gt;'Mois','required'   =&gt; false])
+            -&gt;add('dureePossible2', NumberSuffixType::class, &#91;'label'=&gt;'Durée possible 2','suffix'=&gt;'Mois','required'   =&gt; false])
+            -&gt;add('dureePossible3', NumberSuffixType::class, &#91;'label'=&gt;'Durée possible 3','suffix'=&gt;'Mois','required'   =&gt; false])
+            -&gt;add('dureePossible4', NumberSuffixType::class, &#91;'label'=&gt;'Durée possible 4','suffix'=&gt;'Mois','required'   =&gt; false])
+</pre></div>
+
+
+<p>Cela donne ensuite un champ comme ceci</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="429" src="https://www.partitech.com/wp-content/uploads/2020/09/image-1-1024x429.png" alt="" class="wp-image-712" srcset="https://www.partitech.com/wp-content/uploads/2020/09/image-1-1024x429.png 1024w, https://www.partitech.com/wp-content/uploads/2020/09/image-1-300x126.png 300w, https://www.partitech.com/wp-content/uploads/2020/09/image-1-768x322.png 768w, https://www.partitech.com/wp-content/uploads/2020/09/image-1.png 1073w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>

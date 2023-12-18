@@ -1,0 +1,51 @@
+
+<p>Aussi bizarre que cela puisse paraître j&rsquo;ai du utiliser une entity avec une primary key positionné sur un champ de type varchar, et certaines valeurs  contenaient un « / ».<br><br>Tant que l&rsquo;on est pas confronté au problème, impossible de se dire que cela va poser un soucis. Et la c&rsquo;est le drame.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="152" src="https://www.partitech.com/wp-content/uploads/2020/02/image-1024x152.png" alt="" class="wp-image-374" srcset="https://www.partitech.com/wp-content/uploads/2020/02/image-1024x152.png 1024w, https://www.partitech.com/wp-content/uploads/2020/02/image-300x45.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/image-768x114.png 768w, https://www.partitech.com/wp-content/uploads/2020/02/image.png 1070w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+An exception has been thrown during the rendering of a template (&quot;Parameter &quot;id&quot; for route &quot;admin_app_wtype_edit&quot; must match &quot;&#91;^/]++&quot; (&quot;MACHIN/CHOSE&quot; given) to generate a corresponding URL.&quot;).
+</pre></div>
+
+
+<p>En gros, le slash est interprété par le générateur d’URL comme un séparateur de l’URL et cela fait planter le système.<br>Du coup, il faut modifier le générateur d’URL pour qu&rsquo;il transforme ce « / » en autre chose (en gros URL encodé), et ensuite en entrée il faut modifier la valeur de la clef primaire récupéré pour sélectionner l&rsquo;objet pour qu&rsquo;il fasse la transformation inverse.</p>
+
+
+
+<p>Dans votre fichier XxxAdmin.php, rajoutez l&rsquo;interface :<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface as RoutingUrlGeneratorInterface;
+</pre></div>
+
+
+<p>Puis rajoutez les deux fonction suivantes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+ public function generateUrl($name, array $parameters = &#91;], $absolute = RoutingUrlGeneratorInterface::ABSOLUTE_PATH)
+    {
+       
+        if(!empty($parameters&#91;'id'])){
+            $parameters&#91;'id'] = str_replace(&quot;/&quot;,&quot;%2F&quot;,$parameters&#91;'id']);
+        }
+        
+        return $this-&gt;routeGenerator-&gt;generateUrl($this, $name, $parameters, $absolute);
+    }
+    
+    public function getObject($id)
+    {
+        $id=str_replace(&quot;%2F&quot;,&quot;/&quot;,$id);
+
+        $object = $this-&gt;getModelManager()-&gt;find($this-&gt;getClass(), $id);
+        foreach ($this-&gt;getExtensions() as $extension) {
+            $extension-&gt;alterObject($this, $object);
+        }
+    
+        return $object;
+    }
+</pre></div>

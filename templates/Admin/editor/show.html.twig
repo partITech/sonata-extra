@@ -1,0 +1,43 @@
+{% extends get_global_template('show') %}
+
+{%- block tab_menu -%}
+    {% if action is defined %}
+        {{ knp_menu_render(admin.sidemenu(action), {
+            'currentClass': 'active',
+            'template': '@PartitechSonataExtra/Admin/editor/tab_menu_template.html.twig'
+        }, 'twig') }}
+    {% endif %}
+{%- endblock -%}
+
+{% block sonata_admin_content %}
+    <div class="show-article-container">
+        <h1>{{ object.title }}</h1>
+        <div class="meta">
+            <span class="author">{{ object.author }}</span>
+            <span class="published">Publié le {{ object.publishedAt|date('d-m-Y') }}</span>
+        </div>
+        <div class="content">
+            {{ object.content|raw }}
+        </div>
+    </div>
+
+    {# Custom CSS #}
+    <style>
+        .show-article-container {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            border: 1px solid #ccc;
+            padding: 20px;
+            border-radius: 10px;
+            background-color: white;
+        }
+        .meta {
+            font-size: 14px;
+            color: #777;
+            margin-bottom: 20px;
+        }
+        .content {
+            font-size: 16px;
+        }
+    </style>
+{% endblock %}

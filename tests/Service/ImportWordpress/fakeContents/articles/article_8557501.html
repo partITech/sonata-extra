@@ -1,0 +1,487 @@
+
+<p>Un des besoins récurent d&rsquo;un projet web, est d&rsquo;avoir besoin de paramètres globaux pour votre application. Généralement, on stock ça dans un fichier yml et le tour est joué. Mais cela se complique lorsque le client demande à pouvoir avoir la main dessus.<br>Lui donner les accès FTP/SSH pour les modifier ? Non, certainement pas. Surtout si c&rsquo;est pour refiler cette tache au stagiaire.<br><br>Il faudra lui mettre à disposition une interface d&rsquo;admin avec un formulaire pour pouvoir les modifier.<br><br>Dans notre cas, nous avons besoin de juste de quelques paramètres, mais cette interface permettra de gérer autant de paramètres que nous souhaitons. <br></p>
+
+
+
+<h2>Création de notre table</h2>
+
+
+
+<p>On créé une table toute bête avec mysqlWorkbench, ou avec make:entity. Au choix. <br>Dans notre exemple, nous allons juste utiliser 2 champs date pour un début et fin d&rsquo;une offre.<br>Nous avons besoin d&rsquo;un champs clef, qui contiendra le mot clef qui permettra de pointer dessus. Et un champs valeur, qui contiendra une chaîne avec la valeur sérialisée. <br>Et un dernier champs avec la dernière date de mise à jour.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="222" height="170" src="https://www.partitech.com/wp-content/uploads/2020/08/Sélection_219.png" alt="" class="wp-image-697"/></figure>
+
+
+
+<h2>Création de notre interface d&rsquo;admin</h2>
+
+
+
+<p>Une fois notre table créé avec MysqlWorkbench ou PhpMyAdmin, on crée notre entité et repository</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php bin/console doctrine:mapping:import &quot;App\Entity&quot; annotation --path=src/Entity
+</pre></div>
+
+
+<p>Et pour que notre repository soit créé, nous faudra rajouter l&rsquo;annotation suivante et régénérer le tout</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+@ORM\Entity(repositoryClass=&quot;App\Repository\parametresRepository&quot;)
+</pre></div>
+
+
+<p>Pour donner ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; highlight: [5]; title: ; notranslate" title="">
+/**
+ * Parametres
+ *
+ * @ORM\Table(name=&quot;parametres&quot;, indexes={@ORM\Index(name=&quot;clef&quot;, columns={&quot;clef&quot;})})
+ * @ORM\Entity(repositoryClass=&quot;App\Repository\parametresRepository&quot;)
+ */
+class Parametres
+{
+</pre></div>
+
+
+<p>On régénère les fichiers</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console make:entity --regenerate App
+</pre></div>
+
+
+<p>On créé notre admin :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console make:sonata:admin
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="786" height="422" src="https://www.partitech.com/wp-content/uploads/2020/08/image-4.png" alt="" class="wp-image-670" srcset="https://www.partitech.com/wp-content/uploads/2020/08/image-4.png 786w, https://www.partitech.com/wp-content/uploads/2020/08/image-4-300x161.png 300w, https://www.partitech.com/wp-content/uploads/2020/08/image-4-768x412.png 768w" sizes="(max-width: 786px) 100vw, 786px" /></figure>
+
+
+
+<p>Et voila, à ce stade nous avons créé notre interface d&rsquo;admin de paramétrage, avec un CRUD simple.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="250" src="https://www.partitech.com/wp-content/uploads/2020/08/image-5-1024x250.png" alt="" class="wp-image-672" srcset="https://www.partitech.com/wp-content/uploads/2020/08/image-5-1024x250.png 1024w, https://www.partitech.com/wp-content/uploads/2020/08/image-5-300x73.png 300w, https://www.partitech.com/wp-content/uploads/2020/08/image-5-768x187.png 768w, https://www.partitech.com/wp-content/uploads/2020/08/image-5-1536x375.png 1536w, https://www.partitech.com/wp-content/uploads/2020/08/image-5.png 1828w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p><br>Sauf, que ce n&rsquo;est pas ce qu&rsquo;on veux, même si ça fonctionnerais quand même.<br>On va donc créer une page d&rsquo;admin où l&rsquo;utilisateur ne pourras pas créer et modifier ce qu&rsquo;il veux, mais uniquement nos 2 paramètres.</p>
+
+
+
+<p>Par défaut, notre interface pointe sur la vue list. c&rsquo;est cette action que nous allons utiliser.<br>Et pour la surcharger il va falloir créer un controller.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="719" height="231" src="https://www.partitech.com/wp-content/uploads/2020/08/Sélection_216.png" alt="" class="wp-image-673" srcset="https://www.partitech.com/wp-content/uploads/2020/08/Sélection_216.png 719w, https://www.partitech.com/wp-content/uploads/2020/08/Sélection_216-300x96.png 300w" sizes="(max-width: 719px) 100vw, 719px" /></figure>
+
+
+
+<p>Puis l&rsquo;ajouter dans la configuration notre service admin en rajoutant le controller (App\Controller\ParametresController) dans les arguments :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; highlight: [3]; title: ; notranslate" title="">
+    admin.parametres:
+        class: App\Admin\ParametresAdmin
+        arguments: &#91;~, App\Entity\Parametres, App\Controller\ParametresController]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: Parametres }
+        public: true
+</pre></div>
+
+
+<p>Ensuite, nous devons changer l&rsquo;extend de notre controller pour qu&rsquo;il utilise CRUDController au lieux de AbstractController. Nous devons aussi ajouter notre méthode listAction qui pointe sur son propre template.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Controller;
+
+#use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
+use Sonata\AdminBundle\Controller\CRUDController;
+
+class ParametresController extends CRUDController
+{
+    
+    public function listAction()
+    {
+        
+        
+        if (false === $this-&gt;admin-&gt;isGranted('LIST')) {
+            throw new AccessDeniedException();
+        }
+        
+        return $this-&gt;render('Admin/parametres/listAction.html.twig', &#91;
+            'controller_name' =&gt; 'ParametresController',
+        ]);
+    }
+}
+
+</pre></div>
+
+
+<h2>Installer un datePicker</h2>
+
+
+
+<p>Comme notre paramètre est une date. Il va falloir que nous installions un datepicker. La documentation parle de eonasdan bootstrap-datetimepicker</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+composer require eonasdan/bootstrap-datetimepicker
+php bin/console assets:install
+</pre></div>
+
+
+<p>On rajoute un thème à twig</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+# config/packages/twig.yaml.yml
+
+twig:
+    form_themes:
+        - '@SonataCore/Form/datepicker.html.twig'
+</pre></div>
+
+
+<p>Et on ajoute la référence a nos assets dans sonata_admin.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; highlight: [10,21]; title: ; notranslate" title="">
+    assets:
+        extra_stylesheets:
+            - bundles/sonataformatter/markitup/skins/sonata/style.css
+            - bundles/sonataformatter/markitup/sets/markdown/style.css
+            - bundles/sonataformatter/markitup/sets/html/style.css
+            - bundles/sonataformatter/markitup/sets/textile/style.css
+            - css/admin.css
+            - build/admin.css
+            - css/fontawesome/css/all.css
+            - bundles/sonatacore/vendor/eonasdan-bootstrap-datetimepicker/build/css/bootstrap-datetimepicker.min.css
+
+
+        extra_javascripts:
+            - bundles/fosckeditor/ckeditor.js
+            - bundles/sonataformatter/vendor/markitup-markitup/markitup/jquery.markitup.js
+            - bundles/sonataformatter/markitup/sets/markdown/set.js
+            - bundles/sonataformatter/markitup/sets/html/set.js
+            - bundles/sonataformatter/markitup/sets/textile/set.js
+            - bundles/pixsortablebehavior/js/jquery-ui.min.js
+            - bundles/pixsortablebehavior/js/init.js
+            - bundles/sonatacore/vendor/eonasdan-bootstrap-datetimepicker/build/js/bootstrap-datetimepicker.min.js
+            - js/admin.js
+</pre></div>
+
+
+<h2>Création de notre formulaire</h2>
+
+
+
+<p>En premier lieu nous allons créer une méthode pour mettre à jour nos valeurs selon nos clefs de notre paramètre. Cette méthode sera placée dans notre repository.<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Repository;
+
+use App\Entity\Parametres;
+use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\Persistence\ManagerRegistry;
+
+
+class ParametresRepository extends ServiceEntityRepository
+{
+    public function __construct(ManagerRegistry $registry)
+    {
+        $this-&gt;registry=$registry;
+        $this-&gt;connection=$this-&gt;registry-&gt;getManager()-&gt;getConnection();
+
+        parent::__construct($registry, Parametres::class);
+    }
+
+    public function updateConfig($clef,$valeur){
+        $em = $this-&gt;registry-&gt;getManager();
+        $item = $this-&gt;createQueryBuilder('p')
+        -&gt;andWhere('p.clef = :val')
+        -&gt;setParameter('val', $clef)
+        -&gt;getQuery()
+        -&gt;getOneOrNullResult();
+        if (!$item) {
+            $item = new Parametres();
+            $item-&gt;setValeur($valeur);
+            $item-&gt;setClef($clef);
+            $item-&gt;setUpdatedAt(date(&quot;Y-m-d H:i:s&quot;,strtotime('now')));
+            $em-&gt;persist($item);
+        }else{
+            $item-&gt;setValeur($valeur);
+            $item-&gt;setUpdatedAt(date(&quot;Y-m-d H:i:s&quot;,strtotime('now')));
+        }
+       $em-&gt;flush();
+    }
+}
+</pre></div>
+
+
+<p>Ensuite, nous voulons stoker des valeurs. Elles peuvent être de toutes natures. Nous allons donc stocker des éléments sérialisés. <br>Il faut donc que nous modifions notre getter et notre setter de notre entity Parametres. Et mettre notre champs date en type string pour plus de facilités.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    public function getValeur(): ?string
+    {
+        return unserialize($this-&gt;valeur);
+    }
+
+    public function setValeur(?string $valeur): self
+    {
+        $this-&gt;valeur = serialize($valeur);
+
+        return $this;
+    }
+
+    public function getUpdatedAt(): ?string
+    {
+        return $this-&gt;updatedAt;
+    }
+
+    public function setUpdatedAt(?string $updatedAt): self
+    {
+        $this-&gt;updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+</pre></div>
+
+
+<p>On peu ensuite créer notre formulaire, avec sa vérification dans notre controller. On rajoute tout de même quelques fonctions pour gérer nos dates.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Controller;
+
+use Symfony\Component\Routing\Annotation\Route;
+use Sonata\AdminBundle\Controller\CRUDController;
+use App\Entity\Parametres;
+
+use Symfony\Component\Form\FormEvent;
+use Symfony\Component\Form\FormEvents;
+use Symfony\Component\HttpFoundation\Request;
+use Sonata\CoreBundle\Form\Type\DatePickerType;
+use Sonata\CoreBundle\Form\Type\DateTimePickerType;
+use Symfony\Component\Validator\Constraints\Callback;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Validator\Context\ExecutionContextInterface;
+
+class ParametresController extends CRUDController
+{
+    
+    private function getConfigData() {
+        $em = $this-&gt;container-&gt;get('doctrine.orm.entity_manager');
+        $config = $em-&gt;getRepository(Parametres::class)-&gt;findAll();
+        $data=&#91;];
+        foreach($config as $c){
+            $data&#91;$c-&gt;getClef()]=$c-&gt;getValeur();
+        }
+        return $data;
+    }
+    
+    public function listAction()
+    {
+        
+        
+        if (false === $this-&gt;admin-&gt;isGranted('LIST')) {
+            throw new AccessDeniedException();
+        }
+        
+        $request = $this-&gt;getRequest();
+        $locale = $this-&gt;getRequest()-&gt;getLocale();
+        
+        $data = $this-&gt;getConfigData();
+       
+        
+        $formBuilder = $this-&gt;createFormBuilder(null, &#91;
+            'constraints' =&gt; &#91;new Callback(&#91;$this, 'formValidate'])]
+        ]);
+        $formBuilder-&gt;add(&quot;offre_date_debut&quot;, DatePickerType::class, &#91;
+            'required' =&gt; true,
+            'dp_use_current' =&gt; false,
+            'dp_min_date' =&gt; new \DateTime(&quot;2020-01-01&quot;),
+            'data' =&gt; isset($data&#91;'offre_date_debut']) ? new \DateTime('@'.$this-&gt;parseDate($data&#91;'offre_date_debut'],$locale)) : new \DateTime(),
+            'mapped' =&gt; false,
+        ])
+        -&gt;add(&quot;offre_date_fin&quot;, DatePickerType::class, &#91;
+            'required' =&gt; true,
+            'dp_use_current' =&gt; false,
+            'dp_min_date' =&gt; new \DateTime(&quot;2020-01-01&quot;),
+            'data' =&gt; isset($data&#91;'offre_date_fin']) ? new \DateTime('@'.$this-&gt;parseDate($data&#91;'offre_date_fin'],$locale)) : new \DateTime(),
+            'mapped' =&gt; false,
+        ])
+        -&gt;add('submit', SubmitType::class, &#91;
+            'label' =&gt; $this-&gt;get('translator')-&gt;trans('Valider')
+        ]);
+
+        $form = $formBuilder-&gt;getForm();
+        $form-&gt;handleRequest($request);
+        
+        if ($form-&gt;isSubmitted() &amp;&amp; $form-&gt;isValid()) {
+            $formData = $this-&gt;getRequest()-&gt;request-&gt;get('form');
+            $ParametresRepositoty = $this-&gt;container-&gt;get('doctrine.orm.entity_manager')-&gt;getRepository(Parametres::class);
+            $ParametresRepositoty-&gt;updateConfig('offre_date_debut', date(&quot;Y-m-d&quot;, $this-&gt;parseDate($formData&#91;'offre_date_debut'],$locale)) );
+            $ParametresRepositoty-&gt;updateConfig('offre_date_fin',date(&quot;Y-m-d&quot;,$this-&gt;parseDate($formData&#91;'offre_date_fin'],$locale)));
+            $this-&gt;addFlash('success', $this-&gt;get('translator')-&gt;trans('Parametres sauvegardés.'));
+        }
+        
+        
+        return $this-&gt;render('Admin/parametres/listAction.html.twig', &#91;
+            'controller_name' =&gt; 'ParametresController',
+            'form' =&gt; $form-&gt;createView()
+        ]);
+    }
+    
+
+    
+    public function formValidate($data, ExecutionContextInterface $context) {
+    
+        $data = $this-&gt;getRequest()-&gt;request-&gt;get('form');
+        $locale = $this-&gt;getRequest()-&gt;getLocale();
+        
+        if (isset($data&#91;'offre_date_debut'])) {
+            $offre_date_debut = $this-&gt;parseDate($data&#91;'offre_date_debut'], $locale);
+            $offre_date_debut = new \DateTime(&quot;@$offre_date_debut&quot;);
+        }
+        if (isset($data&#91;'offre_date_fin'])) {
+            $offre_date_fin = $this-&gt;parseDate($data&#91;'offre_date_fin'], $locale);
+            $offre_date_fin = new \DateTime(&quot;@$offre_date_fin&quot;);
+        }
+    }
+    
+    
+    public function parseDate($date, $locale, $format = 'dd LLL. y') {
+        $fmt = \IntlDateFormatter::create(
+            $locale,
+            \IntlDateFormatter::FULL,
+            \IntlDateFormatter::FULL,
+            'Etc/UTC',
+            \IntlDateFormatter::GREGORIAN,
+            $format
+            );
+        if (isset($date)) {
+            $parse_date = $fmt-&gt;parse($date);
+            return $parse_date;
+        }
+        return null;
+    }
+}
+</pre></div>
+
+
+<p>Notre dernière étape consiste à mettre en forme notre page dans notre template twig que nous avons placé dans templates/Admin/parametres/listAction.html.twig</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+{% extends '@SonataAdmin/standard_layout.html.twig' %}
+
+{% block notice %}
+    {{ parent() }}
+{% endblock %}
+
+{% form_theme form _self %}
+
+{# form_errors.html.twig #}
+{% block form_errors %}
+    {% spaceless %}
+        {% if errors|length &gt; 0 %}
+            {% for error in errors %}
+            &lt;div class=&quot;alert alert-danger alert-dismissable&quot;&gt;
+            &lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;alert&quot; aria-hidden=&quot;true&quot; aria-label=&quot;Fermer&quot;&gt;×&lt;/button&gt;
+                {{ error.message }}
+            &lt;/div&gt;
+            {% endfor %}
+        {% endif %}
+    {% endspaceless %}
+{% endblock form_errors %}
+
+{% block sonata_admin_content %}
+    {% include 'SonataCoreBundle:FlashMessage:render.html.twig' %}
+
+    &lt;div&gt;
+        {{ form_errors(form) }}
+        &lt;h2 class=&quot;title-border&quot;&gt;{{ 'Paramétrage'|trans }}&lt;/h2&gt;
+        &lt;p&gt;{{ 'Modifiaction des parametres transverse de l\'application'|trans }}&lt;/p&gt;
+        &lt;div class=&quot;sonata-ba-form&quot;&gt;
+        {{ form_start(form, { attr: { class: 'form-setting-general form-theme' }}) }}
+        &lt;div class=&quot;box-body container-fluid&quot;&gt;
+            &lt;div class=&quot;sonata-ba-collapsed-fields form-theme-hoz&quot;&gt;
+                &lt;div class=&quot;row&quot;&gt;
+                    &lt;div class=&quot;&quot;&gt;
+                        &lt;div class=&quot;box box-primary&quot;&gt;
+                            &lt;div class=&quot;box-header with-border&quot;&gt;
+                                &lt;h4 class=&quot;box-title&quot;&gt;{{ 'Dates par défaut des offres'|trans }}&lt;/h4&gt;
+                            &lt;/div&gt;
+                            &lt;div class=&quot;box-body&quot;&gt;
+                            
+                                &lt;div class=&quot;sonata-ba-collapsed-fields&quot;&gt;
+                                    &lt;div class=&quot;form-group&quot;&gt;
+                                        &lt;label class=&quot;control-label required&quot; for=&quot;form_date_manifestation&quot;&gt;{{ 'Date de début'|trans }}&lt;/label&gt;
+                                        &lt;div class=&quot;sonata-ba-field sonata-ba-field-standard-natural&quot;&gt;
+                                            {{ form_widget(form.offre_date_debut, { attr: { class: 'sonata-medium-date form-control' }}) }}
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                &lt;div class=&quot;sonata-ba-collapsed-fields&quot;&gt;
+                                    &lt;div class=&quot;form-group&quot;&gt;
+                                        &lt;label class=&quot;control-label required&quot; for=&quot;form_date_manifestation&quot;&gt;{{ 'Date de fin'|trans }}&lt;/label&gt;
+                                        &lt;div class=&quot;sonata-ba-field sonata-ba-field-standard-natural&quot;&gt;
+                                            {{ form_widget(form.offre_date_fin, { attr: { class: 'sonata-medium-date form-control' }}) }}
+                                        &lt;/div&gt;
+                                    &lt;/div&gt;
+                                &lt;/div&gt;
+                                
+                                
+                            &lt;/div&gt;
+                        &lt;/div&gt;
+                    &lt;/div&gt;
+
+                    &lt;div class=&quot;sonata-ba-form-actions well well-small form-actions&quot;&gt;
+                                   {{ form_widget(form.submit, { attr: { class: 'btn btn-success' }}) }}                                                                                                                
+                     &lt;/div&gt;
+
+
+                &lt;/div&gt;
+            &lt;/div&gt;
+        &lt;/div&gt;
+                                                                                         
+        {{ form_end(form) }}
+        &lt;/div&gt;
+    &lt;/div&gt;
+{% endblock %}
+
+</pre></div>
+
+
+<p>Et voici le rendu de notre page</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="322" src="https://www.partitech.com/wp-content/uploads/2020/08/image-6-1024x322.png" alt="" class="wp-image-688" srcset="https://www.partitech.com/wp-content/uploads/2020/08/image-6-1024x322.png 1024w, https://www.partitech.com/wp-content/uploads/2020/08/image-6-300x94.png 300w, https://www.partitech.com/wp-content/uploads/2020/08/image-6-768x242.png 768w, https://www.partitech.com/wp-content/uploads/2020/08/image-6-1536x483.png 1536w, https://www.partitech.com/wp-content/uploads/2020/08/image-6.png 1865w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>

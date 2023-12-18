@@ -1,0 +1,215 @@
+sonata-extra:
+  approve:
+    log_message : "L'utilisateur <b>[user]</b> a [action] l'élément [entity]"
+    approval_message : "En attente de validation."
+    approved_by_message : "<br> Approuvé par <b>[user]</b> le [date]."
+    cancel_modification: "Êtes-vous sûr de vouloir annuler cette modification ?"
+    cancel_modification_btn: "Annuler la modification"
+    approve_create: "Êtes-vous sûr de vouloir approuver cette création ?"
+    approve_delete: "Êtes-vous sûr de vouloir approuver cette supression ?"
+    approve_update: "Êtes-vous sûr de vouloir approuver cette modification ?"
+    approve_create_btn: "Approuver la création"
+    approve_delete_btn: "Approuver la supression"
+    approve_update_btn: "Approuver la modification"
+    purge_all_btn: "Purger les modifications en attente"
+    confirm_purge_all: "Êtes-vous sûr de vouloir purger les modifications en attente ?"
+
+    success_message:
+      create: "La création doit être approuvée pour être prise en compte."
+      update: "La création doit être approuvée pour être prise en compte."
+      delete: "La création doit être approuvée pour être prise en compte."
+      all_applied: "Toutes les modifications ont été appliquées."
+      create_applied: "La création a été appliquée."
+      revert_successfully: "La modification a été annulée avec succès."
+      all_revert_applied: "Toutes les modifications ont été annulées avec succès."
+      purge: "Les modifications approuvées ont été purgées avec succès."
+    error_message:
+      journal_not_found: 'Journal des modifications introuvable.'
+      journal_not_found_for_activity: 'Aucun journal des modifications trouvé pour cette activité.'
+      entity_not_found: 'Entité introuvable.'
+      token: "Token invalide, veuillez réessayer."
+
+  redirect_admin:
+    import_btn: "Import de vos rediction au format CSV"
+    import_title: "Import de vos rediction au format CSV"
+    success:
+      import: "Import réussi"
+
+  faq:
+    manage_question: "Gérer les questions"
+
+  article_admin:
+    retour: "Retour"
+    revisions: "Révisions"
+    global_settings: "Paramètres globaux"
+    publish_settings: "Paramètres de publication"
+    published_at: "Publié le"
+    author: "Auteur"
+    status: "Statut"
+    published: "Publié"
+    draft: "Brouillon"
+    title: "Titre"
+    contenu: "Contenu"
+    content: "Contenu"
+    id: "ID"
+    actions: "Actions"
+    edit: "Éditer"
+    delete: "Supprimer"
+    editor_gutenberg: "Editeur : Gutenberg"
+    editor_ckeditor: "Editeur : Ckeditor"
+    editor_textarea: "Editeur : Textearea"
+    editor_markdown: "Editeur : Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Textearea"
+    label_markdown: "Markdown"
+    msg_editor_change: "L'éditeur a été changé"
+    seo_proposal: "Proposition SEO"
+    seo_modal_title: "Calculez les parametres SEO optimum pour ce contenu"
+    seo_modal_excerpt: "Résumé (excerpt)"
+    seo_modal_seo_title: "Meta title"
+    seo_modal_seo_description: "Meta descrition"
+    seo_modal_seo_seokeywords: "Meta keywords"
+    seo_modal_seo_slug: "SLUG"
+    seo_modal_calculate_btn: "Calculer"
+    seo_modal_use_btn: "Utiliser"
+    seo_modal_error: "Il semblerait qu'il y ait un problème avec le service de suggestion SEO.<br> Veillez relancer le calcule."
+
+  editor_admin:
+    editor_gutenberg: "Editeur : Gutenberg"
+    editor_ckeditor: "Editeur : Ckeditor"
+    editor_textarea: "Editeur : Textearea"
+    editor_markdown: "Editeur : Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Textearea"
+    label_markdown: "Markdown"
+    msg_editor_change: "L'éditeur a été changé"
+
+  page_admin:
+    tree_view:
+      create_translation_popin: "Choisissez la langue source pour la traduction de votre page"
+      create: "Création de la page pour le site "
+      edit: "Edition de la page pour le site"
+    compose:
+      preview_btn: "Prévisualiser la page"
+
+  translation:
+    selector_title: "Pages pour le site"
+    create_entity: "Créer un enregistrement pour le site "
+    create: "Créer la traduction pour le site "
+    edit: "Modifier la traduction pour le site "
+    header_list_label: "Traductions"
+
+  block_contact:
+    title: "Titre"
+    first_name: "Prénom"
+    use_field_first_name: "Utiliser le champ prénom"
+    first_name_label: "libelle du champ prénom"
+    last_name: "Nom"
+    use_field_last_name: "Utiliser le champ nom"
+    last_name_label: "libelle du champ nom"
+    company_name: "Entreprise"
+    use_field_company_name: "Utiliser le champ entreprise"
+    company_name_label: "libelle du champ entreprise"
+    address: "Adresse"
+    use_field_address: "Utiliser le champ adresse"
+    address_label: "libelle du champ adresse"
+    email : "Email"
+    use_field_email: "Utiliser le champ email"
+    email_label: "libelle du champ email"
+    phone: "Téléphone"
+    use_field_phone: "Utiliser le champ téléphone"
+    phone_label: "libelle du champ téléphone"
+    use_field_additional_information: "Utiliser le champ information additionnelles"
+    additional_information: "Informations additionnelles"
+    additional_information_label: "libelle du champ information additionnelles"
+    required_field: "Champ requis ?"
+    send_me_a_copy: "Proposer l'envois d'une copie du message ?"
+    send_me_a_copy_label: "Libelle de la question d'envoi d'une copie du message"
+    send_me_a_copy_default_message: "M'envoyer une copie"
+    send_to_label: "Envoyer une copie interne du message ?"
+    send_to: "Renseigner l'email de destination"
+    submit_label: "label du bouton de soumission"
+
+    mail_confirmation: "Template de mail de confirmation utilisateur"
+    mail_subject: "Sujet de l'email envoyé"
+    mail_admin_notification: "Template de mail de confirmation administrateur"
+    mail_signature: "Signature de l'email"
+
+    confirmation_message_label: "Message de confirmation"
+    confirmation_message: |
+      <div class="container">
+        <div class="contact_confirmation">
+          <h4 class="alert-heading">Merci de nous avoir contacté !</h4>
+          <p>Votre message a bien été envoyé. Nous avons reçu votre demande et nous vous répondrons dès que possible.</p>
+          <p class="mb-0">En attendant, n'hésitez pas à parcourir notre site pour plus d'informations.</p>
+        </div>
+      </div>
+    confirmation_template_label: "Template de confirmation"
+    confirmation_javascript_label: "Javascript page de confirmation"
+
+    firstName_not_blank: "Le prénom est obligatoire."
+    lastName_not_blank: "Le nom est obligatoire."
+    companyName_not_blank: "Le nom de l'entreprise est obligatoire."
+    address_not_blank: "L'adresse est obligatoire."
+    email_not_blank: "L'adresse e-mail est obligatoire."
+    email_invalid: "L'adresse e-mail n'est pas valide."
+    phone_not_blank: "Le numéro de téléphone est obligatoire."
+    phone_invalid: "Le numéro de téléphone n'est pas valide."
+    additionalInformation_not_blank: "Le champ d'informations supplémentaires est obligatoire."
+    submitLabel: "Envoyer"
+
+    confirmation:
+      title: "Confirmation de votre demande de contact"
+      heading: "Confirmation de votre demande de contact"
+      greeting: "Bonjour"
+      received: "Nous avons bien reçu votre demande de contact avec les informations suivantes :"
+      firstName: "Prénom"
+      lastName: "Nom"
+      email: "Email"
+      phone: "Téléphone"
+      message: "Message"
+      confirmation: "Ceci est une confirmation que nous avons reçu votre message. Un membre de notre équipe vous contactera sous peu."
+      thankYou: "Merci de nous avoir contactés."
+      regards: "Cordialement"
+
+    admin-notification:
+      title: "Nouvelle demande de contact"
+      heading: "Nouvelle demande de contact"
+      introduction: "Vous avez reçu une nouvelle demande de contact avec les informations suivantes :"
+      procedure: "Veuillez suivre cette demande conformément à nos procédures internes."
+
+
+
+  search:
+    submit_label: "Envoyer"
+    label_submit_label: "label du bouton de soumission"
+    placeholder: "Placeholder"
+    result_title: "Résultats"
+    no_article_found_for_this_search: "Aucun article trouvé pour cette recherche."
+
+  blog:
+    section_article_title: "Section"
+    section_category_list_title: "Section"
+    section_tag_list_title: "Section"
+    no_article_found_for_this_category: "Aucun article trouvé pour cette catégorie."
+    no_article_found_for_this_tag: "Aucun article trouvé pour ce tag."
+    write_by: "Écrit par"
+    publish_date: "le"
+    read_more: "Lire la suite "
+    categories: "Catégorie : "
+    tags: "Tags : "
+    btn_read_more: "Lire la suite"
+    share_this_article: "Partager cet article"
+    about_the_author: "A propos de l'auteur"
+
+  category:
+    label_saved: "Catégorie correctement enregistré"
+    label_error: "Il y a une erreur"
+    tree_catalog_title: "Modification des catégories"
+    label_delete: "Supprimer"
+    label_modify: "Modifier"
+    label_enabled: "Activer"
+    label_disabled: "Désactiver"
+    label_action: "Action"

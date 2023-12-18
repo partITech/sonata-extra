@@ -1,0 +1,16 @@
+<p>Lancer le gestionnaire de préférences d&rsquo;applications au démarrage :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+gnome-session-properties
+</pre>
+<p>Puis ajouter un item viber avec la commande suivante :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+Name: Viber
+Command: /opt/viber/Viber StartMinimized
+Comment: Commentaire par défaut.
+</pre>
+<p>Pour lancer skype avec un user spécifique (pour le lancé minimisé, options-&gt;Démarrer Skype minimisé dans la barre d&rsquo;état système):</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+Name: Skype
+Command: /bin/sh -c  &quot;echo 'tbourdin.partitech xxxxx' | skype --pipelogin&quot;
+Comment: Skype.
+</pre>

@@ -1,0 +1,609 @@
+
+<p>Voici les commandes pour initialiser un projet symfony, avec un admin sécurisé.</p>
+
+
+
+<p>On commence par installer le skeleton du projet.<br>composer create-project symfony/skeleton nom-du-projet</p>
+
+
+
+<p>On rajoute les briques nécessaires :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">cd nom-du-projet
+composer require symfony/debug-pack --no-update
+composer require symfony/maker-bundle --dev --no-update
+composer require sonata-project/doctrine-orm-admin-bundle --no-update
+composer require templating --no-update
+composer require symfony/translation --no-update
+composer require doctrine/doctrine-fixtures-bundle --dev --no-update
+composer require sonata-project/notification-bundle --no-update
+composer require jms/serializer-bundle --no-update
+composer require sonata-project/user-bundle --no-update
+composer require sonata-project/doctrine-orm-admin-bundle --no-update
+composer require symfony/serializer-pack --no-update
+composer require swiftmailer-bundle --no-update
+composer require symfony/apache-pack --no-update
+composer require migrations --no-update
+composer require symfony/var-dumper --no-update
+composer require phpoffice/phpspreadsheet --no-update
+composer require pixassociates/sortable-behavior-bundle --no-update
+composer require sonata-project/media-bundle --no-update
+composer require liip/imagine-bundle --no-update
+composer require sonata-project/intl-bundle --no-update
+composer require sonata-project/formatter-bundle  --no-update
+composer require annotations  --no-update
+composer update
+composer dump-autoload</code></pre>
+
+
+
+<p>Ensuite dans /config/packages/framework.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">framework:
+    secret: '%env(APP_SECRET)%'
+    #csrf_protection: true
+    #http_method_override: true
+
+    # Enables session support. Note that the session will ONLY be started if you read or write from it.
+    # Remove or comment this section to explicitly disable session support.
+    session:
+        handler_id: null
+        cookie_secure: auto
+        cookie_samesite: lax
+
+    #esi: true
+    #fragments: true
+    php_errors:
+        log: true
+    translator: { fallbacks: ['%locale%'] }
+    serializer:
+        enabled: true
+    templating:
+        engines: ['twig', 'php']
+</code></pre>
+
+
+
+<p>Ensuite dans /config/packages/doctrine.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+        types:
+            json: Sonata\Doctrine\Types\JsonType
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '5.7'
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            ApplicationSonataMediaBundle: ~
+            SonataMediaBundle: ~
+            App:
+                is_bundle: false
+                type: annotation
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App</code></pre>
+
+
+
+<p>Dans  /config/packages/sonata_media.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">sonata_media:
+    class:
+        media: App\Application\Sonata\MediaBundle\Entity\Media
+        gallery: App\Application\Sonata\MediaBundle\Entity\Gallery
+        gallery_has_media: App\Application\Sonata\MediaBundle\Entity\GalleryHasMedia
+    db_driver: doctrine_orm
+    default_context: default
+    contexts:
+        default:
+            providers:
+                - sonata.media.provider.dailymotion
+                - sonata.media.provider.youtube
+                - sonata.media.provider.image
+                - sonata.media.provider.file
+                - sonata.media.provider.vimeo
+
+            formats:
+                small: { width: 100 , quality: 70}
+                big:   { width: 500 , quality: 70}
+
+    cdn:
+        server:
+            path: /upload/media
+
+    filesystem:
+        local:
+            # Directory for uploads should be writable
+            directory: "%kernel.project_dir%/public/upload/media"
+            create: false
+    providers:
+        file:
+            allowed_extensions: ['pdf', 'txt', 'rtf', 'doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx', 'odt', 'odg', 'odp', 'ods', 'odc', 'odf', 'odb', 'odt', 'odp', 'csv', 'jpg', 'png', 'jpeg', 'svg']
+            allowed_mime_types: ['application/pdf', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  'application/vnd.openxmlformats-officedocument.wordprocessingml.template', 'application/vnd.ms-word.document.macroEnabled.12', 'application/vnd.ms-word.template.macroEnabled.12',  'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/vnd.openxmlformats-officedocument.spreadsheetml.template', 'application/vnd.ms-excel.sheet.macroEnabled.12','application/vnd.ms-excel.template.macroEnabled.12', 'application/vnd.ms-excel.addin.macroEnabled.12',  'application/vnd.ms-excel.sheet.binary.macroEnabled.12', 'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation', 'application/vnd.openxmlformats-officedocument.presentationml.template',  'application/vnd.openxmlformats-officedocument.presentationml.slideshow',  'application/vnd.ms-powerpoint.addin.macroEnabled.12', 'application/vnd.ms-powerpoint.presentation.macroEnabled.12',  'application/vnd.ms-powerpoint.template.macroEnabled.12', 'application/vnd.ms-powerpoint.slideshow.macroEnabled.12', 'application/vnd.ms-access', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'application/x-pdf', 'application/rtf', 'text/html', 'text/rtf', 'text/plain', 'application/vnd.ms-powerpoint', 'image/svg+xml', 'image/gif', 'image/jpeg', 'image/pjpeg', 'image/png']
+            service:    sonata.media.provider.file
+            resizer:    false
+            filesystem: sonata.media.filesystem.local
+            cdn:        sonata.media.cdn.server
+            generator:  sonata.media.generator.default
+            thumbnail:  sonata.media.thumbnail.liip_imagine
+        image:
+            allowed_extensions: ['gif', 'svg', 'jpg', 'jpeg', 'png']
+            allowed_mime_types: ['image/svg+xml', 'image/gif', 'image/jpeg', 'image/pjpeg', 'image/png']
+            #thumbnail: sonata.media.thumbnail.format          # default value
+            #thumbnail: sonata.media.thumbnail.consumer.format # can be used to dispatch the resize action to async task
+            thumbnail: sonata.media.thumbnail.liip_imagine    # use the LiipImagineBundle to resize the image
+
+
+    resizer:
+        simple:
+            mode:  outbound
+
+    pixlr:
+        enabled:  false
+        referrer: Sonata Project
+
+liip_imagine:
+     # valid drivers options include "gd" or "gmagick" or "imagick"
+    driver: "imagick"
+    
+    filter_sets:
+        test_banner:
+            quality: 75
+            filters:              
+                relative_resize: { widen: 898,  heighten: 610 }
+                crop: {size: [ 898, 610 ], start: [ 0, 0 ] }
+                background : { size : [898, 610], position : center, color : '#FFFFFF' }
+                
+        test_thumb_gallery:
+            quality: 100
+            filters:
+                thumbnail: { size: [288, 192], mode: outbound, allow_upscale: true}
+                crop: {size: [288, 192], start: [ 0, 0 ] }
+                background : { size : [288, 192], position : center, color : '#FFFFFF' }
+                
+        test_small_center:
+            quality: 75
+            filters:
+                thumbnail: { size: [319, 207], mode: outbound, allow_upscale: true}
+                crop: {size: [ 319, 207 ], start: [ 0, 0 ] }
+                background : { size : [319, 207], position : center, color : '#FFFFFF' }
+                
+        test_medium_center_background:
+            quality: 75
+            filters:
+                background : { size : [141, 93], position : center, color : '#FFFFFF' }
+                thumbnail: { size: [141, 93], mode: outbound, allow_upscale: true}
+                crop: {size: [ 141, 93 ], start: [ 0, 0 ] }
+                
+        test_widden:
+            quality: 75
+            filters:
+                relative_resize: {widen: 796}
+
+            </code></pre>
+
+
+
+<p>Ajouter la configuration du formatter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">#config/packages/sonata_formatter.yml
+
+sonata_formatter:
+    default_formatter: richhtml
+    formatters:
+        markdown:
+            service: sonata.formatter.text.markdown
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig #keep this commented unless you are using media bundle.
+
+
+        text:
+            service: sonata.formatter.text.text
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig
+
+
+        rawhtml:
+            service: sonata.formatter.text.raw
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig
+
+
+        richhtml:
+            service: sonata.formatter.text.raw
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig
+
+
+        twig:
+            service: sonata.formatter.text.twigengine
+            extensions: [] # Twig formatter cannot have extensions
+            
+    ckeditor:
+        templates:
+            browser: '@App/Ckeditor/browser.html.twig'
+            upload: '@App/Ckeditor/upload.html.twig'
+            
+            
+fos_ck_editor:
+    default_config: default
+    configs:
+        default:
+            # default toolbar plus Format button
+            toolbar:
+            - [Bold, Italic, Underline, -, 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ,-, Cut, Copy, Paste, PasteText, PasteFromWord, -, Undo, Redo, -, NumberedList, BulletedList, -, Outdent, Indent, -,Blockquote, -, Image, Link, Unlink, Table]
+            - [Format, Maximize, Source, Iframe]
+
+           </code></pre>
+
+
+
+<p>Et pour terminer l&rsquo;implémentation de CKeditor il faut ajouter le theme dans twig</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">#twig.yaml
+twig:
+    default_path: '%kernel.project_dir%/templates'
+    debug: '%kernel.debug%'
+    strict_variables: '%kernel.debug%'
+    exception_controller: null
+
+    form_themes:
+        - '@SonataFormatter/Form/formatter.html.twig'</code></pre>
+
+
+
+<p>Ajouter les routes de media bundle dans config/routes.yaml</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">#index:
+#    path: /
+#    controller: App\Controller\DefaultController::index
+
+gallery:
+    resource: '@SonataMediaBundle/Resources/config/routing/gallery.xml'
+    prefix: /media/gallery
+
+media:
+    resource: '@SonataMediaBundle/Resources/config/routing/media.xml'
+    prefix: /media
+    
+#for 3.x change admin with admin_area    
+admin:
+    resource: "@SonataAdminBundle/Resources/config/routing/sonata_admin.xml"
+    prefix: /admin
+
+_sonata_admin:
+    resource: .
+    type: sonata_admin
+    prefix: /admin</code></pre>
+
+
+
+<p>Ensuite dans /config/routes/sonata_admin.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">sonata_user_admin_security:
+    resource: '@SonataUserBundle/Resources/config/routing/admin_security.xml'
+    prefix: /admin
+
+sonata_user_admin_resetting:
+    resource: '@SonataUserBundle/Resources/config/routing/admin_resetting.xml'
+    prefix: /admin/resetting    
+    
+admin_area:
+    resource: "@SonataAdminBundle/Resources/config/routing/sonata_admin.xml"
+    prefix: /admin
+
+_sonata_admin:
+    resource: .
+    type: sonata_admin
+    prefix: /admin    </code></pre>
+
+
+
+<p>Ensuite dans /config/packages/sonata_user.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">sonata_user:
+    security_acl: false
+    manager_type: orm # can be orm or mongodb
+    class:
+        user: App\Application\Sonata\UserBundle\Entity\User
+        group: App\Application\Sonata\UserBundle\Entity\Group
+    </code></pre>
+
+
+
+<p>Ensuite dans /config/packages/security.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    encoders:
+        FOS\UserBundle\Model\UserInterface: bcrypt
+
+    providers:
+        in_memory: { memory: null }
+        fos_userbundle:
+            id: fos_user.user_provider.username
+
+    firewalls:
+        # Disabling the security for the web debug toolbar, the profiler and Assetic.
+        dev:
+            pattern:  ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # -> custom firewall for the admin area of the URL
+        admin:
+            pattern:            /admin(.*)
+            context:            user
+            form_login:
+                provider:       fos_userbundle
+                login_path:     /admin/login
+                use_forward:    false
+                check_path:     /admin/login_check
+                failure_path:   null
+            logout:
+                path:           /admin/logout
+                target:         /admin/login
+            anonymous:          true
+
+        # -> end custom configuration
+
+        # default login area for standard users
+
+        # This firewall is used to handle the public login area
+        # This part is handled by the FOS User Bundle
+        main:
+            pattern:             .*
+            context:             user
+            form_login:
+                provider:       fos_userbundle
+                login_path:     /login
+                use_forward:    false
+                check_path:     /login_check
+                failure_path:   null
+            logout:             true
+            anonymous:          true
+            
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # Admin login page needs to be accessed without credential
+        - { path: ^/admin/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/logout$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/login_check$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+
+        # Secured part of the site
+        # This config requires being logged for the whole site and having the admin role for the admin part.
+        # Change these rules to adapt them to your needs
+        - { path: ^/admin/, role: [ROLE_ADMIN, ROLE_SONATA_ADMIN, ROLE_SUPER_ADMIN] }
+        - { path: ^/.*, role: IS_AUTHENTICATED_ANONYMOUSLY }</code></pre>
+
+
+
+<p>Ensuite dans /config/packages/swiftmailer.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">swiftmailer:
+    url: '%env(MAILER_URL)%'
+    #pour envoyer directement un email sans attendre
+    #spool: { type: 'memory' }
+    #pour utiliser le spooler d'envois.
+    #dans ce cas, inscrire une cron : 
+    #* * * * *  cd /var/www/monprojet/ &amp;&amp; APP_ENV=prod php bin/console swiftmailer:spool:send --message-limit=3
+    spool:
+        type: file
+        path: '%kernel.project_dir%/var/spool'</code></pre>
+
+
+
+<p>Ensuite dans /config/packages/fos_user.yaml ajouter</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">fos_user:
+    db_driver:      orm # can be orm or odm
+    firewall_name:  main
+    #user_class:     Sonata\UserBundle\Entity\BaseUser
+    user_class:     App\Application\Sonata\UserBundle\Entity\User
+
+    group:
+        #group_class:   Sonata\UserBundle\Entity\BaseGroup
+        group_class:   App\Application\Sonata\UserBundle\Entity\Group
+        group_manager: sonata.user.orm.group_manager # If you're using doctrine orm (use sonata.user.mongodb.group_manager for mongodb)
+
+    service:
+        user_manager: sonata.user.orm.user_manager
+
+    from_email:
+        address: "tbourdin@partitech.com"
+        sender_name: "tbourdin@partitech.com"</code></pre>
+
+
+
+<p>Configurer les locales pour avoir l&rsquo;interface en français dans&nbsp; /config/packages/translation.yaml</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">framework:
+    default_locale: fr
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks:
+            - en
+</code></pre>
+
+
+
+<p>Puis configurer le timezone :</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml">#config/packages/sonata_intl.yaml
+sonata_intl:
+    timezone:
+        default: Europe/Paris
+        locales:
+            fr:    Europe/Paris
+            en_UK: Europe/London</code></pre>
+
+
+
+<p>Il faut ensuite étendre le bundle :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">bin/console sonata:easy-extends:generate SonataUserBundle --dest=src --namespace_prefix=App</code></pre>
+
+
+
+<p>Il faut aussi générer les entity de média bundle</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">bin/console sonata:easy-extends:generate --dest=src SonataMediaBundle --namespace_prefix=App</code></pre>
+
+
+
+<p>Et l&rsquo;enregistrer dans les bundle à loader (/config/bundles.php) ajouter l&rsquo;appel à ApplicationSonataUserBundle :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+return [
+    Symfony\Bundle\FrameworkBundle\FrameworkBundle::class => ['all' => true],
+    Sonata\DatagridBundle\SonataDatagridBundle::class => ['all' => true],
+    Sonata\CoreBundle\SonataCoreBundle::class => ['all' => true],
+    Symfony\Bundle\TwigBundle\TwigBundle::class => ['all' => true],
+    Symfony\Bundle\SecurityBundle\SecurityBundle::class => ['all' => true],
+    Sonata\BlockBundle\SonataBlockBundle::class => ['all' => true],
+    Knp\Bundle\MenuBundle\KnpMenuBundle::class => ['all' => true],
+    Sonata\AdminBundle\SonataAdminBundle::class => ['all' => true],
+    Doctrine\Bundle\DoctrineBundle\DoctrineBundle::class => ['all' => true],
+    Sonata\DoctrineORMAdminBundle\SonataDoctrineORMAdminBundle::class => ['all' => true],
+    Doctrine\Bundle\FixturesBundle\DoctrineFixturesBundle::class => ['dev' => true, 'test' => true],
+    Sonata\EasyExtendsBundle\SonataEasyExtendsBundle::class => ['all' => true],
+    Sonata\NotificationBundle\SonataNotificationBundle::class => ['all' => true],
+    FOS\UserBundle\FOSUserBundle::class => ['all' => true],
+    Sonata\UserBundle\SonataUserBundle::class => ['all' => true],
+    Symfony\Bundle\WebProfilerBundle\WebProfilerBundle::class => ['dev' => true, 'test' => true],
+    Symfony\Bundle\MonologBundle\MonologBundle::class => ['all' => true],
+    Symfony\Bundle\DebugBundle\DebugBundle::class => ['dev' => true, 'test' => true],
+    Symfony\Bundle\MakerBundle\MakerBundle::class => ['dev' => true],
+    Symfony\Bundle\SwiftmailerBundle\SwiftmailerBundle::class => ['all' => true],
+    Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle::class => ['all' => true],
+    JMS\SerializerBundle\JMSSerializerBundle::class => ['all' => true],
+    Pix\SortableBehaviorBundle\PixSortableBehaviorBundle::class => ['all' => true],
+    Sonata\MediaBundle\SonataMediaBundle::class => ['all' => true],
+    App\Application\Sonata\UserBundle\ApplicationSonataUserBundle::class => ['all' => true],
+    App\Application\Sonata\MediaBundle\ApplicationSonataMediaBundle::class => ['all' => true],
+Liip\ImagineBundle\LiipImagineBundle::class => ['all' => true],
+Sonata\IntlBundle\SonataIntlBundle::class => ['all' => true],
+];
+</code></pre>
+
+
+
+<p>Il faut exclure le répertoire Application de l&rsquo;autowireing des services</p>
+
+
+
+<pre class="wp-block-code"><code lang="yaml" class="language-yaml"># config/services.yaml
+
+services:
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{Entity,Tests,Application}'</code></pre>
+
+
+
+<p>Derniers points, configurer la base de donnée dans le fichier .env</p>
+
+
+
+<pre class="wp-block-code"><code lang="adoc" class="language-adoc">DATABASE_URL=mysql://root:toor@127.0.0.1:3306/delef?serverVersion=5.7</code></pre>
+
+
+
+<p>Lancer la création des tables :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">php bin/console doctrine:schema:update --force</code></pre>
+
+
+<p>Installer les assets :</p>
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">php bin/console assets:install
+php bin/console ckeditor:install</code></pre>
+
+
+
+<p>Créer le répertoire de stockage des fichiers</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">mkdir -p public/uploads/media</code></pre>
+
+
+
+<p>Vider le cache :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">php bin/console cache:clear</code></pre>
+
+
+
+<p>Et créez l&rsquo;utilisateur admin</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">php bin/console fos:user:create admin mail@mail.com p@ssword --super-admin</code></pre>
+
+
+
+<div class="wp-block-file"><a id="wp-block-file--media-3a51e5e8-41c9-4de4-8c81-f944a135467c" href="https://www.partitech.com/wp-content/uploads/2020/01/skeleton.zip">Le projet v1 initial ( SF + Sonata + FosUser ) est téléchargeable ici : </a><a href="https://www.partitech.com/wp-content/uploads/2020/01/skeleton.zip" class="wp-block-file__button wp-element-button" download aria-describedby="wp-block-file--media-3a51e5e8-41c9-4de4-8c81-f944a135467c">Télécharger</a></div>
+
+
+
+<div class="wp-block-file"><a id="wp-block-file--media-e9237adc-d9a4-4a95-8c0f-2d176c892f2a" href="https://www.partitech.com/wp-content/uploads/2020/02/symfony-sonata-skeleton_v2.zip">Le projet V2 ( v1 + Media + LiipImagine ) est téléchargeable ici : </a><a href="https://www.partitech.com/wp-content/uploads/2020/02/symfony-sonata-skeleton_v2.zip" class="wp-block-file__button wp-element-button" download aria-describedby="wp-block-file--media-e9237adc-d9a4-4a95-8c0f-2d176c892f2a">Télécharger</a></div>
+
+
+
+<p></p>

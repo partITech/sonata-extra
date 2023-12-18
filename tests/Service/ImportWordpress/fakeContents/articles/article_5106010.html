@@ -1,0 +1,11 @@
+<p>Un gros fichier, et pas d&rsquo;éditeur assez puissant sous la main pour faire un rechercher/remplacer ?</p>
+<p>Rien de plus simple avec vi.</p>
+<p>Edition du fichier avec la commande vi<br />
+<code>vi fichier</code></p>
+<p>Puis dans l’éditeur saisir:<br />
+<code>:%s/machaine1/machaine2/</code></p>
+<p><figure id="attachment_1255" aria-describedby="caption-attachment-1255" style="width: 300px" class="wp-caption alignnone"><a href="https://www.partitech.com/wp-content/uploads/2021/03/Selection_394.png"><img decoding="async" loading="lazy" class="wp-image-1255 size-medium" src="https://www.partitech.com/wp-content/uploads/2021/03/Selection_394-300x162.png" alt="Remplacer une chaine dans un gros fichier avec VI" width="300" height="162" srcset="https://www.partitech.com/wp-content/uploads/2021/03/Selection_394-300x162.png 300w, https://www.partitech.com/wp-content/uploads/2021/03/Selection_394-768x415.png 768w, https://www.partitech.com/wp-content/uploads/2021/03/Selection_394-800x433.png 800w, https://www.partitech.com/wp-content/uploads/2021/03/Selection_394-550x297.png 550w, https://www.partitech.com/wp-content/uploads/2021/03/Selection_394.png 856w" sizes="(max-width: 300px) 100vw, 300px" /></a><figcaption id="caption-attachment-1255" class="wp-caption-text">Remplacer une chaine dans un gros fichier avec VI</figcaption></figure></p>
+<p>Sinon il y a une autre option avec sed :<br />
+<code>sed -i -e "s/machaines1/machaine2/g" fichier</code></p>
+<p>si la chaîne contient des caractères spéciaux, on devra les échapper avec ‘\’</p>
+<p><code>sed -i -e "s/\#machaines1/\#machaine2/g" fichier</code></p>

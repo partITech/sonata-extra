@@ -1,0 +1,24 @@
+{% extends '@SonataAdmin/standard_layout.html.twig' %}
+
+{% block sonata_admin_content %}
+    <table class="table">
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Path</th>
+            <th>Methods</th>
+            <th>Roles</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for route in routes %}
+            <tr>
+                <td>{{ route.getName() }}</td>
+                <td>{{ route.getPath() }}</td>
+                <td>{{ route.getMethods()|join(', ') }}</td>
+                <td>{{ route.getRoles()|join(', ') }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

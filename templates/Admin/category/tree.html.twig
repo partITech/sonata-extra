@@ -1,0 +1,114 @@
+{#
+
+This file is part of the Sonata package.
+
+(c) Thomas Rabaix <thomas.rabaix@sonata-project.org>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{#
+    This template is not used at all, it is just a template that you can use to create
+    your own custom tree view.
+#}
+{% extends '@SonataAdmin/CRUD/base_list.html.twig' %}
+
+
+
+{% block tab_menu %}
+    {% include '@PartitechSonataExtra/Admin/category/list_tab_menu.html.twig' with {
+        'mode':   'tree',
+        'action': action,
+        'admin':  admin,
+    } only %}
+
+{% endblock %}
+
+{% block sonata_admin_content_actions_wrappers %}
+    {% include '@PartitechSonataExtra/Admin/translation/crud_header_actions_buttons.html.twig' %}
+{% endblock %}
+
+
+{% block content %}
+    {% for flashMessage in app.session.flashbag.get('notice') %}
+        <div class="alert alert-success" role="alert">{{ flashMessage }}</div>
+    {% endfor %}
+
+    {% for flashMessage in app.session.flashbag.get('error') %}
+        <div class="alert alert-danger" role="alert">{{ flashMessage }}</div>
+    {% endfor %}
+{% endblock %}
+{% block list_table %}
+
+    <form method="POST" action="{{ app.request.schemeAndHttpHost ~ app.request.requestUri }}">
+
+    <div class="col-xs-12 col-md-12">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h1 class="box-title ">
+                    {{ 'sonata-extra.category.tree_catalog_title'|trans({}, 'PartitechSonataExtraBundle') }}
+
+                </h1>
+            </div>
+            <div class="box-content panel-body ">
+                <div id="nestable" class="menu-tree dd">
+                    {% import '@PartitechSonataExtra/Admin/category/category_tree_macro.html.twig' as tree %}
+
+                    {% if current_categories is empty %}
+                        {{ tree.menu([], admin) }}
+                    {% else %}
+                        {{ tree.menu(current_categories, admin) }}
+                    {% endif %}
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+
+    <input type="hidden" id="items" name="items" value="" />
+
+    <div class="sonata-ba-form-actions well well-small form-actions">
+        <button type="submit" class="btn btn-success" name="btn_update"><i class="fa fa-save" aria-hidden="true"></i> {% trans from "PartitechSonataMenuBundle" %}config.label_update{% endtrans %}</button>
+    </div>
+    </form>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script type="text/javascript" src="{{ asset('bundles/partitechsonataextra/assets/js/jquery.nestable.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/partitechsonataextra/assets/js/sonata_extra.js') }}"></script>
+{% endblock %}
+{% block stylesheets %}
+    {{ parent() }}
+    <link rel="stylesheet" type="text/css" href="{{ asset('bundles/partitechsonataextra/assets/styles/sonata_extra_category.css') }}">
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>
+    <style>
+
+        .btn-app-xs{
+            height: 25px !important;
+            width: 25px !important;
+            min-width: 25px;
+            padding: 0;
+            margin-left: 2px;
+            margin-right: 2px;
+            line-height: 1.5;
+            font-size: 12px;
+
+        }
+        .btn-app-xs>i{
+            margin-top:4px;
+            width:1.5em !important;
+            height:1.3em !important;
+
+        }
+        .item-content button, .item-content  .btn{
+            height:  25px !important;
+        }
+        .group-tab-menu{
+            float:right;left: 6px;top: -2px;
+        }
+    </style>
+{% endblock %}

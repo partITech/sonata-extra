@@ -1,0 +1,95 @@
+
+<p>Nous allons ici développer l&rsquo;ensemble des manipulations pour construire une interface many to many via Sonata.<br>Nous prendrons comme exemple une gestion de zones avec une liaison par départements. Chaque zones est donc constitué d&rsquo;un liaison multiple avec la table département.<br><br>Sous MysqlWorkbench, cela donne ceci :</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="590" height="171" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_123.png" alt="" class="wp-image-495" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_123.png 590w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_123-300x87.png 300w" sizes="(max-width: 590px) 100vw, 590px" /></figure>
+
+
+
+<p>Pour générer les entity, nous utilisons la commande suivante :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php bin/console doctrine:mapping:import &quot;App\Entity&quot; annotation --path=src/Entity
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="414" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_124-1024x414.png" alt="" class="wp-image-496" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_124-1024x414.png 1024w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_124-300x121.png 300w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_124-768x310.png 768w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_124.png 1212w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Ensuite, nous créons les setter et getter dans nos entity via la commande :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php bin/console make:entity --regenerate App
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="872" height="568" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_125-1.png" alt="" class="wp-image-498" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_125-1.png 872w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_125-1-300x195.png 300w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_125-1-768x500.png 768w" sizes="(max-width: 872px) 100vw, 872px" /></figure>
+
+
+
+<p>Il ne nous reste plus qu&rsquo;a générer notre CRUD sonata sans oublier de vider le cache.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php bin/console make:sonata:admin App/Entity/ZxZone
+php bin/console cache:clear
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="590" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_126-1024x590.png" alt="" class="wp-image-499" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_126-1024x590.png 1024w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_126-300x173.png 300w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_126-768x443.png 768w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_126.png 1069w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Notre interface sera créé et le service aussi. Il nous faudra tout de même faire quelques manipulations.<br><br>1 &#8211; Supprimer l&rsquo;ID de notre formulaire de création d&rsquo;enregistrement et ajouter notre champs département<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+//ajouter le use suivant
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+
+//supprimez l'id, et ajouter la liaison département
+  protected function configureFormFields(FormMapper $formMapper): void
+    {
+       $formMapper
+           //-&gt;add('id')
+            -&gt;add('label')
+            -&gt;add('code')
+            -&gt;add('departement', EntityType::class, &#91;
+                'class' =&gt; 'App\Entity\Departement',
+                'choice_label' =&gt; 'label',
+                'label' =&gt; 'Départements',
+                'required' =&gt; false,
+                'by_reference' =&gt; false,
+                'multiple' =&gt; true,
+                'expanded' =&gt; false,
+            ]);
+    }
+</pre></div>
+
+
+<p>Dans la définition de département nous demandons explicitement d&rsquo;afficher le champs label dans notre liste, via le paramètre « choice_label ».<br><br>Cela nous permet d&rsquo;afficher un label plus sympa que juste l&rsquo;id. Mais pour cela, il faut ajouter les méthodes suivantes dans l&rsquo;entity departement.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+//Permet d'afficher un nom plus sympa dans les messages du CRUD
+    public function __toString(): ?string
+    {
+        return $this-&gt;id.&quot; : &quot;.$this-&gt;nomClairRiche;
+    }
+//Permet d'afficher un label dans notre liste de configuration
+    public function getLabel(): ?string
+    {
+        return $this-&gt;id.&quot; : &quot;.$this-&gt;nomClairRiche;
+    }
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="600" height="297" src="https://www.partitech.com/wp-content/uploads/2020/03/on2many.gif" alt="" class="wp-image-505"/></figure>
+
+
+
+<p></p>

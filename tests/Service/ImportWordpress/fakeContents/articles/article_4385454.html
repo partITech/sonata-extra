@@ -1,0 +1,529 @@
+
+<p><strong>Composer c&rsquo;est quoi ?</strong></p>
+
+
+
+<p>A l&rsquo;image de NPM pour javascript , composer est l&rsquo;outil dédié à PHP vous permettant de gérer les dépendances de librairies de vos applications. Si vous utilisez un framework du type Symfony vous l&rsquo;avez obligatoirement utilisé. En réalité tout développeur PHP l&rsquo;utilise quotidiennement. Si vous êtes sur cette page c&rsquo;est que probablement vous vous demandez comment on crée une librairie que l&rsquo;on peut redistribuer facilement et partager avec la communauté. C&rsquo;est ce que je vais tenter de vous montrer. </p>
+
+
+
+<p>Pour le bien de notre tutoriel je vais prendre un exemple concret d&rsquo;une correction que j&rsquo;ai dû appliquer sur un projet récemment. Je me suis vraiment posé la question « Pourquoi y&rsquo;a pas déjà un outil pour corriger cela facilement ? ». Je vais donc prendre cette petite correction et la transformer en librairie composer et peut-être qu&rsquo;en plus de me permettre d&rsquo;écrire cet article cette librairie servira à quelqu&rsquo;un.</p>
+
+
+
+<p><strong>Contexte</strong> : Je récupère un projet sur lequel il y a un problème de dé-sérialisation de données insérées dans une base de données. Le développeur a eu la bonne idée d&rsquo;utiliser <a href="https://www.php.net/manual/fr/function.serialize.php">serialize</a> sur un array. Bon, c&rsquo;est pas ce que j&rsquo;aurais fait, mais l&rsquo;appli est ainsi faite et en soit ce n&rsquo;est pas trop dérangeant. Sauf que visiblement les données sont passées d&rsquo;une BDD à une autre (mysql->mssql->mysql) générant des problèmes d&rsquo;encodage. On se retrouve au final avec une belle erreur <em><strong>unserialize error at offset</strong></em>. L&rsquo;erreur est assez verbeuse. Le format serialize de PHP qui nous indique le type, suivi du nombre de caractères, nous permet de rapidement diagnostiquer que le  nombre de caractères calculés n&rsquo;est pas bon. Il suffit juste de recalculer et de l’écrire dans le fichier avec une regex et un callback. </p>
+
+
+
+<p>Pour rappel voici la doc du format https://en.wikipedia.org/wiki/PHP_serialization_format</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-1.png"><img decoding="async" loading="lazy" width="654" height="411" src="https://www.partitech.com/wp-content/uploads/2023/01/image-1.png" alt="" class="wp-image-2171" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-1.png 654w, https://www.partitech.com/wp-content/uploads/2023/01/image-1-300x189.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-1-550x346.png 550w" sizes="(max-width: 654px) 100vw, 654px" /></a></figure>
+
+
+
+<p>Notre erreur provient donc du fait qu&rsquo;à la dé-sérialisation le nombre de caractères spécifiés pour une string ne correspond pas à ce qui est décodé par la fonction unserialize. Il faut donc recalculer. Par exemple :</p>
+
+
+
+<pre class="wp-block-code"><code lang="adoc" class="language-adoc">s:6:"apple";</code></pre>
+
+
+
+<p>devrait être :</p>
+
+
+
+<pre class="wp-block-code"><code lang="adoc" class="language-adoc">s:5:"apple";</code></pre>
+
+
+
+<p>C&rsquo;est tout bête, mais parfait pour notre exemple !</p>
+
+
+
+<p>Allez c&rsquo;est partit ! On va mette un peu les mains dans le cambouis. <br></p>
+
+
+
+<p><strong>Les pré-requis</strong></p>
+
+
+
+<p>Nous allons avoir besoin de :<br>&#8211; PHP installé en CLI sur notre machine,<br>&#8211; d&rsquo;un compte sur <em>github</em>,<br>&#8211; d&rsquo;un compte sur <em>packagist</em><br>&#8211; de composer installé sur notre machine.</p>
+
+
+
+<p>A priori si vous êtes ici c&rsquo;est que vous avez déjà installé PHP ainsi que composer. Si ce n&rsquo;est pas encore le cas, vous trouverez tout un tas de ressources sur Internet pour vous expliquer comment. </p>
+
+
+
+<p>On va donc commencer par se créer son projet sous son éditeur préféré, pour ma part : PhpStorm. A ce stade vous devriez avoir un répertoire vide.</p>
+
+
+
+<p>La commande suivante va vous permettre d&rsquo;initialiser votre projet composer et de l&rsquo;agrémenter d&rsquo;informations de base comme la License, le nom, l&rsquo;adresse de votre dépôt ainsi que d&rsquo;une petite description. </p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">composer init -q -a src \
+--name partitech/fix-serialize \
+--description "Fix Php unserialize error at offset" \
+--license MIT</code></pre>
+
+
+
+<p>Vous allez passer d&rsquo;un coup d&rsquo;un répertoire vide à une architecture prévue pour composer. C&rsquo;est assez magique.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-2.png"><img decoding="async" loading="lazy" width="323" height="329" src="https://www.partitech.com/wp-content/uploads/2023/01/image-2.png" alt="" class="wp-image-2172" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-2.png 323w, https://www.partitech.com/wp-content/uploads/2023/01/image-2-295x300.png 295w" sizes="(max-width: 323px) 100vw, 323px" /></a></figure>
+
+
+
+<pre title="composer.json" class="wp-block-code"><code lang="json" class="language-json">{
+    "name": "partitech/fix-serialize",
+    "description": "Fix Php unserialize error at offset",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Partitech\\FixSerialize\\": "src"
+        }
+    },
+    "require": {}
+}</code></pre>
+
+
+
+<p><strong>src</strong> :  Contient votre code<br><strong>vendor</strong> : Contient toutes les dépendances. Oui votre librairie peut avoir besoin d&rsquo;autres librairies composer pour fonctionner. <br><em>composer.json</em> et <em>composer.lock</em> sont des fichiers auxquels vous êtes forcément habitués 🙂</p>
+
+
+
+<p>Comme toute bonne librairie nous allons tester à chaque étape de notre développement notre code et pour cela nous allons installer, je vous le donne en mille&#8230;. PhpUnit. </p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">composer require --dev phpunit/phpunit ^9.5</code></pre>
+
+
+
+<p>Nous allons configurer PhpUnit avec le fameux phpunit.xml et ajouter dans composer.json les bonnes références.</p>
+
+
+
+<pre title="phpunit.xml" class="wp-block-code"><code lang="xml" class="language-xml">&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;phpunit bootstrap="vendor/autoload.php" colors="true"&gt;
+    &lt;testsuites&gt;
+        &lt;testsuite name="common tests"&gt;
+            &lt;directory&gt;tests&lt;/directory&gt;
+        &lt;/testsuite&gt;
+    &lt;/testsuites&gt;
+&lt;/phpunit&gt;</code></pre>
+
+
+
+<p>Votre fichier composer devrait sensiblement ressembler à cela.</p>
+
+
+
+<pre title="composer.json" class="wp-block-code"><code lang="json" class="language-json">{
+    "name": "partitech/fix-unserialize",
+    "description": "Fix Php unserialize error at offset",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Partitech\\FixUnSerialize\\": "src"
+        }
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "scripts": {
+        "test": "phpunit"
+    }
+}</code></pre>
+
+
+
+<p>Vous pouvez créer le répertoire <strong><em>tests</em></strong> et lancer la commande <em><strong>composer test</strong></em>. Il n&rsquo;y a aucun test pour le moment mais cela validera que l&rsquo;ensemble est correctement créé. </p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">mkdir tests
+composer test</code></pre>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-3.png"><img decoding="async" loading="lazy" width="520" height="115" src="https://www.partitech.com/wp-content/uploads/2023/01/image-3.png" alt="" class="wp-image-2181" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-3.png 520w, https://www.partitech.com/wp-content/uploads/2023/01/image-3-300x66.png 300w" sizes="(max-width: 520px) 100vw, 520px" /></a></figure>
+
+
+
+<p>Il est enfin temps de créer notre premier test factice ce qui va nous permettre de créer les fichiers dont nous avons besoin. </p>
+
+
+
+<pre title="test/FixUnserializeTest.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace Partitech\FixUnSerialize\Tests;
+
+use Partitech\FixUnSerialize\UnSerializeService;
+
+class FixUnSerializeTest extends \PHPUnit\Framework\TestCase
+{
+    public function testSayHelloWorld()
+    {
+        $helloWorld = new UnSerializeService();
+        $this-&gt;assertEquals("Hello World!", $helloWorld-&gt;unserialize('Hello'));
+    }
+}</code></pre>
+
+
+
+<pre title="src/UnSerializeService.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+namespace Partitech\FixUnSerialize;
+
+class UnSerializeService
+{
+    /**
+     * @param string $data
+     * @return string|null
+     */
+    public function unserialize(string $data): ?string
+    {
+        return $data . ' World!';
+    }
+}</code></pre>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-4.png"><img decoding="async" loading="lazy" width="678" height="201" src="https://www.partitech.com/wp-content/uploads/2023/01/image-4.png" alt="" class="wp-image-2182" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-4.png 678w, https://www.partitech.com/wp-content/uploads/2023/01/image-4-300x89.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-4-550x163.png 550w" sizes="(max-width: 678px) 100vw, 678px" /></a></figure>
+
+
+
+<p>A ce stade vous avez ce qu&rsquo;il faut pour commencer à coder votre propre librairie. En ce qui me concerne je vais créer des méthodes les plus petites et simples possibles afin de pouvoir les tester le plus simplement. J&rsquo;aime assez le principe de « une méthode une responsabilité » me permettant de bien découper ce que je souhaite faire. De plus le fait d&rsquo;assigner une responsabilité simple à chacune de mes méthodes me permet d&rsquo;inclure le contrat/documentation directement dans le nom. Ainsi une méthode « isValid » n&rsquo;aura que la responsabilité de tester si une entrée est valide, etc. Voici le schéma de la classe que nous allons utiliser. Encore une fois ceci n&rsquo;est là que pour illustrer notre tutoriel.</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">public isValid(string $data): bool
+
+public fixIfInvalid(string $data):? string
+
+public fix(string $data): string
+
+public fixLength(array $values): string
+ 
+public unserialize(string $data) 
+</code></pre>
+
+
+
+<p>Donc dans l&rsquo;ordre on appelle unserialize -&gt; on test si invalide -&gt; on fixe -&gt; on dé-serialize. En somme très simple.  Je vous fournis le code pour l&rsquo;exemple et on passe à la suite. </p>
+
+
+
+<pre title="src/UnSerializeService.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace Partitech\FixUnSerialize;
+
+class UnSerializeService
+{
+    /**
+     * @param string $data
+     * @return mixed
+     */
+    public function unserialize(string $data)
+    {
+        $data = $this-&gt;fixIfInvalid($data);
+        return unserialize($data);
+    }
+
+    /**
+     * @param string $data
+     * @return string|null
+     */
+    public function fixIfInvalid(string $data): ?string
+    {
+        if (!$this-&gt;isValid($data)) {
+            $data = $this-&gt;fix($data);
+        }
+        return $data;
+    }
+
+    /**
+     * @param string $data
+     * @return bool
+     */
+    public function isValid(string $data): bool
+    {
+        if (!@unserialize($data)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @param string $data
+     * @return string
+     */
+    public function fix(string $data): string
+    {
+        $pattern = '/s\:(\d+)\:\"(.*?)\";/s';
+        return preg_replace_callback($pattern, [$this, 'fixLength'], $data);
+    }
+
+    /**
+     * @param array $values
+     * @return string
+     */
+    public function fixLength(array $values): string
+    {
+        $string = $values[2];
+        $length = strlen($string);
+        return 's:' . $length . ':"' . $string . '";';
+    }
+}</code></pre>
+
+
+
+<pre title="tests/FixUnserializeTest.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace Partitech\FixUnSerialize\Tests;
+
+use Partitech\FixUnSerialize\UnSerializeService;
+use PHPUnit\Framework\TestCase;
+
+class FixUnSerializeTest extends TestCase
+{
+    const VALID_STRING = 'a:2:{s:4:"test";s:4:"test";s:5:"test2";s:5:"test2";}';
+    const INVALID_STRING = 'a:2:{s:123456:"test";s:4:"test";s:5:"test2";s:5:"test2";}';
+
+    private UnSerializeService $unserializeService;
+
+    public function __construct(?string $name = null, array $data = [], $dataName = '')
+    {
+        parent::__construct($name, $data, $dataName);
+        $this-&gt;unserializeService = new UnSerializeService();
+    }
+
+    public function testIsValidTrue()
+    {
+        $this-&gt;assertTrue($this-&gt;unserializeService-&gt;isValid(self::VALID_STRING));
+    }
+
+    public function testIsValidFalse()
+    {
+        $this-&gt;assertNotTrue($this-&gt;unserializeService-&gt;isValid(self::INVALID_STRING));
+    }
+
+    public function testFixIfInvalidWithValidString()
+    {
+        $this-&gt;assertEquals(
+            self::VALID_STRING,
+            $this-&gt;unserializeService-&gt;fixIfInvalid(self::VALID_STRING)
+        );
+    }
+
+    public function testFixIfInvalidWithInvalidString()
+    {
+        $this-&gt;assertEquals(
+            self::VALID_STRING,
+            $this-&gt;unserializeService-&gt;fixIfInvalid(self::INVALID_STRING)
+        );
+    }
+
+    public function testFixLength()
+    {
+        $data = [
+            's:5000:"test2";',
+            5,
+            'test2'
+        ];
+        $expected = 's:5:"test2";';
+        $this-&gt;assertEquals(
+            $expected,
+            $this-&gt;unserializeService-&gt;fixLength($data)
+        );
+    }
+
+    public function testFixValid()
+    {
+        $this-&gt;assertEquals(
+            self::VALID_STRING,
+            $this-&gt;unserializeService-&gt;fix(self::VALID_STRING)
+        );
+    }
+
+    public function testFixInvalid()
+    {
+        $this-&gt;assertEquals(
+            self::VALID_STRING,
+            $this-&gt;unserializeService-&gt;fix(self::INVALID_STRING)
+        );
+    }
+
+    public function testUnserializeValid()
+    {
+        $this-&gt;assertEquals(
+            unserialize(self::VALID_STRING),
+            $this-&gt;unserializeService-&gt;unserialize(self::VALID_STRING)
+        );
+    }
+
+    public function testUnserializeInvalid()
+    {
+        $this-&gt;assertEquals(
+            unserialize(self::VALID_STRING),
+            $this-&gt;unserializeService-&gt;unserialize(self::INVALID_STRING)
+        );
+    }
+}</code></pre>
+
+
+
+<p>Maintenant que nous avons notre code nous allons le pousser sur Github. On commence par versionner notre projet et ajouter la liste des fichiers que nous ne souhaitons pas inclure.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">git init
+touch .gitignore
+echo "vendor/" &gt;&gt; .gitignore
+echo ".phpunit.result.cache" &gt;&gt; .gitignore
+echo ".idea/" &gt;&gt; .gitignore
+git add .
+git commit -m "First commit"</code></pre>
+
+
+
+<p>Initialisez un dépôt vide sur Github. Nous pouvons à présent pousser notre code dans notre dépôt.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">git remote add origin ssh://git@github.com/partitech/fix-serialize.git
+git branch -M main
+git push -f -u origin main</code></pre>
+
+
+
+<p>Maintenant que votre code est publié sur Github nous pouvons passer à la suite. </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-5.png"><img decoding="async" loading="lazy" width="1024" height="467" src="https://www.partitech.com/wp-content/uploads/2023/01/image-5-1024x467.png" alt="" class="wp-image-2197" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-5-1024x467.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-5-300x137.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-5-768x350.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-5-800x365.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-5-550x251.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-5.png 1230w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Créez votre première release.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-6.png"><img decoding="async" loading="lazy" width="1024" height="346" src="https://www.partitech.com/wp-content/uploads/2023/01/image-6-1024x346.png" alt="" class="wp-image-2198" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-6-1024x346.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-6-300x101.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-6-768x260.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-6-1440x487.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-6-800x271.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-6-550x186.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-6.png 1508w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Dans la page de création de release sélectionnez « <strong>Choose a tag</strong> » et entrez « <strong>v0.0.1</strong> » et cliquez sur « <strong>create new tag</strong>« , idem pour le nom de votre release. Entrez « <strong>Initial release</strong> » comme description et cliquez sur « <strong>Publish release</strong>« .</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-8.png"><img decoding="async" loading="lazy" width="987" height="773" src="https://www.partitech.com/wp-content/uploads/2023/01/image-8.png" alt="" class="wp-image-2200" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-8.png 987w, https://www.partitech.com/wp-content/uploads/2023/01/image-8-300x235.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-8-768x601.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-8-800x627.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-8-550x431.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-8-766x600.png 766w" sizes="(max-width: 987px) 100vw, 987px" /></a></figure>
+
+
+
+<p>Une fois créé vous vous retrouvez sur votre première page de release. </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-9.png"><img decoding="async" loading="lazy" width="1024" height="401" src="https://www.partitech.com/wp-content/uploads/2023/01/image-9-1024x401.png" alt="" class="wp-image-2201" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-9-1024x401.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-9-300x118.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-9-768x301.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-9-800x313.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-9-550x215.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-9.png 1261w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Notre dernière étape va consister à référencer notre version sur packagist afin d&rsquo;y avoir accès directement via composer.</p>
+
+
+
+<p> Sur la page <a href="https://packagist.org/login/">https://packagist.org/login/</a> utilisez l&rsquo;option « <strong>log with Github</strong>« .</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-10.png"><img decoding="async" loading="lazy" width="581" height="426" src="https://www.partitech.com/wp-content/uploads/2023/01/image-10.png" alt="" class="wp-image-2203" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-10.png 581w, https://www.partitech.com/wp-content/uploads/2023/01/image-10-300x220.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-10-550x403.png 550w" sizes="(max-width: 581px) 100vw, 581px" /></a></figure>
+
+
+
+<p> Soumettez votre dépôt : </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-11.png"><img decoding="async" loading="lazy" width="1024" height="417" src="https://www.partitech.com/wp-content/uploads/2023/01/image-11-1024x417.png" alt="" class="wp-image-2204" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-11-1024x417.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-11-300x122.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-11-768x313.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-11-800x326.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-11-550x224.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-11.png 1271w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-12.png"><img decoding="async" loading="lazy" width="1024" height="326" src="https://www.partitech.com/wp-content/uploads/2023/01/image-12-1024x326.png" alt="" class="wp-image-2205" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-12-1024x326.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-12-300x95.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-12-768x244.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-12-800x255.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-12-550x175.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-12.png 1213w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-13.png"><img decoding="async" loading="lazy" width="1024" height="724" src="https://www.partitech.com/wp-content/uploads/2023/01/image-13-1024x724.png" alt="" class="wp-image-2206" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-13-1024x724.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-13-300x212.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-13-768x543.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-13-800x565.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-13-550x389.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-13-849x600.png 849w, https://www.partitech.com/wp-content/uploads/2023/01/image-13.png 1220w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Vous avez maintenant accès à votre package directement via :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">composer require partitech/fix-unserialize</code></pre>
+
+
+
+<p>Génial 🙂</p>
+
+
+
+<p>Nous allons maintenant configurer Github pour notifier Packagist de tout changement sur le dépôt.</p>
+
+
+
+<p>Récupérez votre Api Token sur Packagist <a href="https://packagist.org/profile/">https://packagist.org/profile/</a>. Clikez sur <strong>Show API Token</strong> et copiez votre clef.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-17.png"><img decoding="async" loading="lazy" width="1024" height="578" src="https://www.partitech.com/wp-content/uploads/2023/01/image-17-1024x578.png" alt="" class="wp-image-2211" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-17-1024x578.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-17-300x169.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-17-768x433.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-17-800x451.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-17-550x310.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-17-1063x600.png 1063w, https://www.partitech.com/wp-content/uploads/2023/01/image-17.png 1228w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Dans GitHub, allez dans <strong>Settings</strong>  &gt; <strong>Webhooks</strong> &gt; <strong>Edit</strong>.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-16.png"><img decoding="async" loading="lazy" width="1024" height="486" src="https://www.partitech.com/wp-content/uploads/2023/01/image-16-1024x486.png" alt="" class="wp-image-2210" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-16-1024x486.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-300x143.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-768x365.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-1536x730.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-1440x684.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-800x380.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-550x261.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-16-1263x600.png 1263w, https://www.partitech.com/wp-content/uploads/2023/01/image-16.png 1821w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Changez le <strong>Secret</strong> en collant votre clef d&rsquo;API Packagist.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-18.png"><img decoding="async" loading="lazy" width="1024" height="705" src="https://www.partitech.com/wp-content/uploads/2023/01/image-18-1024x705.png" alt="" class="wp-image-2212" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-18-1024x705.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-18-300x207.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-18-768x529.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-18-800x551.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-18-550x379.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-18-872x600.png 872w, https://www.partitech.com/wp-content/uploads/2023/01/image-18.png 1194w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-20.png"><img decoding="async" loading="lazy" width="1024" height="795" src="https://www.partitech.com/wp-content/uploads/2023/01/image-20-1024x795.png" alt="" class="wp-image-2214" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-20-1024x795.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-20-300x233.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-20-768x596.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-20-800x621.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-20-550x427.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-20-773x600.png 773w, https://www.partitech.com/wp-content/uploads/2023/01/image-20.png 1134w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Et voila, vous pouvez faire un <strong>push</strong> sur votre dépôt et regarder les logs <strong>Settings</strong> &gt; <strong>Webhooks</strong> &gt; <strong>Recent Deliveries</strong></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-21.png"><img decoding="async" loading="lazy" width="1024" height="170" src="https://www.partitech.com/wp-content/uploads/2023/01/image-21-1024x170.png" alt="" class="wp-image-2215" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-21-1024x170.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-21-300x50.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-21-768x128.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-21-800x133.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-21-550x91.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-21.png 1143w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Bien vérifier sur Packagist que tout est ok.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-22.png"><img decoding="async" loading="lazy" width="1024" height="671" src="https://www.partitech.com/wp-content/uploads/2023/01/image-22-1024x671.png" alt="" class="wp-image-2216" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-22-1024x671.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-22-300x197.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-22-768x503.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-22-800x524.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-22-550x360.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-22-916x600.png 916w, https://www.partitech.com/wp-content/uploads/2023/01/image-22.png 1273w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Vous savez à présent comment créer une librairie composer et comment la délivrer au reste du monde 😉</p>

@@ -1,0 +1,140 @@
+
+<p>Il faut installer <code>pixassociates/sortable-behavior-bundle</code> et <code>stof/doctrine-extensions-bundle</code> </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require stof/doctrine-extensions-bundle
+composer require pixassociates/sortable-behavior-bundle
+</pre></div>
+
+
+<p>Ajouter la configuration dans pix_sortable.yaml<br>En ajoutant l&rsquo;entité et le champs dans position_field (ici wconf, et le champs position)</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+pix_sortable_behavior:
+    db_driver: orm # mongodb default value : orm
+    position_field:
+        default: position #default value : position
+        entities:
+            App\Entity\Wconf: position
+    sortable_groups:
+        entities:
+            #AppBundle\Entity\Baz: &#91; group ]
+            
+stof_doctrine_extensions:
+    orm:
+        default:
+            sortable: true
+</pre></div>
+
+
+<p>Dans l&rsquo;entitée il faut créer un champs qui va gérer la position (au hazard on l&rsquo;appel position)</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+use Gedmo\Mapping\Annotation as Gedmo;
+
+    /**
+     * @Gedmo\SortablePosition
+     * @ORM\Column(type=&quot;integer&quot;)
+     */
+    private $position;
+
+    public function getPosition(): ?int
+    {
+        return $this-&gt;position;
+    }
+
+    public function setPosition(int $position): self
+    {
+        $this-&gt;position = $position;
+
+        return $this;
+    }
+
+
+</pre></div>
+
+
+<p>Dans le controller, il faut rajouter la ref dans use, ajouter la route, et le bouton</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use Sonata\AdminBundle\Route\RouteCollection;
+use Pix\SortableBehaviorBundle\Services\PositionORMHandler as PositionHandler;
+
+
+public $last_position = 0;
+private $positionService;
+
+protected $datagridValues = array(
+	'_page' =&gt; 1,
+	'_sort_by' =&gt; 'position',
+	'_sort_order' =&gt; 'ASC',
+);
+
+public function setPositionService(PositionHandler $positionHandler)
+{
+        $this-&gt;positionService = $positionHandler;
+}
+
+
+protected function configureListFields(ListMapper $listMapper)
+{
+$listMapper-&gt;add('_action', null, array(
+            'actions' =&gt; array(
+                'move' =&gt; array(
+                    'template' =&gt; '@PixSortableBehavior/Default/_sort_drag_drop.html.twig',
+                    'enable_top_bottom_buttons' =&gt; false, 
+                ),
+            ),
+        ))
+        ;
+}
+
+protected function configureRoutes(RouteCollection $collection)
+{
+        $collection-&gt;add('move', $this-&gt;getRouterIdParameter().'/move/{position}');
+}
+
+
+
+</pre></div>
+
+
+<p>Ajouter ensuite les assets javascripts dans config/sonata_admin.yaml ajouter le service gedmo, et ajouter la configuration des arguments et calls</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+                    
+    assets:
+        extra_javascripts:
+            - bundles/pixsortablebehavior/js/jquery-ui.min.js // if you haven't got jQuery UI yet.
+            - bundles/pixsortablebehavior/js/init.js
+            
+</pre></div>
+
+
+<p>Dans la configuration des services : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    gedmo.listener.sortable:
+        class: Gedmo\Sortable\SortableListener
+        calls:
+            - &#91;setAnnotationReader, &#91;'@annotation_reader']]
+        tags:
+            - { name: doctrine.event_subscriber, connection: default }
+
+
+    admin.wconf:
+        class: App\Admin\WconfAdmin
+        arguments: &#91;~, App\Entity\Wconf, 'PixSortableBehaviorBundle:SortableAdmin']
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Configuration des types&quot; }
+        public: true        
+        calls:
+              - &#91;setPositionService, &#91;&quot;@pix_sortable_behavior.position&quot;]]
+
+</pre></div>

@@ -1,0 +1,49 @@
+{
+    "name": "partitech/sonata-extra",
+    "version": "1.0.0",
+    "type": "symfony-bundle",
+    "description": "Daily usefully tools helpers for Sonata",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Partitech\\SonataExtra\\": "src"
+        }
+    },
+    "require": {
+        "php": ">=8.2",
+        "sonata-project/admin-bundle": "^4.22",
+        "sonata-project/classification-bundle": "^4.7",
+        "sonata-project/doctrine-orm-admin-bundle": "^4.10",
+        "sonata-project/formatter-bundle": "^5.1",
+        "sonata-project/page-bundle": "5.x-dev",
+        "sonata-project/media-bundle": "^4.10.4",
+        "sonata-project/translation-bundle": "^3.1",
+        "sonata-project/user-bundle": "*",
+        "league/csv": "^9.11",
+        "jms/serializer-bundle": "^5.3.1",
+        "psr/http-factory": "^1.0",
+        "symfony/templating" : "*",
+        "guzzlehttp/guzzle": "^7.8",
+        "presta/sitemap-bundle": "^3.3",
+        "symfony/mime": "*",
+        "ext-dom": "*",
+        "ext-libxml": "*",
+      "ext-zip": "*"
+    },
+    "authors": [
+        {
+            "name": "Thomas Bourdin",
+            "email": "tbourdin@partitech.com",
+            "homepage": "https://thomasbourdinwebsite.com"
+        },
+        {
+            "name": "Géraud Bourdin",
+            "email": "gbourdin@partitech.com",
+            "homepage": "https://thomasbourdinwebsite.com"
+        }
+    ],
+    "require-dev": {
+        "phpunit/phpunit": "^10.4",
+        "symfony/test-pack": "^1.0"
+    }
+}

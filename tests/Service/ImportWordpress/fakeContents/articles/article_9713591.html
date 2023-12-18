@@ -1,0 +1,737 @@
+
+<p>Nous allons voir comment créer un Token (Smart Contract) sur la Binance Smart Chain (BSC) et le déployer afin de permettre à tout le monde de le trader.<br><br>Nous partons du principe que vous connaissez déjà les principes de la crypto monnaie, que vous en avez déjà acheté, et que savez comment fonctionne les portefeuilles (wallets).<br><br>Les Smart Contracts sont des programmes qui contrôlent directement des actifs numériques. Ce sont ces programmes qui, une fois « inséré » dans la blockchain, vont définir comment ces actifs vont être gérés.<br><br>Une fois que le programme est ajouté à la blockchain, il n&rsquo;est plus modifiable et il est impossible de le supprimer.<br><br>Nous utilisons ici les mécanismes de Smart Contract de la Blockchain de Binance, la BSC (sur le réseau BEP20).<br>Nous avons choisi la BSC car les frais de gaz sont très faibles. <br>Il est possible de faire la même chose sur la Blockchain Ethereum (ERC20) mais chaque transactions peut représenter plusieurs dizaines d&rsquo;euros contre quelques fractions de centimes sur la BSC.</p>
+
+
+
+<p></p>
+
+
+
+<h2 id="ajouter-le-reseau-bsc-au-wallet-metamask">Ajouter le réseau BSC au wallet MetaMask</h2>
+
+
+
+<p>Pour valider les transactions sur la BSC il vous faudra un portefeuille (wallet) relié au réseau BEP20.<br>Pour cela nous allons installer MetaMask, lui ajouter du BNB (la monnaie nécessaire pour payer les frais de transaction), et le relier au réseau BEP20.</p>
+
+
+
+<p>Vous pouvez l&rsquo;installer sur votre téléphone ou bien sur votre PC (préférable pour suivre cet article).<br><br>https://metamask.io/download</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/image.png"><img decoding="async" loading="lazy" width="981" height="822" src="https://www.partitech.com/wp-content/uploads/2021/08/image.png" alt="" class="wp-image-1635" srcset="https://www.partitech.com/wp-content/uploads/2021/08/image.png 981w, https://www.partitech.com/wp-content/uploads/2021/08/image-300x251.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/image-768x644.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/image-800x670.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/image-550x461.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/image-716x600.png 716w" sizes="(max-width: 981px) 100vw, 981px" /></a></figure>
+
+
+
+<p>Notez bien votre seed phrase (la clé privée) et gardez la en lieux sûr. <br><br><strong>Ne la transférez jamais à un tiers.</strong></p>
+
+
+
+<p>C&rsquo;est cette clé qui vous permettra de réinstaller votre portefeuille plus tard.<br><br>Une fois installée il vous faudra aller dans la configuration de l&rsquo;extension et ajouter le réseau BSC.<br><br>Cliquez sur la barre du milieux qui contient le nom du réseau puis sur « RPC personnalisé ».</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_186.png"><img decoding="async" loading="lazy" width="361" height="611" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_186.png" alt="" class="wp-image-1637" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_186.png 361w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_186-177x300.png 177w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_186-355x600.png 355w" sizes="(max-width: 361px) 100vw, 361px" /></a></figure></div>
+
+
+
+<p>Complétez le formulaire suivant :</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_187.png"><img decoding="async" loading="lazy" width="365" height="606" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_187.png" alt="" class="wp-image-1638" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_187.png 365w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_187-181x300.png 181w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_187-361x600.png 361w" sizes="(max-width: 365px) 100vw, 365px" /></a></figure></div>
+
+
+
+<p>Pour le réseau principal (Main Net) :<br><br><strong>Network Name :</strong> Binance Smart Chain<br><strong>New RPC URL : </strong>https://bsc-dataseed.binance.org/<br><strong>ChainID :</strong> 56<br><strong>Symbol :</strong> BNB<br><strong>Block Explorer URL :</strong> https://bscscan.com</p>
+
+
+
+<p>Puis le réseau de test (Testnet) : https://docs.binance.org/smart-chain/developer/rpc.html<br><br><strong>Network Name :</strong> Binance Smart Chain Testnet<br><strong>New RPC URL : </strong>https://data-seed-prebsc-2-s1.binance.org:8545/<br><strong>ChainID :</strong> 97<br><strong>Symbol :</strong> BNB<br><strong>Block Explorer URL :</strong> https://testnet.bscscan.com</p>
+
+
+
+<p>En règle générale, pour tester votre contrat, vous commencerez par le publier dans le testnet. <br>Pour cela il vous faudra alimenter votre wallet avec du BNB de test (heureusement gratuit). </p>
+
+
+
+<p>Il vous suffit de vous rendre sur la page suivante : <a href="https://testnet.binance.org/faucet-smart" target="_blank" rel="noreferrer noopener">https://testnet.binance.org/faucet-smart</a></p>
+
+
+
+<p>Puis de renseigner l’adresse de votre portefeuille. </p>
+
+
+
+<p>Votre adresse se trouve ici :<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_188.png"><img decoding="async" loading="lazy" width="355" height="607" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_188.png" alt="" class="wp-image-1639" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_188.png 355w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_188-175x300.png 175w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_188-351x600.png 351w" sizes="(max-width: 355px) 100vw, 355px" /></a></figure></div>
+
+
+
+<p>Vous renseignez votre adresse puis sélectionnez 1 BNB dans la liste &lsquo;Give me BNB&rsquo;.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_189.png"><img decoding="async" loading="lazy" width="839" height="293" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_189.png" alt="" class="wp-image-1640" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_189.png 839w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_189-300x105.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_189-768x268.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_189-800x279.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_189-550x192.png 550w" sizes="(max-width: 839px) 100vw, 839px" /></a></figure></div>
+
+
+
+<p>Votre compte sera automatiquement crédité.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_191.png"><img decoding="async" loading="lazy" width="362" height="605" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_191.png" alt="" class="wp-image-1641" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_191.png 362w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_191-180x300.png 180w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_191-359x600.png 359w" sizes="(max-width: 362px) 100vw, 362px" /></a></figure></div>
+
+
+
+<h2 id="creation-de-votre-smart-contract">Création de votre Smart Contract</h2>
+
+
+
+<p>On a vu précédemment qu&rsquo;un Smart Contract était un programme inséré dans la blockchain. <br>Pour le réseau BEP20 (BSC), le langage de programmation utilisé est le Solidity.<br><br>Vous trouverez la documentation complète ici : https://solidity-fr.readthedocs.io/fr/latest/</p>
+
+
+
+<p>Honnêtement, ce n&rsquo;est pas très compliqué. Il suffit de <strong>RTFM,</strong> comme un peu tous les langages. Il est aussi accessible que JavaScript.</p>
+
+
+
+<p>Pour rédiger notre programme, le compiler et le publier, nous allons le faire directement en ligne sur le site <a href="https://remix.ethereum.org/" target="_blank" rel="noreferrer noopener">https://remix.ethereum.org/</a></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/image-1.png"><img decoding="async" loading="lazy" width="1024" height="521" src="https://www.partitech.com/wp-content/uploads/2021/08/image-1-1024x521.png" alt="" class="wp-image-1642" srcset="https://www.partitech.com/wp-content/uploads/2021/08/image-1-1024x521.png 1024w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-300x153.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-768x391.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-1536x781.png 1536w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-1440x732.png 1440w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-800x407.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-550x280.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/image-1-1180x600.png 1180w, https://www.partitech.com/wp-content/uploads/2021/08/image-1.png 1870w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p><br>Tout vas se faire directement depuis ce site. <br><br>Nous allons créer un Token appelé le « PartiTech Token » avec le symbole « PTECH ».</p>
+
+
+
+<h3 id="1-on-cree-notre-fichier">1 &#8211; On crée notre fichier</h3>
+
+
+
+<p>On prendra bien soin de nommer notre fichier du nom de notre projet.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_193.png"><img decoding="async" loading="lazy" width="372" height="395" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_193.png" alt="" class="wp-image-1643" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_193.png 372w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_193-283x300.png 283w" sizes="(max-width: 372px) 100vw, 372px" /></a></figure></div>
+
+
+
+<h3 id="2-l-entete-de-notre-fichier">2 &#8211; L’entête de notre fichier</h3>
+
+
+
+<p>Très importante, c&rsquo;est elle qui va définir la version du compilateur utilisé et par conséquent la version du langage.<br><br>Dans notre cas, nous allons utiliser la dernière version : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+</pre></div>
+
+
+<h3 id="3-le-corp-de-notre-programme">3 &#8211; Le corp de notre programme</h3>
+
+
+
+<p>Nous créons ensuite notre contrat via la déclaration « contract » que nous nommerons de la même manière que notre fichier (ce qui est un peu plus propre).<br><br>A noter que vous pouvez déclarer autant de contrats que vous le souhaitez dans un même fichier.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+
+}
+
+</pre></div>
+
+
+<h3 id="4-definition-de-notre-contrat">4 &#8211; Définition de notre contrat</h3>
+
+
+
+<p>Nous allons devoir définir quelques paramètres de notre contrat. <br>Son nom, le nombre de token, et son symbole.<br><br>Arrêtons nous un instant sur la syntaxe que nous allons utiliser. Nous devons déclarer des variables. <br>Comme dans la plupart des langages, elle sont typées (int, string, bool etc) et ont une portée (publique ou privée).<br><br>Dans la blockchains tout est publique. Donc ne vous méprenez pas sur la notion de privée, c&rsquo;est une portée d’accès de la valeur mais il est toujours possible d&rsquo;y accéder.<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    uint private totalSupply = 1 000 000 000 000;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+}
+
+
+</pre></div>
+
+
+<p>Notre contrat aura 1k Milliards de tokens disponibles et s&rsquo;appellera le « Parti Tech Token »  avec un symbole « PTECH ».<br>(Franchement, on a pas longtemps hésité entre PTECH et PTT…)</p>
+
+
+
+<p>Donc comme vous le voyez, déclarer une chaîne est tout simple : </p>
+
+
+
+<p>Type+Portée+Nom = valeur;</p>
+
+
+
+<p>Mais ce n&rsquo;est pas tout. <br>Nous voulons ajouter des décimales à notre token de sorte que les traders puissent en acheter des fractions. Nous allons donc spécifier le nombre de décimales.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; highlight: [5,8]; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+}
+
+</pre></div>
+
+
+<p>Notez bien notre nouvelle variable « decimals » et la modification faite sur la variable « totalSupply ».<br><br>18 décimal, puis un nombre de token de 1 000 000 000 000 * 10 ** 18<br><br>La double * permet de donner la puissance du nombre, et on multiplie le nombre de token par 10 car d&rsquo;un point de vue du portefeuille pour afficher un token, il lui faut 10 unités. Donc nous devons multiplier le nombre réel de token par 10 puissance 18 pour les décimales.</p>
+
+
+
+<h3 id="5-ajouter-le-mapping-des-tokens-aux-adresses">5 &#8211; Ajouter le mapping des tokens aux adresses</h3>
+
+
+
+<p>A ce stade, notre contrat ne sait même pas qu&rsquo;il a pour logique d&rsquo;affecter des token à des utilisateurs. Pour le moment, il sait juste qu&rsquo;il a un nombre de token total dont la répartition lui est totalement inconnue.</p>
+
+
+
+<p>Pour cela, nous allons ajouter un mapping des adresses des gens (wallets) à la répartition des tokens que nous allons appeler balance (comme une balance en comptabilité).</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; highlight: [5]; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+}
+</pre></div>
+
+
+<p>En faisant ça, on affecte à notre objet « balances » l&rsquo;ensemble des adresses qui vont interagir avec notre contrat. Nous pourrons plus tard manipuler « balance » pour ajouter ou supprimer des tokens aux adresses. <br><br>Pour faire simple, on va mapper un index à une valeur. L&rsquo;index sera l&rsquo;adresse d&rsquo;un utilisateur et la valeur les token qu&rsquo;il aura acheté ou gagné (oui parce qu&rsquo;on est pas forcé d&rsquo;acheter le token, on peut en faire gagner aussi, à l&rsquo;image des token déflationnistes).</p>
+
+
+
+<h3 id="6-le-constructeur"><br>6 &#8211; Le constructeur</h3>
+
+
+
+<p>Le constructeur est à l&rsquo;image d&rsquo;un « constructor » dans les autres langages. C&rsquo;est une fonction qui sera exécutée qu&rsquo;une seule fois dans la vie du programme. Et comme on a vu que le programme était exécuté à vie, sans possibilité de le mettre à jour, le constructeur sera vraiment exécuté qu&rsquo;une seule fois.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+
+
+}
+</pre></div>
+
+
+<p>Faisons le point sur ce que l&rsquo;on vient d&rsquo;ajouter. <br>Notre constructeur ne prend pas d&rsquo;argument. Dedans, nous affectons l&rsquo;ensemble des tokens à un indice précis. Notre indice, c&rsquo;est une adresse.<br><br>Pour bien comprendre le mécanisme, à chaque interaction entre un utilisateur et notre programme, la blockchains va envoyer des messages. Un message en entrée, un message en retour. <br>Lorsque le contrat est publié, celui qui le publie est le détenteur du contrat, c&rsquo;est nous.<br>Donc le message en entrée qui est représenté par l&rsquo;objet « msg » contient en paramètre « sender » notre adresse.<br>Nous affectons donc à notre adresse l&rsquo;ensemble des tokens disponibles.<br><br>On pourrait très bien faire une répartition sur plusieurs adresses. Par exemple, créer un portefeuille mort (dead wallet) et y affecter dès la création du contrat un pourcentage de nos tokens. <br>On pourrais aussi créer un portefeuille pour le marketing, pour les devs et leurs répartir des tokens qu&rsquo;ils utiliseront plus tard, lorsqu&rsquo;il y aura de la liquidité, pour se rémunérer ou financer une action marketing.</p>
+
+
+
+<h3 id="7-fonction-pour-lire-la-balance-d-un-utilisateur">7 &#8211; Fonction pour lire la balance d&rsquo;un utilisateur</h3>
+
+
+
+<p id="block-187179e5-7071-4158-953c-852e6ec7fcf8">Nous devons maintenant produire une série de fonctionnalités à notre programme qui permettront de gérer les fonctions basiques de notre contrat.<br>La première est de récupérer la balance de l&rsquo;utilisateur.<br>En gros, lorsque vous ouvrez votre wallet, la première chose qu&rsquo;il va faire est d&rsquo;envoyer une requête vers le contrat pour récupérer votre solde.<br>Et le protocole va exécuter une fonction définie par le protocole qui s&rsquo;appelle « balanceOf() ». Cette fonction aura toujours comme argument l&rsquo;adresse du messager.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+    function balanceOf(address user) public view returns (uint)
+    {
+        return balances&#91;user];
+        
+    }
+
+}
+</pre></div>
+
+
+<p>Wait. Prends 2 secondes pour analyser la syntaxe de notre fonction.<br><br>function balanceOf(address user) <strong>public view returns (uint)</strong><br><br>En gros qu&rsquo;est-ce que l&rsquo;on vient de faire ? On spécifie le type de retour que va produire notre fonction. Tout simplement.<br>Avec une portée publique ou privée et un retour de type integer (uint). Et chose importante, la propriété n&rsquo;est que lisible (view, en gros lecture seule).<br>Ensuite, on voit que notre fonction prend en entrée une variable user qui n&rsquo;est autre qu&rsquo;une adresse et que l&rsquo;on retourne ensuite la valeur affectée pour l&rsquo;indice correspondant à notre adresse dans notre tableau « balances ».<br><br></p>
+
+
+
+<h3 id="8-le-transfert-de-tokens-aux-utilisateurs">8 &#8211; Le transfert de tokens aux utilisateurs</h3>
+
+
+
+<p>Il nous faut maintenant définir l’interaction entre chaque transaction. <br>Lorsqu&rsquo;un utilisateur va acheter notre token sur une maketplace il va nous envoyer une demande de transfert. A la réception nous devrons affecter le nombre de tokens à notre utilisateur. <br><br>Si nous voulions faire un système comme le DOGE coin, qui crée des tokens à chaque transaction, nous pourrions le faire ici. De même, si nous voulions faire un mécanisme de Burn, nous pourrions le faire ici aussi.<br><br>Comme vous le voyez, tous ces termes qui circulent autour des contrats sont en réalité très simples à implémenter.<br>Une règle mathématique toute bête.<br><br>Ça ne sera pas notre cas ici. Restons simple.<br><br>Donc à chaque transaction le protocole de la blockchain va nous envoyer un message qui appellera la fonction « transfer() » qui contiendra l&rsquo;adresse de l&rsquo;utilisateur.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+    function balanceOf(address user) public view returns (uint)
+    {
+        return balances&#91;user];
+        
+    }
+
+    function transfer(address to, uint value) public view returns (uint)
+    {
+        require(balanceOf(msg.sender)&gt;=value, &quot;Solde est insuffisant&quot;);
+        
+    }
+
+}
+</pre></div>
+
+
+<p>Globalement, une transaction c&rsquo;est un transfert d&rsquo;une valeur d&rsquo;une adresse à une autre. Donc si le détenteur A veux transférer un token à un détenteur B, il faut impérativement que A possède au moins 1 token. <br><br>Pour cela nous allons utiliser l&rsquo;instruction « requier », qui permet de valider une condition. Si la condition échoue, alors le processus est arrêté, et une erreur est renvoyée au protocole qui se charge de le transmettre à l&rsquo;utilisateur.<br><br>Donc ce que l&rsquo;on fait, c&rsquo;est récupérer l&rsquo;adresse de l&rsquo;utilisateur et appeler notre fonction « balanceOf » qui nous retourne le solde pour l&rsquo;adresse donnée et valider que le nombre de tokens à transférer est disponible dans la balance du donneur d&rsquo;ordre.<br>Si le solde est insuffisant, on arrête la transaction.<br><br>A noter que l&rsquo;objet msg est global et disponible à tout moment dans chaque function au moment d&rsquo;une transaction.<br></p>
+
+
+
+<p>En fonction du résultat, on incrémente le solde du destinataire et on décrémente le solde du donneur d&rsquo;ordre.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; highlight: [24,25]; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+    function balanceOf(address user) public view returns (uint)
+    {
+        return balances&#91;user];
+        
+    }
+
+    function transfer(address to, uint value) public view returns (uint)
+    {
+        require(balanceOf(msg.sender)&gt;=value, &quot;Solde est insuffisant&quot;);
+        balances&#91;to]+=value;
+        balances&#91;msg.sender]-=value;
+    }
+
+}
+</pre></div>
+
+
+<p>Une fois que la balance est faite, on va écrire dans la blockchain. Pour cela nous allons émettre un événement « Transfer ».<br>Un peu comme en JS on pourrait faire un fire event dans le DOM. <br>Pour invoquer un évènement, on utilise le mot-clé « emit », et pour déclarer l&rsquo;évènement, on utilise le mot-clé « event ».</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; highlight: [11,28]; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    event Transfer(address indexed from, address indexed to, uint value);
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+    function balanceOf(address user) public view returns (uint)
+    {
+        return balances&#91;user];
+        
+    }
+
+    function transfer(address to, uint value) public returns (bool)
+    {
+        require(balanceOf(msg.sender)&gt;=value, &quot;Solde insuffisant&quot;);
+        balances&#91;to]+=value;
+        balances&#91;msg.sender]-=value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+}
+</pre></div>
+
+
+<p>Donc une fois validée, on envoit un ordre de transfert du donneur d&rsquo;ordre « msg.sender » vers le destinataire « to » pour une valeur « value ».</p>
+
+
+
+<h3 id="8-la-delegation-de-transfert"> 8 -La délégation de transfert</h3>
+
+
+
+<p>La délégation de transfert donne la possibilité à un tiers de faire des transferts à la place du détenteur du contrat. C&rsquo;est exactement ce que fait la finance décentralisée (DEFI).<br>Donc ce qu&rsquo;il se passe c&rsquo;est que l&rsquo;on autorise le contrat à effectuer des transferts à notre place ce qui permet ensuite au contrat de passer des ordres depuis l&rsquo;adresse du détenteur vers l&rsquo;adresse du destinataire.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; highlight: [6,14,35,36,37,38,39]; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    mapping (address =&gt; mapping (address=&gt;uint)) public allowance;
+
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    event Transfer(address indexed from, address indexed to, uint value);
+    event Approval(address indexed owner, address indexed spender, uint value);
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+    function balanceOf(address user) public view returns (uint)
+    {
+        return balances&#91;user];
+        
+    }
+
+    function transfer(address to, uint value) public returns (bool)
+    {
+        require(balanceOf(msg.sender)&gt;=value, &quot;Solde insuffisant&quot;);
+        balances&#91;to]+=value;
+        balances&#91;msg.sender]-=value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+    function approve(address spender, uint value) public  returns (bool)
+    {
+        allowance&#91;msg.sender]&#91;spender]=value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+
+}
+</pre></div>
+
+
+<p>Je ne vais pas revenir sur les concepts que nous avons vus plus haut.<br>On crée un mapping d&rsquo;adresses qui contient lui même un mapping d&rsquo;adresses. En gros un tableau à 3 dimensions.<br>On crée une fonction « approve » qui va affecter à notre mapping d&rsquo;adresses une valeur. Ce qui va permettre de dire au système que cette adresse a le droit de dépenser en notre nom tel nombre de tokens.</p>
+
+
+
+<p>On rajoute une fonction « TransferFrom » qui, lorsque l&rsquo;ordre sera un ordre délégué, va vérifier la balance et vérifier la délégation. Si la balance est suffisante, et que la délégation est suffisante aussi, alors on calcule les balances de notre tableau « balances » et on émet un évènement transfert pour écrire dans la blockchain.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; title: ; notranslate" title="">
+pragma solidity ^0.8.4;
+
+contract PTECH
+{
+    mapping (address =&gt; uint) public balances;
+    mapping (address =&gt; mapping (address=&gt;uint)) public allowance;
+
+    uint private totalSupply = 1 000 000 000 000 * 10 ** 18;
+    string public name = &quot;Parti Tech Token&quot;;
+    string public symbol = &quot;PTECH&quot;;
+    uint public decimals = 18;
+
+    event Transfer(address indexed from, address indexed to, uint value);
+    event Approval(address indexed owner, address indexed spender, uint value);
+
+    constructor(){
+        balances&#91;msg.sender]=totalSupply;
+    }
+
+    function balanceOf(address user) public view returns (uint)
+    {
+        return balances&#91;user];
+        
+    }
+
+    function transfer(address to, uint value) public returns (bool)
+    {
+        require(balanceOf(msg.sender)&gt;=value, &quot;Solde insuffisant&quot;);
+        balances&#91;to]+=value;
+        balances&#91;msg.sender]-=value;
+        emit Transfer(msg.sender, to, value);
+        return true;
+    }
+
+    function TransferFrom(address from, address to, uint value) public  returns (bool)
+    {
+        require(balanceOf(from)&gt;=value, &quot;Solde insuffisant&quot;);
+        require(allowance&#91;from]&#91;msg.sender]&gt;=value, &quot;Délégation insuffisante&quot;);
+        balances&#91;to]+=value;
+        balances&#91;from]-=value;
+        emit Transfer(from, to, value);
+        return true;
+    }
+
+    function approve(address spender, uint value) public  returns (bool)
+    {
+        allowance&#91;msg.sender]&#91;spender]=value;
+        emit Approval(msg.sender, spender, value);
+        return true;
+    }
+
+}
+</pre></div>
+
+
+<h2 id="deploiement-du-contrat-dans-la-blockchain">Déploiement du contrat dans la Blockchain</h2>
+
+
+
+<p>Pour lé déploiement, on reste dans notre éditeur du site https://remix.ethereum.org/</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_196.png"><img decoding="async" loading="lazy" width="1024" height="679" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-1024x679.png" alt="" class="wp-image-1659" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-1024x679.png 1024w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-300x199.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-768x509.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-800x531.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-550x365.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_196-904x600.png 904w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_196.png 1429w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+
+<p>On va maintenant compiler notre contrat en vérifiant bien la version du compilateur et le type de langage. <br>On cochera « Hide warning » pour ne pas se polluer avec des messages non bloquants.<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_199-1.png"><img decoding="async" loading="lazy" width="543" height="731" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_199-1.png" alt="" class="wp-image-1666" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_199-1.png 543w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_199-1-223x300.png 223w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_199-1-446x600.png 446w" sizes="(max-width: 543px) 100vw, 543px" /></a></figure></div>
+
+
+
+<p>Il faut ensuite injecter web3 dans votre projet. En gros, cela va lier votre portefeuille MetaMask à votre contrat.<br>On positionnera au préalable MetaMask sur le réseau TestNet.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_200.png"><img decoding="async" loading="lazy" width="361" height="604" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_200.png" alt="" class="wp-image-1667" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_200.png 361w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_200-179x300.png 179w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_200-359x600.png 359w" sizes="(max-width: 361px) 100vw, 361px" /></a></figure></div>
+
+
+
+<p>Ensuite on se positionne dans l&rsquo;onglet déploiement, on injecte « Web3 », MetaMask s&rsquo;ouvre et nous demande de valider quel compte nous voulons utiliser.<br></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_202.png"><img decoding="async" loading="lazy" width="1024" height="516" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-1024x516.png" alt="" class="wp-image-1668" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-1024x516.png 1024w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-300x151.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-768x387.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-1536x774.png 1536w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-1440x725.png 1440w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-800x403.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-550x277.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202-1191x600.png 1191w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_202.png 1870w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>On valide.<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_203.png"><img decoding="async" loading="lazy" width="365" height="655" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_203.png" alt="" class="wp-image-1669" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_203.png 365w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_203-167x300.png 167w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_203-334x600.png 334w" sizes="(max-width: 365px) 100vw, 365px" /></a></figure></div>
+
+
+
+<p>Le numéro de notre compte est directement remplis dans l&rsquo;interface.<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/image-4.png"><img decoding="async" loading="lazy" width="447" height="686" src="https://www.partitech.com/wp-content/uploads/2021/08/image-4.png" alt="" class="wp-image-1670" srcset="https://www.partitech.com/wp-content/uploads/2021/08/image-4.png 447w, https://www.partitech.com/wp-content/uploads/2021/08/image-4-195x300.png 195w, https://www.partitech.com/wp-content/uploads/2021/08/image-4-391x600.png 391w" sizes="(max-width: 447px) 100vw, 447px" /></a></figure></div>
+
+
+
+<p>On clique sur « Déploy » et MétaMask nous demande de valider la transaction. <br><br>Le déploiement va nous coûter 0.0088 BNB. Une broutille. Sans compter que sur le TestNet, on peut se créditer des BNB de tests 😉</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_205.png"><img decoding="async" loading="lazy" width="1024" height="520" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-1024x520.png" alt="" class="wp-image-1671" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-1024x520.png 1024w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-300x152.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-768x390.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-1536x780.png 1536w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-1440x732.png 1440w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-800x406.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-550x279.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205-1181x600.png 1181w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_205.png 1868w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+
+<p>Et on confirme.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/image-5.png"><img decoding="async" loading="lazy" width="1024" height="521" src="https://www.partitech.com/wp-content/uploads/2021/08/image-5-1024x521.png" alt="" class="wp-image-1673" srcset="https://www.partitech.com/wp-content/uploads/2021/08/image-5-1024x521.png 1024w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-300x153.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-768x391.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-1536x782.png 1536w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-1440x733.png 1440w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-800x407.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-550x280.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/image-5-1179x600.png 1179w, https://www.partitech.com/wp-content/uploads/2021/08/image-5.png 1866w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+
+<p>On a la petite coche verte, tout est bon !<br><br>On vérifie la transaction dans MétaMask.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_208.png"><img decoding="async" loading="lazy" width="357" height="605" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_208.png" alt="" class="wp-image-1674" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_208.png 357w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_208-177x300.png 177w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_208-354x600.png 354w" sizes="(max-width: 357px) 100vw, 357px" /></a></figure></div>
+
+
+
+<p>On clique sur le lien pour vérifier le déploiement sur bscscan.com</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_209.png"><img decoding="async" loading="lazy" width="360" height="605" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_209.png" alt="" class="wp-image-1675" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_209.png 360w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_209-179x300.png 179w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_209-357x600.png 357w" sizes="(max-width: 360px) 100vw, 360px" /></a></figure></div>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/08/Selection_210.png"><img decoding="async" loading="lazy" width="1024" height="496" src="https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-1024x496.png" alt="" class="wp-image-1676" srcset="https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-1024x496.png 1024w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-300x145.png 300w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-768x372.png 768w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-800x388.png 800w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-550x267.png 550w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_210-1238x600.png 1238w, https://www.partitech.com/wp-content/uploads/2021/08/Selection_210.png 1386w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Voilà, notre contrat est créé. <br>Nous verrons dans un prochain chapitre comment y ajouter de la liquidité afin de permettre le tradding dans les différentes places de marché.</p>
+
+
+
+<h2 id="creation-d-une-paire-et-pool-de-liquidite">Création d&rsquo;une paire et pool de liquidité</h2>
+
+
+
+<p>Pour que votre contrat soit en capacité d&rsquo;être traidé, il faudra créer une paire avec un autre token et y ajouter de la liquidité.<br>Par exemple, faire une paire PTECH/BNB. On y créera un pool d&rsquo;une fraction ou de la totalité de nos token disponibles, et on lui affectera une valeur de départ.<br>250 000 000 000 token pour 33BNB (soit à peut pret 10 000$ au cours d&rsquo;aujourd&rsquo;hui) serait une bonne valeur de départ.<br><br>Pour cela nous allons aller sur pancakeswap : https://pancakeswap.finance<br>On choisi « Liquidity » dans le menu « Trade »</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image.png"><img decoding="async" loading="lazy" width="664" height="286" src="https://www.partitech.com/wp-content/uploads/2022/02/image.png" alt="" class="wp-image-1788" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image.png 664w, https://www.partitech.com/wp-content/uploads/2022/02/image-300x129.png 300w, https://www.partitech.com/wp-content/uploads/2022/02/image-550x237.png 550w" sizes="(max-width: 664px) 100vw, 664px" /></a></figure></div>
+
+
+
+<p>Ensuite on selectionne l&rsquo;onglet « Liquidity » et on clique sur « + Add Liquidity »</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-2.png"><img decoding="async" loading="lazy" width="696" height="433" src="https://www.partitech.com/wp-content/uploads/2022/02/image-2.png" alt="" class="wp-image-1790" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-2.png 696w, https://www.partitech.com/wp-content/uploads/2022/02/image-2-300x187.png 300w, https://www.partitech.com/wp-content/uploads/2022/02/image-2-550x342.png 550w" sizes="(max-width: 696px) 100vw, 696px" /></a></figure></div>
+
+
+
+<p>Il faut impérativement connecter son wallet au site, si nous souhaitons que le site créé notre pool.</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-3.png"><img decoding="async" loading="lazy" width="415" height="136" src="https://www.partitech.com/wp-content/uploads/2022/02/image-3.png" alt="" class="wp-image-1791" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-3.png 415w, https://www.partitech.com/wp-content/uploads/2022/02/image-3-300x98.png 300w" sizes="(max-width: 415px) 100vw, 415px" /></a></figure></div>
+
+
+
+<p>Une fois connecté, le site nous indique nos pools. Pour le moment, nous n&rsquo;en avons pas.<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-4.png"><img decoding="async" loading="lazy" width="513" height="479" src="https://www.partitech.com/wp-content/uploads/2022/02/image-4.png" alt="" class="wp-image-1792" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-4.png 513w, https://www.partitech.com/wp-content/uploads/2022/02/image-4-300x280.png 300w" sizes="(max-width: 513px) 100vw, 513px" /></a></figure></div>
+
+
+
+<p>On clique sur « + Add liquidity »</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-5.png"><img decoding="async" loading="lazy" width="523" height="529" src="https://www.partitech.com/wp-content/uploads/2022/02/image-5.png" alt="" class="wp-image-1793" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-5.png 523w, https://www.partitech.com/wp-content/uploads/2022/02/image-5-297x300.png 297w" sizes="(max-width: 523px) 100vw, 523px" /></a></figure></div>
+
+
+
+<p>Et on ajoute notre token. Dans la liste, on clique sur Manage token</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-6.png"><img decoding="async" loading="lazy" width="550" height="797" src="https://www.partitech.com/wp-content/uploads/2022/02/image-6.png" alt="" class="wp-image-1794" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-6.png 550w, https://www.partitech.com/wp-content/uploads/2022/02/image-6-207x300.png 207w, https://www.partitech.com/wp-content/uploads/2022/02/image-6-414x600.png 414w" sizes="(max-width: 550px) 100vw, 550px" /></a></figure></div>
+
+
+
+<p>Puis dans l&rsquo;onglet token on ajoute l&rsquo;adresse de notre contrat :</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-7.png"><img decoding="async" loading="lazy" width="597" height="437" src="https://www.partitech.com/wp-content/uploads/2022/02/image-7.png" alt="" class="wp-image-1795" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-7.png 597w, https://www.partitech.com/wp-content/uploads/2022/02/image-7-300x220.png 300w, https://www.partitech.com/wp-content/uploads/2022/02/image-7-550x403.png 550w" sizes="(max-width: 597px) 100vw, 597px" /></a></figure></div>
+
+
+
+<p>Une fois le contrat importé, on le selectionne :</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-8.png"><img decoding="async" loading="lazy" width="477" height="444" src="https://www.partitech.com/wp-content/uploads/2022/02/image-8.png" alt="" class="wp-image-1796" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-8.png 477w, https://www.partitech.com/wp-content/uploads/2022/02/image-8-300x279.png 300w" sizes="(max-width: 477px) 100vw, 477px" /></a></figure></div>
+
+
+
+<p>Et on choisis la deuxieme devise a « coupler » avec notre contrat. Contrat/devise ou devise/Contrat, c&rsquo;est comme vous le souhaitez.<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/02/image-9.png"><img decoding="async" loading="lazy" width="475" height="656" src="https://www.partitech.com/wp-content/uploads/2022/02/image-9.png" alt="" class="wp-image-1797" srcset="https://www.partitech.com/wp-content/uploads/2022/02/image-9.png 475w, https://www.partitech.com/wp-content/uploads/2022/02/image-9-217x300.png 217w, https://www.partitech.com/wp-content/uploads/2022/02/image-9-434x600.png 434w" sizes="(max-width: 475px) 100vw, 475px" /></a></figure></div>
+
+
+
+<p>On clique sur « Enable » et on laisse travailler Metamask qui va vous demander d&rsquo;authoriser les transactions necessaire à la création du pool.</p>
+
+
+
+<p>Vous ne devriez pas tarder a le voir listé dans les nouveaux contrats disponibles. Par exemple sur  https://poocoin.app/ape</p>
+
+
+
+<h2 id="une-fois-que-votre-pool-est-cree">Une fois que votre pool est créé</h2>
+
+
+
+<p>Si vous cet article vous a été utile, n&rsquo;hésitez pas a me faire un petit dont de quelques milliards 😉<br>Mon adresse : 0x3637fCa571aeA47DBC90f61c38629dd92a742315</p>
+
+
+
+<p>Je listerais ci-dessous les généreux donateurs avec l&rsquo;adresse du pool sur un exchange pour pouvoir le trader :</p>
+
+
+
+<figure class="wp-block-table"><table><tbody><tr><td>Montant</td><td>Token</td><td>Addresse exchange</td></tr><tr><td></td><td></td><td></td></tr></tbody></table><figcaption>Pour le moment, personne n&rsquo;a fait de don. Soyez le premier !</figcaption></figure>
+
+
+
+<p></p>

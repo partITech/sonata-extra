@@ -1,0 +1,12 @@
+<p>Pour activer le pavé numerique au démarrage d&rsquo;ubuntu, il y a deux solution.</p>
+<p>1 &#8211; Avec le paquet numlockx (À partir de la version 14.04 64 bits) :<br />
+sudo apt-get install numlockx</p>
+<p>Ne créez pas de fichier /etc/lightdm/lightdm.conf, sinon lightdm ne se lancera pas !<br />
+Dans /usr/share/lightdm/lightdm.conf.d/50-unity-greeter.conf Ajouter dans la section [SeatDefaults]</p>
+<p>greeter-setup-script=/usr/bin/numlockx on</p>
+<p>2 &#8211; Pour toutes les versions de linux :<br />
+Editez le fichier 	/etc/rc.local et ajouter ceci :<br />
+# Turn Numlock on for the TTYs:<br />
+for tty in /dev/tty[1-6]; do<br />
+/usr/bin/setleds -D +num &lt; $tty<br />
+done</p>

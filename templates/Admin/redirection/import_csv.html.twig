@@ -1,0 +1,23 @@
+{% extends '@SonataAdmin/CRUD/base_edit.html.twig' %}
+
+{% block title %}
+    {{ 'Import CSV'|trans }}
+{% endblock %}
+
+{% block navbar_title %}
+    {{ 'Import CSV '|trans }}
+{% endblock %}
+
+
+{% block sonata_form_action_url %}{{ path('admin_partitech_sonataextra_redirection_import') }}{% endblock sonata_form_action_url %}
+{% block formactions %}
+    <div class="sonata-ba-form-actions well well-small form-actions">
+
+        <button class="btn btn-success" type="submit">
+            <i class="fa fa-save" aria-hidden="true"></i> {{ 'Import'|trans({}, 'messages') }}
+        </button>
+        <a class="btn btn-info" href="{{ admin.generateUrl('list') }}">
+            <i class="fa fa-list" aria-hidden="true"></i> {{ 'Return to list'|trans({}, 'messages') }}
+        </a>
+    </div>
+{% endblock formactions %}

@@ -1,0 +1,19 @@
+{{ knp_menu_render(admin.sidemenu(action), {'currentClass' : 'active'}, 'list') }}
+
+<div class="btn-group group-tab-menu" style="">
+
+</div>
+{% include '@PartitechSonataExtra/Admin/translation/crud_header.html.twig' %}
+{#  <div class="btn-group" style="float:right">
+
+    <a type="button" class="navbar-btn btn {% if mode == 'list' %}btn-info active{% else %}btn-default{% endif %}" href="{{ admin.generateUrl('list', { 'filter': { 'context': { 'value': current_category is defined ? current_category.context.id|default('') : '' }}}) }}">
+        <i class="fa fa-list"></i> {{ 'classification.list_mode'|trans({}, 'SonataClassificationBundle') }}
+    </a>
+    <a type="button" class="navbar-btn btn {% if mode == 'tree' %}btn-info active{% else %}btn-default{% endif %}" href="{{ admin.generateUrl('tree') }}">
+        <i class="fa fa-sitemap"></i> {{ 'classification.tree_mode'|trans({}, 'SonataClassificationBundle') }}
+    </a>
+    </div>
+#}
+
+
+

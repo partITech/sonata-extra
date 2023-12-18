@@ -1,0 +1,140 @@
+
+<h2><br>Introduction</h2>
+
+
+
+<p>Depuis la version 7.4 de PHP nous avons enfin accès aux fonctions d&rsquo;interopérabilité entre les différents languages et PHP:&nbsp;le FFI ou<a href="https://en.wikipedia.org/wiki/Foreign_function_interface"> Foreign </a><a href="https://en.wikipedia.org/wiki/Foreign_function_interface" target="_blank" rel="noreferrer noopener">function</a><a href="https://en.wikipedia.org/wiki/Foreign_function_interface"> interface</a>.</p>
+
+
+
+<p><strong>FFI c&rsquo;est quoi&nbsp;?&nbsp;</strong><br>C&rsquo;est tout simplement la possibilité d&rsquo;utiliser une librairie externe&nbsp;(.dll ou&nbsp;.so)&nbsp;directement dans PHP,&nbsp;et ce,&nbsp;sans avoir à créer un module PHP.&nbsp;<br>Oui oui,&nbsp;juste avec un script PHP !&nbsp;<br>C&rsquo;est entre autre ce qui à fait la gloire de python et lui a permis d&rsquo;avoir tant de fonctionnalités.</p>
+
+
+
+<p>Ce qui est génial avec FFI c&rsquo;est qu&rsquo;un développeur PHP non-expert en C/Rust/Go/Kotlin&nbsp;(liste non exhaustive)&nbsp;peut enfin lier une librairie externe par lui même.&nbsp;Ainsi,&nbsp;si vous avez un projet avec un besoin hyper spécifique,&nbsp;une lib propriétaire ou que sais-je encore et que vous n&rsquo;avez pas trop de charge vous pouvez directement vous coller au dev de l&rsquo;utilisation de celle-ci.&nbsp;<br>Ça arrive rarement,&nbsp;mais ici chez partITech, ça nous est quand même arrivé de devoir développer des module PHP.&nbsp;Du coup,&nbsp;le fait de développer directement la liaison avec la lib en PHP devrait rendre la procédure bien plus simple et rapide à déployer.</p>
+
+
+
+<p>Bien entendu ce jeu de fonction a un coût car,&nbsp;même si la procédure permet d&rsquo;aller plus vite en développement, elle reste moins rapide qu&rsquo;un vrai module PHP écrit en c/c++.&nbsp;<br>En effet,&nbsp;accéder aux structures avec FFI est pour le moment 2 fois moins rapide qu&rsquo;avec un module natif.&nbsp;Il n&rsquo;est donc pas recommandé d&rsquo;utiliser FFI pour améliorer les performances de votre application.&nbsp;En revanche,&nbsp;il peut grandement vous aider à réduire la mémoire utilisée sur des process très gourmands.&nbsp;(source&nbsp;<a href="https://www.php.net/manual/fr/intro.ffi.php" target="_blank" rel="noreferrer noopener">https://www.php.net/manual/fr/intro.ffi.php</a>).</p>
+
+
+
+<p>Bon, les intros et les blah-blah très peu pour nous.&nbsp;Ce qu&rsquo;on veut voir c&rsquo;est du code.&nbsp;<br>Donc je vous propose de voir plusieurs problématiques rencontrées lors de nos tests.&nbsp;Bien entendu chaque projet est différent mais si cet article peut vous aider à mettre les mains dans le « bousin » on sera content.</p>
+
+
+
+<p></p>
+
+
+
+<h2>Le hello world</h2>
+
+
+
+<p>Le test basique de référence restant le fameux « Hello world », nous allons débuter notre voyage dans le monde merveilleux des FFI avec une fonction C qui va nous retourner « Hello world ».</p>
+
+
+
+<p><strong>hello.c</strong></p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">#include &lt;stdio.h&gt;
+
+ const char * hello() {
+   return "Hello, World!";
+}</code></pre>
+
+
+
+<p><strong>hello.h</strong></p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">export const char * hello();</code></pre>
+
+
+
+<p>On peut à présent compiler.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">gcc -c hello.c</code></pre>
+
+
+
+<p>On demande à gcc de nous créer notre librairie partagée, le fameux fichier&nbsp;.so</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">gcc -shared -o hello.so hello.o
+</code></pre>
+
+
+
+<p>Voilà ! A présent nous avons notre matière pour jouer avec PHP-ffi directement.</p>
+
+
+
+<p>Voici le code PHP nous permettant d&rsquo;appeler notre fonction hello()</p>
+
+
+
+<p><strong>hello.php</strong></p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">#!/usr/bin/php8.1
+&lt;?php
+$ffi = FFI::cdef(
+    "const char *hello();",
+    __DIR__ ."/hello.so"
+);
+
+echo $ffi-&gt;hello();</code></pre>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">chmod +x hello.php
+./hello.php
+Hello, World!</code></pre>
+
+
+
+<p><strong>Explications&nbsp;:</strong></p>
+
+
+
+<p>La méthode <strong>cdef</strong> nous permet de créer un nouvel objet FFI.&nbsp;Le premier paramètre est une chaîne contenant la définition de notre librairie.&nbsp;On est pas obligé de mettre l’intégralité des informations de la librairie,&nbsp;seulement ce qui nous intéresse.</p>
+
+
+
+<p>A noter que si vous utilisez des header files un peu complexe, il y a de fortes chances pour que ça plante directement.&nbsp;De ce que j&rsquo;ai pu utiliser,&nbsp;j&rsquo;ai systématiquement recréé et simplifié les fichiers de définitions.&nbsp;<br>Nous verrons dans un autre exemple comment créer et utiliser directement un header file un peu trop gros pour être posé directement dans notre script.&nbsp;Ça peut rapidement devenir compliqué&nbsp;🙂</p>
+
+
+
+<p>Le second paramètre est notre librairie partagée.&nbsp;Pas vraiment besoin d&rsquo;expliquer.</p>
+
+
+
+<p>Finalement on va directement appeler la fonction et faire un echo du résultat.</p>
+
+
+
+<p>Simple&#8230;Basique.</p>
+
+
+
+<p>On passe à un exemple un petit peu plus poussé&nbsp;? Rendez vous dans la seconde partie de notre dossier sur le monde merveilleux des Foreign Function Interfaces.</p>
+
+
+
+<p><a href="/php-ffi/php-ffi-partie-2">PHP FFI: Passage de paramètres et utilisation le zend engine &#8211; partie 2</a></p>
+
+
+
+<p></p>
+
+
+
+<p>Merci à <a href="https://www.linkedin.com/in/thomas-bourdin-b332b630/">Thomas Bourdin</a>, <a href="https://www.linkedin.com/in/lejallec/">Cédric Le Jallé</a>, <a href="https://www.linkedin.com/in/stephanepechard/">Stéphane Péchard</a> pour leur aide, conseils et relecture.</p>

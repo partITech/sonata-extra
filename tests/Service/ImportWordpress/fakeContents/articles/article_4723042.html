@@ -1,0 +1,244 @@
+
+<p>En gros on souhaites faire une interface CRUD, 1N, avec laquelle, lorsque l&rsquo;on est sur l&rsquo;édition d&rsquo;un élément, on ajoute un panel pour gérer tous les éléments fils.<br><br>Ici nous avons une table wtype, avec une table wconf qui contient une série d&rsquo;enregistrement reliés a un item wtype.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="299" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_081-1024x299.png" alt="" class="wp-image-422" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_081-1024x299.png 1024w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_081-300x88.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_081-768x225.png 768w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_081-1536x449.png 1536w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_081.png 1860w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="293" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_082-1024x293.png" alt="" class="wp-image-423" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_082-1024x293.png 1024w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_082-300x86.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_082-768x220.png 768w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_082-1536x440.png 1536w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_082.png 1862w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Tout comme pour l&rsquo;exemple d&rsquo;implémentation du sortable avec drag&rsquo;ndrop ( <a rel="noreferrer noopener" aria-label="disponible ici (ouverture dans un nouvel onglet)" href="/symfony-sonata-gerer-lordre-en-dragn-drop/" target="_blank">disponible ici</a> ) nous allons utiliser les composants suivants :<br><code>pixassociates/sortable-behavior-bundle</code> et <code>stof/doctrine-extensions-bundle</code><br>Vous devrez donc avoir préalablement créé une entités qui contient une liaison 1N avec un deuxième entité.<br><br>La manipulation consiste uniquement à injecter la deuxième entités dans le call de la déclaration du service de la première avec l’argument « addChild » et la référence du service parent.</p>
+
+
+
+<p> </p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="783" height="347" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_083.png" alt="" class="wp-image-425" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_083.png 783w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_083-300x133.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_083-768x340.png 768w" sizes="(max-width: 783px) 100vw, 783px" /></figure>
+
+
+
+<p>Lorsque l&rsquo;on souhaites faire référence a un service on utilise la chaîne utilisée pour la déclaration (qui est libre), et on ajoute « @ » pour dire que c&rsquo;est une référence.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+#config/services.yaml
+services:
+     admin.wconf:
+        class: App\Admin\WconfAdmin
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Configuration des types&quot; }
+        public: true
+        arguments: &#91;~, App\Entity\Wconf, 'PixSortableBehaviorBundle:SortableAdmin']
+        calls:
+            - &#91;setPositionService, &#91;&quot;@pix_sortable_behavior.position&quot;]]
+        
+    admin.wtype:
+        class: App\Admin\WtypeAdmin
+        arguments: &#91;~, App\Entity\Wtype, ~]
+        calls:
+            - &#91;addChild, &#91;&quot;@admin.wconf&quot;]] 
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Types de contrats&quot; }
+        public: true
+ 
+</pre></div>
+
+
+<p>Dans les 2 controller admin, il faudra rajouter les références au librairies suivantes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use Knp\Menu\ItemInterface as MenuItemInterface;
+use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Route\RouteCollection;
+use Pix\SortableBehaviorBundle\Services\PositionORMHandler as PositionHandler;
+</pre></div>
+
+
+<p>Ensuite dans l&rsquo;interface Parent, on ajoute les boutons.<br>Pour l&rsquo;url de l’interface fils, il faut lui donner la référence du service pour qu&rsquo;il créé les routes. Comme notre service est « admin.wconf », la référence pour la liste sera donc &lsquo;admin.wconf.list&rsquo;</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    protected function configureSideMenu(MenuItemInterface $menu, $action, AdminInterface $childAdmin = null): void
+    {
+        if (!$childAdmin &amp;&amp; !\in_array($action, &#91;'edit'], true)) {
+            return;
+        }
+               
+        $admin = $this-&gt;isChild() ? $this-&gt;getParent() : $this;
+        $id = $admin-&gt;getRequest()-&gt;get('id');
+        $label=$this-&gt;hasSubject() &amp;&amp; null !== $this-&gt;getSubject()-&gt;getLabel() ? $this-&gt;getSubject()-&gt;getLabel():null;
+        
+        $menu-&gt;addChild(
+            'Configuration du contrat '.$label,
+            $admin-&gt;generateMenuUrl('edit', &#91;'id' =&gt; $id])
+           
+            );
+        
+        $menu-&gt;addChild( 'Configuration des interfaces '.$label, 
+            &#91;
+                'uri' =&gt; $admin-&gt;generateUrl('admin.wconf.list', &#91;'id' =&gt; $id]) 
+            ]);
+        
+    }
+</pre></div>
+
+
+<p>Puisque maintenant notre interface CRUD fils est restreinte au scope de notre sélection parent, et que nous souhaitons gérer l&rsquo;ordre en drag&rsquo;n drop, nous allons supprimer la possibilité de trier la liste. <br>Il suffit juste d&rsquo;ajouter l&rsquo;argument sortable=false (default true), lors de la définition des champs de la liste.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    protected function configureListFields(ListMapper $listMapper)
+    {
+        $listMapper-&gt;add('_action', null, array(
+            'actions' =&gt; array(
+                'move' =&gt; array(
+                    'template' =&gt; '@PixSortableBehavior/Default/_sort_drag_drop.html.twig',
+                    'enable_top_bottom_buttons' =&gt; false, //optional
+                ),
+            ),
+        ))
+        ;
+        
+        $listMapper-&gt;addIdentifier('etape', null, &#91;'label' =&gt; 'Etape','sortable'=&gt;false]);
+        $listMapper-&gt;addIdentifier('position', null, &#91;'label' =&gt; 'position','sortable'=&gt;false]);
+        //$listMapper-&gt;addIdentifier('id', null, &#91;'label' =&gt; 'id','sortable'=&gt;false]);
+        $listMapper-&gt;addIdentifier('label', null, &#91;'label' =&gt; 'Label','sortable'=&gt;false]);
+        
+        
+        $listMapper-&gt;addIdentifier('synchro_field', null, &#91;'label' =&gt; 'Destination du champs','sortable'=&gt;false]);
+        $listMapper-&gt;add('actif', null, &#91;'editable' =&gt; true,'sortable'=&gt;false]);
+        
+    }
+</pre></div>
+
+
+<p>On souhaites aussi conserver l&rsquo;ordre par défaut, pour que l&rsquo;utilisateur retrouve toujours le même ordre à chaque rechargement.<br>Il y a deux manières. </p>
+
+
+
+<p><br>La première, consiste à surcharger la configuration par défaut :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+public function __construct( $code, $class, $baseControllerName ) {
+        parent::__construct( $code, $class, $baseControllerName );
+
+}
+ protected $datagridValues = array(
+        '_page' =&gt; 1,
+        '_sort_by' =&gt; 'position',
+        '_sort_order' =&gt; 'ASC',
+    );
+</pre></div>
+
+
+<p>La seconde méthode, permet de faire un trie plus fin, par exemple sur 2 champs en surchargeant la requête utilisée pour la liste.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    public function createQuery($context = 'list')
+    {
+        $proxyQuery = parent::createQuery('list');
+        $proxyQuery-&gt;addOrderBy($proxyQuery-&gt;getRootAlias().'.etape', 'ASC');
+        $proxyQuery-&gt;addOrderBy($proxyQuery-&gt;getRootAlias().'.position', 'ASC');
+    
+        return $proxyQuery;
+    }
+    
+</pre></div>
+
+
+<p>Et la on se rends compte que si on désactive l&rsquo;ordre des colonnes, notre ordre configuré dans notre requête ne fonctionne plus.<br>Du coup, ce que l&rsquo;on va faire, c&rsquo;est surcharger le template pour cette liste uniquement, et virer le code qui gère les entête de colonnes, mais garder tout le reste. </p>
+
+
+
+<p>La liste se trouve dans vendor/sonata-project/admin-bundle/src/Resources/views/CRUD/base_list.html.twig  et notre block concerné est « table_header »</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="688" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_088-1024x688.png" alt="" class="wp-image-428" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_088-1024x688.png 1024w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_088-300x202.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_088-768x516.png 768w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_088.png 1375w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Nous allons ajouter notre template dans la déclaration de notre service. <br>Pour cela nous devons prendre la référence du template, décrit dans cette page : <a href="https://symfony.com/doc/master/bundles/SonataAdminBundle/reference/templates.html#global-templates">https://symfony.com/doc/master/bundles/SonataAdminBundle/reference/templates.html#global-templates</a><br>Dans notre cas c&rsquo;est </p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="730" height="804" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_089.png" alt="" class="wp-image-429" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_089.png 730w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_089-272x300.png 272w" sizes="(max-width: 730px) 100vw, 730px" /></figure>
+
+
+
+<p>Et on vas juste ajouter un call de type setTemplate avec notre configuration</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+    admin.wconf:
+        class: App\Admin\WconfAdmin
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Configuration des types&quot; }
+        public: true
+        arguments: &#91;~, App\Entity\Wconf, 'PixSortableBehaviorBundle:SortableAdmin']
+        calls:
+            - &#91;setPositionService, &#91;&quot;@pix_sortable_behavior.position&quot;]]
+            - &#91; setTemplate, &#91;list, &quot;Admin/wconf-list.html.twig&quot;]]
+</pre></div>
+
+
+<p>On a mis : « Admin/wconf-list.html.twig »<br>Ce qui veux dire que le système vas aller chercher le fichier /templates/Admin/wconf-list.html.twig<br>Ce fichier doit étendre la vue initiale de la liste, et redéfinir le block qui gère l’entête uniquement. On souhaites vraiment garder tout le reste.<br>Du coup, on démarre notre fichier en donnant la référence du template maître, et on redéfinis ensuite notre block</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+#/templates/Admin/wconf-list.html.twig
+{% extends '@SonataAdmin/CRUD/base_list.html.twig' %}
+
+        {% block table_header %}
+        
+                            &lt;thead&gt;
+                                &lt;tr class=&quot;sonata-ba-list-field-header&quot;&gt;
+                                    {% for field_description in admin.list.elements %}
+                                        {% if admin.hasRoute('batch') and field_description.getOption('code') == '_batch' and batchactions|length &gt; 0 %}
+                                            &lt;th class=&quot;sonata-ba-list-field-header sonata-ba-list-field-header-batch&quot;&gt;
+                                              &lt;input type=&quot;checkbox&quot; id=&quot;list_batch_checkbox&quot;&gt;
+                                            &lt;/th&gt;
+                                        {% elseif field_description.getOption('code') == '_select' %}
+                                            &lt;th class=&quot;sonata-ba-list-field-header sonata-ba-list-field-header-select&quot;&gt;&lt;/th&gt;
+                                        {% elseif field_description.name == '_action' and app.request.isXmlHttpRequest %}
+                                            {# Action buttons disabled in ajax view! #}
+                                        {% elseif field_description.getOption('ajax_hidden') == true and app.request.isXmlHttpRequest %}
+                                            {# Disable fields with 'ajax_hidden' option set to true #}
+                                        {% else %}
+                                            {% set sortable = false %}
+                                            {% apply spaceless %}
+                                                &lt;th class=&quot;sonata-ba-list-field-header-{{ field_description.type }}{% if sortable %} sonata-ba-list-field-header-order-{{ sort_by|lower }} {{ sort_active_class }}{% endif %}{% if field_description.options.header_class is defined %} {{ field_description.options.header_class }}{% endif %}&quot;{% if field_description.options.header_style is defined %} style=&quot;{{ field_description.options.header_style }}&quot;{% endif %}&gt;
+                                                    {% if field_description.getOption('label_icon') %}
+                                                        &lt;i class=&quot;sonata-ba-list-field-header-label-icon {{ field_description.getOption('label_icon') }}&quot; aria-hidden=&quot;true&quot;&gt;&lt;/i&gt;
+                                                    {% endif %}
+                                                    {{ field_description.label|trans({}, field_description.translationDomain) }}
+                                                   
+                                                &lt;/th&gt;
+                                            {% endapply %}
+                                        {% endif %}
+                                    {% endfor %}
+                                &lt;/tr&gt;
+                            &lt;/thead&gt;
+            {% endblock %}
+
+</pre></div>
+
+
+<p>On a ensuite notre entête sans les liens pour pouvoir trier le contenus.<br>On est sûr que l&rsquo;utilisateur ne vas pas gérer l&rsquo;ordre en drag&rsquo;n drop avec un trie mal configuré et nous appeler toutes les 5 minutes pour nous dire que ça ne fonctionne pas.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="724" height="370" src="https://www.partitech.com/wp-content/uploads/2020/02/Crud_child_dnd.gif" alt="" class="wp-image-433"/></figure>
+
+
+
+<div class="wp-block-file"><a id="wp-block-file--media-1d3fb98f-2529-42be-a588-2bc60dbf39fa" href="https://www.partitech.com/wp-content/uploads/2020/02/Crud_child_dnd.mp4">Le fichier vidéo mp4</a><a href="https://www.partitech.com/wp-content/uploads/2020/02/Crud_child_dnd.mp4" class="wp-block-file__button wp-element-button" download aria-describedby="wp-block-file--media-1d3fb98f-2529-42be-a588-2bc60dbf39fa">Télécharger</a></div>

@@ -1,0 +1,129 @@
+{% if admin.request.attributes.get('realtime_preview') and action_name=='compose' %}
+    <button type="button" class="btn btn-default " id="btn-preview">
+        <strong class="text-info" style="margin-right:10px">
+            <a href="#">
+                <img src="{{ asset('/bundles/partitechsonataextra/assets/img/preview.svg') }}" width="25" height="25" style="margin-top: -3px;">
+                {{ 'sonata-extra.page_admin.compose.preview_btn'|trans({}, 'PartitechSonataExtraBundle') }}
+            </a>
+        </strong>
+    </button>
+
+
+    <script type="text/javascript">
+        var newWindow=false;
+        var panel=false;
+        $(document).ready(function() {
+            $('#btn-preview').on('click', function() {
+                var iframeUrl = "{{ path('sonata_extra_page_preview', {'id': page.id } ) }}";
+                createJsPanel(iframeUrl);
+            });
+
+            function createJsPanel(iframeUrl) {
+                panel = jsPanel.create({
+                    theme: {
+                        bgContent: '#ddd',
+                        colorHeader: '#444',
+                        colorContent: '##444',
+                        border: 'thin solid #ddd',
+                    },
+                    headerControls: {
+                        size: 'xs',
+                        add: {
+                            html: '<img src="{{ asset('/bundles/partitechsonataextra/assets/img/window-open.svg') }}" width="16" height="16">',
+                            name: 'menu',
+                            position: 6,
+                            handler: (panel, control) => {
+                                detachPanel(panel, iframeUrl);
+                            }
+                        },
+                    },
+                    headerTitle: ' ',
+                    panelSize: {
+                        width: () => { return Math.min(800, window.innerWidth*0.9);},
+                        height: () => { return Math.min(500, window.innerHeight*0.6);}
+                    },
+                    animateIn: 'jsPanelFadeIn',
+                    content: '<iframe src="' + iframeUrl + '" width="100%" height="100%" id="preview-iframe"></iframe>',  // Utilisation d'une iframe pour le contenu
+                    onwindowresize: true,
+                });
+
+            }
+
+
+            function detachPanel(panel, iframeUrl) {
+                var windowFeatures = 'width=800,height=600,resizable=yes,scrollbars=yes,status=yes';
+                newWindow = window.open(iframeUrl, '_blank', windowFeatures);
+                panel.close();
+                var interval = setInterval(function() {
+                    if (newWindow.closed) {
+                        clearInterval(interval);
+                        createJsPanel(iframeUrl);
+                    }
+                }, 500);
+            }
+
+            function refreshIframe() {
+                var iframe = $('#preview-iframe');
+                if(iframe ){
+                    var iframeSrc = iframe.attr('src');
+                    iframe.attr('src', iframeSrc);
+                }
+
+                if (newWindow && !newWindow.closed) {
+                    newWindow.location.reload();
+                }
+
+            }
+
+
+            $('[data-page-composer]').on('drop', function(event) {
+                event.preventDefault();
+                refreshIframe();
+            });
+
+            var oldXMLHttpRequest = XMLHttpRequest.prototype.send;
+            XMLHttpRequest.prototype.send = function() {
+                this.addEventListener('load', function() {
+                    //console.log('Requête terminée: ',this.responseURL);
+                    if (this.responseURL.endsWith('compose-preview')) {
+                        //console.log('Requête terminée et URL se termine par compose-preview:', this.responseURL);
+                        refreshIframe();
+                    }
+
+                    if (this.responseURL.endsWith('delete')) {
+                        //console.log('Requête terminée et URL se termine par delete:', this.responseURL);
+                        refreshIframe();
+                    }
+
+                    var url = new URL(this.responseURL);
+                    var params = new URLSearchParams(url.search);
+
+                    if (params.has('uniqid')) {
+                        //console.log('Requête terminée et contient uniqid:', this.responseURL);
+                        refreshIframe();
+                    }
+                    if (params.has('block_id') && params.has('parent_id')) {
+                        //console.log('Requête terminée et contient block_id et parent_id:', this.responseURL);
+                        refreshIframe();
+                    }
+                });
+                oldXMLHttpRequest.apply(this, arguments);
+            };
+        });
+    </script>
+
+
+    <style>
+        .jsPanel{
+            z-index: 1200 !important;
+        }
+        .jsPanel-headerbar {
+            background: #f4f4f4 !important;
+        }
+
+    </style>
+
+    <link href="https://cdn.jsdelivr.net/npm/jspanel4@4.15.0/dist/jspanel.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/jspanel4@4.15.0/dist/jspanel.js"></script>
+
+{% endif %}

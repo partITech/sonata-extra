@@ -1,0 +1,45 @@
+
+{% block stylesheets %}
+    <link rel="stylesheet" href="{{ asset('/bundles/partitechsonataextra/assets/styles/flag-icons.min.css') }}">
+    <link rel="stylesheet" href="{{ asset('/bundles/partitechsonataextra/assets/styles/language-selector.css') }}">
+{% endblock %}
+
+{% block block %}
+    <div class="language-selector">
+        <div class="current-language">
+            <span class="fi fi-{{ current.lang }} fis  " title="{{ current.label }}"></span>
+        </div>
+
+        <div class="language-list" style="display:none;">
+            <ul>
+                {% for t in translations %}
+                    {% if t.routes is defined and t.routes[page.routeName] is defined  %}
+                    <li>
+                        <a class=" " href="{{ t.routes[page.routeName] }}" title="{{ t.label }}">
+                            <span class="fi fi-{{ t.lang }} fis  "></span>
+                        </a>
+
+                        </a>
+                    </li>
+                    {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            $('.current-language').click(function() {
+                $('.language-list').toggle();
+            });
+            $('.language-selector').hover(
+                function() {
+                    $('.language-list').show();
+                },
+                function() {
+                    $('.language-list').hide();
+                }
+            );
+        });
+    </script>
+{% endblock %}

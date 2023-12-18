@@ -1,0 +1,1116 @@
+
+<p>Sonata est une suite de bundle pour Symfony 4. L&rsquo;un d&rsquo;entre eux permet de gérer du contenu à la manière de WordPress.<br>Vous trouverez assez peu de documentations sur le net, et pour cause, l&rsquo;installation est bugué, et les rares personnes qui se sont frotté au bugtracker sur github, se sont vu répondre un RTFM bien en règle.<br><br>Rester sur ce genre d&rsquo;échec n&rsquo;est pas vraiment mon style.<br>Voici donc comment installer et configurer Sonata-Page-Bundle, avec l&rsquo;installation officiel, puis les procédure de contournement de ces F###ing bugs.</p>
+
+
+
+<p>1iere étape, on récupère notre skeleton de symfony 4 qui comprends notre base fonctionnelle du framework agrémenté de Sonata + FosUser + Media.<br>Déjà on économise une bonne journée ^^</p>
+
+
+
+<div class="wp-block-buttons is-layout-flex">
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="/initialiser-un-projet-symfony-sonata/" target="_blank" rel="noopener">Télécharger le skeleton</a></div>
+</div>
+
+
+
+<p>En gros, il faut suivre la documentation : https://sonata-project.org/bundles/page/3-x/doc/reference/installation.html<br><br>Installer tous les Bundles, et suivre scrupuleusement la documentation.<br><br>La première difficulté c&rsquo;est l&rsquo;installation via composer. Je n&rsquo;ai pas réussi à tout installer pour php 7.1. Ni pour php 7.2 d&rsquo;ailleurs. Il y a toujours un package en conflit.<br><br>L&rsquo;astuce dans composer, c&rsquo;est de sortir du stable via l&rsquo;instruction minimum-stability dans votre composer.json et là, au bout de 3 ou 4 heures à tester les versions, on arrive à tout installer.<br><br>Voici mon composer.json </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+{
+    &quot;type&quot;: &quot;project&quot;,
+    &quot;license&quot;: &quot;proprietary&quot;,
+    &quot;require&quot;: {
+        &quot;php&quot;: &quot;^7.1.3&quot;,
+        &quot;ext-ctype&quot;: &quot;*&quot;,
+        &quot;ext-iconv&quot;: &quot;*&quot;,
+        &quot;doctrine/doctrine-migrations-bundle&quot;: &quot;^3.0&quot;,
+        &quot;jms/serializer-bundle&quot;: &quot;^3.7&quot;,
+        &quot;liip/imagine-bundle&quot;: &quot;^2.3&quot;,
+        &quot;nelmio/api-doc-bundle&quot;: &quot;^3.6&quot;,
+        &quot;phpoffice/phpspreadsheet&quot;: &quot;^1.14&quot;,
+        &quot;pixassociates/sortable-behavior-bundle&quot;: &quot;^1.5&quot;,
+        &quot;prodigious/sonata-menu-bundle&quot;: &quot;^3.0&quot;,
+        &quot;sensio/framework-extra-bundle&quot;: &quot;^5.5&quot;,
+        &quot;sonata-project/block-bundle&quot;: &quot;^3.20&quot;,
+        &quot;sonata-project/cache-bundle&quot;: &quot;^2.4&quot;,
+        &quot;sonata-project/core-bundle&quot;: &quot;^3.20&quot;,
+        &quot;sonata-project/doctrine-orm-admin-bundle&quot;: &quot;^3.20&quot;,
+        &quot;sonata-project/formatter-bundle&quot;: &quot;^4.2&quot;,
+        &quot;sonata-project/intl-bundle&quot;: &quot;^2.7&quot;,
+        &quot;sonata-project/media-bundle&quot;: &quot;^3.25&quot;,
+        &quot;sonata-project/notification-bundle&quot;: &quot;^3.8&quot;,
+        &quot;sonata-project/page-bundle&quot;: &quot;^3.17&quot;,
+        &quot;sonata-project/seo-bundle&quot;: &quot;^2.11&quot;,
+        &quot;sonata-project/user-bundle&quot;: &quot;^4.6&quot;,
+        &quot;symfony/apache-pack&quot;: &quot;^1.0&quot;,
+        &quot;symfony/console&quot;: &quot;4.*&quot;,
+        &quot;symfony/debug-pack&quot;: &quot;^1.0&quot;,
+        &quot;symfony/dotenv&quot;: &quot;4.4.*&quot;,
+        &quot;symfony/flex&quot;: &quot;^1.3.1&quot;,
+        &quot;symfony/framework-bundle&quot;: &quot;4.4.*&quot;,
+        &quot;symfony/serializer-pack&quot;: &quot;^1.0&quot;,
+        &quot;symfony/swiftmailer-bundle&quot;: &quot;^3.4&quot;,
+        &quot;symfony/templating&quot;: &quot;4.4.*&quot;,
+        &quot;symfony/translation&quot;: &quot;4.4.*&quot;,
+        &quot;symfony/var-dumper&quot;: &quot;4.4.*&quot;,
+        &quot;symfony/yaml&quot;: &quot;4.*&quot;,
+        &quot;twig/twig&quot;: &quot;^2.9.0&quot;
+    },
+    &quot;require-dev&quot;: {
+        &quot;doctrine/doctrine-fixtures-bundle&quot;: &quot;^3.3&quot;,
+        &quot;symfony/maker-bundle&quot;: &quot;^1.19&quot;
+    },
+    &quot;config&quot;: {
+        &quot;preferred-install&quot;: {
+            &quot;*&quot;: &quot;dist&quot;
+        },
+        &quot;sort-packages&quot;: true
+    },
+    &quot;autoload&quot;: {
+        &quot;psr-4&quot;: {
+            &quot;App\\&quot;: &quot;src/&quot;
+        }
+    },
+    &quot;autoload-dev&quot;: {
+        &quot;psr-4&quot;: {
+            &quot;App\\Tests\\&quot;: &quot;tests/&quot;
+        }
+    },
+    &quot;replace&quot;: {
+        &quot;paragonie/random_compat&quot;: &quot;2.*&quot;,
+        &quot;symfony/polyfill-ctype&quot;: &quot;*&quot;,
+        &quot;symfony/polyfill-iconv&quot;: &quot;*&quot;,
+        &quot;symfony/polyfill-php71&quot;: &quot;*&quot;,
+        &quot;symfony/polyfill-php70&quot;: &quot;*&quot;,
+        &quot;symfony/polyfill-php56&quot;: &quot;*&quot;
+    },
+    &quot;scripts&quot;: {
+        &quot;auto-scripts&quot;: {
+            &quot;cache:clear&quot;: &quot;symfony-cmd&quot;,
+            &quot;assets:install %PUBLIC_DIR%&quot;: &quot;symfony-cmd&quot;
+        },
+        &quot;post-install-cmd&quot;: &#91;
+            &quot;@auto-scripts&quot;
+        ],
+        &quot;post-update-cmd&quot;: &#91;
+            &quot;@auto-scripts&quot;
+        ]
+    },
+    &quot;conflict&quot;: {
+        &quot;symfony/symfony&quot;: &quot;*&quot;
+    },
+    &quot;extra&quot;: {
+        &quot;symfony&quot;: {
+            &quot;allow-contrib&quot;: false,
+            &quot;require&quot;: &quot;4.4.*&quot;
+        }
+    }
+    ,    
+    &quot;minimum-stability&quot;: &quot;dev&quot;,
+    &quot;prefer-stable&quot;: true
+}
+
+</pre></div>
+
+
+<p>Une fois les packages installés, et configurés, n&rsquo;oubliez pas d&rsquo;installer Ckeditor, et les assets. Et accessoirement, votre user super admin.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console assets:install
+php bin/console ckeditor:install
+mkdir -p public/uploads/media
+php bin/console cache:clear
+php bin/console fos:user:create admin tbourdin@partitech.com admin --super-admin
+</pre></div>
+
+
+<p>Il reste à créer le premier site :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php app/console sonata:page:create-site
+
+Please define a value for Site.name : Skeletton CMS
+Please define a value for Site.host : www.skeleton-cms.test
+Please define a value for Site.relativePath : /
+Please define a value for Site.enabled : true
+Please define a value for Site.locale : -
+Please define a value for Site.enabledFrom : now
+Please define a value for Site.enabledTo : +10 years
+Please define a value for Site.default : true
+
+Creating website with the following information :
+  name : www.skeleton-cms.test
+  site : http(s)://www.skeleton-cms.test
+  enabled :  Tue, 10 Jul 2030 16:12:08 +0100 =&gt; Mon, 10 Jan 2022 16:12:08 +0100
+
+Confirm site creation ?y
+
+Site created !
+
+You can now create the related pages and snapshots by running the followings commands:
+  php app/console sonata:page:update-core-routes --site=1
+  php app/console sonata:page:create-snapshots --site=1
+
+</pre></div>
+
+
+<p>Le premier site est maintenant opérationnel. Enfin presque.</p>
+
+
+
+<p>Dans l&rsquo;interface de page, il faut créer notre première page</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="242" src="https://www.partitech.com/wp-content/uploads/2020/07/image-1024x242.png" alt="" class="wp-image-601" srcset="https://www.partitech.com/wp-content/uploads/2020/07/image-1024x242.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/image-300x71.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/image-768x181.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/image-1536x362.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/image.png 1865w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>La configuration par défaut ne contiens rien. Il faut ensuite organiser le contenu de cette page via un éditeur, qui permet d&rsquo;organiser notre page sous forme de blocks, affectés à des zones de notre templates.</p>
+
+
+
+<p>Dans notre configuration du bundle, nous avons déclaré un template par défaut. Et c&rsquo;est cette configuration, qui nous permet de modéliser l&rsquo;interface de gestion des blocks </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+   default_template: default
+    templates:
+        default:
+            path: '@SonataPage/layout.html.twig'
+            name: 'default'
+            containers:
+                header:
+                    name: Header
+                content_top:
+                    name: Top content
+                content:
+                    name: Main content
+                content_bottom:
+                    name: Bottom content
+                footer:
+                    name: Footer
+            matrix:
+                layout: |
+                    HHHHHHHH
+                    HHHHHHHH
+                    TTTTTTTT
+                    TTTTTTTT
+                    CCCCCCCC
+                    CCCCCCCC
+                    BBBBBBBB
+                    BBBBBBBB
+                    FFFFFFFF
+                    FFFFFFFF
+
+                mapping:
+                    H: header
+                    T: content_top
+                    C: content
+                    B: content_bottom
+                    F: footer
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="523" src="https://www.partitech.com/wp-content/uploads/2020/07/image-2-1024x523.png" alt="" class="wp-image-606" srcset="https://www.partitech.com/wp-content/uploads/2020/07/image-2-1024x523.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/image-2-300x153.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/image-2-768x392.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/image-2-1536x785.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/image-2.png 1859w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Dans notre exemple plus haut, nous avons inséré 2 blocs dans notre zone.<br>Le premier est un texte simple, le second est un menu (un classique menu footer).<br>Pour insérer un block on se positionne sur une zone a gauche, et on click sur le bouton + à droite pour sélectionner le type de block après l&rsquo;avoir sélectionné dans la liste.<br><br>Toute la gestion des pages se fait de cette manière. <br>Ce qui veux dire que nous allons devoir créer une série de blocks selon les besoins de notre application.<br>Et pour créer un bloc, c&rsquo;est hyper simple. Nous allons prendre l&rsquo;exemple de notre block de menu. <br><br>Les menus sont géré via le package Sonata-Menu-Bundle qui est compatible avec Sonata-Page-Bundle. Mais il n&rsquo;est pas fournis avec un block par défaut. C&rsquo;est con, parce qu’un menu, c&rsquo;est un peu le truc basique.<br><br>Donc on va créer notre block dans /src/Block/SonataMenuBlockService.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+namespace App\Block;
+
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\BlockBundle\Block\BlockContextInterface;
+
+use Sonata\BlockBundle\Block\Service\AbstractAdminBlockService;
+use Sonata\BlockBundle\Meta\Metadata;
+use Sonata\BlockBundle\Model\BlockInterface;
+use Sonata\Form\Type\ImmutableArrayType;
+use Sonata\PageBundle\Model\Page;
+use Sonata\PageBundle\Model\PageManagerInterface;
+use Symfony\Bundle\FrameworkBundle\Templating\EngineInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+
+
+
+
+
+
+use Sonata\AdminBundle\Admin\Pool;
+
+use Sonata\BlockBundle\Block\BaseBlockService;
+use Symfony\Component\Security\Core\SecurityContext;
+use Symfony\Component\OptionsResolver\OptionsResolverInterface;
+use Doctrine\ORM\EntityManager;
+
+
+use Sonata\CoreBundle\Validator\ErrorElement;
+
+class SonataMenuBlockService extends AbstractAdminBlockService
+{
+    /**
+     * @var PageManagerInterface
+     */
+    protected $pageManager;
+
+    /**
+     * @param string $name
+     */
+    public function __construct($name, EngineInterface $templating, Pool $pool, EntityManager $em , PageManagerInterface $pageManager)
+    {
+        parent::__construct($name, $templating);
+
+
+        $this-&gt;pool = $pool;
+        $this-&gt;em = $em;
+        $this-&gt;pageManager = $pageManager;
+        
+    }
+
+    public function getName()
+    {
+        return 'Partitech Menu Block';
+    }
+    
+    public function buildEditForm(FormMapper $formMapper, BlockInterface $block)
+    {
+        $menu_list=$this-&gt;pool-&gt;getContainer()-&gt;get('doctrine')-&gt;getManager()-&gt;getRepository('Prodigious\Sonata\MenuBundle\Entity\Menu')-&gt;findAll();
+        
+        if(!empty($menu_list))
+        {
+            $option_list=array();
+            foreach($menu_list as $m)
+            {
+                
+                $option_list&#91;$m-&gt;getAlias()]=$m-&gt;getName();
+            }
+            
+        }
+          
+        $formMapper-&gt;add('settings', ImmutableArrayType::class, &#91;
+            'keys' =&gt; &#91;
+               /* &#91;'title', TextType::class, &#91;
+                    'label' =&gt; 'form.label_title',
+                    'required' =&gt; false,
+                ]],*/
+                &#91;'menu', ChoiceType::class, &#91;
+                    'label' =&gt; 'Menu',
+                    'choices' =&gt; array_flip($option_list),
+                ]],
+
+                &#91;'template', TextType::class, &#91;
+                    'label' =&gt; 'template',
+                    'required' =&gt; false,
+                ]],
+                
+            ],
+            'translation_domain' =&gt; 'SonataPageBundle',
+        ]);
+    }
+
+    public function execute(BlockContextInterface $blockContext, ?Response $response = null)
+    {
+  
+        
+        $settings=$blockContext-&gt;getSettings();
+        
+        $systemElements = $this-&gt;pageManager-&gt;findBy(&#91;
+            'url' =&gt; null,
+            'parent' =&gt; null,
+        ]);
+
+        
+       
+        $menu_list=$this-&gt;pool-&gt;getContainer()-&gt;get('doctrine')-&gt;getManager()-&gt;getRepository('Prodigious\Sonata\MenuBundle\Entity\Menu')-&gt;findOneBy(&#91;'alias'=&gt; $settings&#91;'menu']]);
+        if(!empty($menu_list)){
+            $menu=$this-&gt;pool-&gt;getContainer()-&gt;get('doctrine')-&gt;getManager()-&gt;getRepository('Prodigious\Sonata\MenuBundle\Entity\MenuItem');
+            $mm = $this-&gt;pool-&gt;getContainer()-&gt;get('prodigious_sonata_menu.manager');
+            $menu = $mm-&gt;load($menu_list-&gt;getId());
+            // $status = true (Get enabled menu items)
+            // $status = false (Get disabled menu items)
+            // getMenuItems($menu, $root = MenuManager::ITEM_CHILD, $status = MenuManager::STATUS_ALL)
+            
+            $menuItems = $mm-&gt;getMenuItems($menu, true, true);
+        }else{
+            $menuItems=false;
+        }
+                ;
+        
+        return $this-&gt;renderResponse($blockContext-&gt;getTemplate(), &#91;
+            'context' =&gt; $blockContext,
+            'block' =&gt; $blockContext-&gt;getBlock(),
+            'settings' =&gt; $blockContext-&gt;getSettings(),
+            
+            'systemElements' =&gt; $systemElements,
+            'menuItems'=&gt;$menuItems
+        ], $response);
+    }
+
+    public function configureSettings(OptionsResolver $resolver)
+    {
+        
+        $resolver-&gt;setDefaults(&#91;
+
+            'menu'=&gt;'menu',
+            'template' =&gt; '/Block/Menu/menu.html.twig',
+        ]);
+    }
+
+    public function getBlockMetadata($code = null)
+    {
+        return new Metadata($this-&gt;getName(), (null !== $code ? $code : $this-&gt;getName()), false, 'SonataPageBundle', &#91;
+            'class' =&gt; 'fa fa-list-ul',
+        ]);
+    }
+}
+
+</pre></div>
+
+
+<p>On ajoute nos templates dans /Block/Menu/menu.html.twig et le fichier macro des menu dans /Block/Menu/menu_tree_macro.html.twig.<br>C&rsquo;est ni plus ni moins que les fichiers par défaut du bundle entouré d&rsquo;une div qui contient des informations du block pour l&rsquo;édition en front.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{#/Block/Menu/menu.html.twig#}
+{% if block.name|length %}
+    {% set name=block.name%}
+{% else %}
+    {% set name=block.settings.menu %}
+{% endif %}
+&lt;div id=&quot;cms-block-25&quot; class=&quot;cms-block cms-block-element ui-sortable-handle&quot; data-id=&quot;{{ block.id }}&quot; data-name=&quot;{{ name }}&quot; data-role=&quot;block&quot; data-page-id=&quot;{{ block.page.id }}&quot;&gt;
+
+    {% if menuItems is not null and menuItems|length &gt; 0 %}
+    
+    {% import 'Block/Menu/menu_tree_macro.html.twig' as tree %}
+    
+    {% set currentPath = app.request.requestUri %}
+    
+    {{ tree.menu(menuItems, currentPath) }}
+    
+    {% endif %}
+
+&lt;/div&gt;
+</pre></div>
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{#/Block/Menu/menu_tree_macro.html.twig#}
+{% macro menu(items, currentPath) %}
+    
+    {% import _self as self %}
+
+        &lt;ul&gt;
+            {% for menuItem in items %}
+    
+            {% set url = menuItem.url %}
+            {% set attributes = &quot;menu-item&quot; %}
+            {% if menuItem.classAttribute %}
+            {% set attributes = attributes ~ ' ' ~ menuItem.classAttribute %}
+            {% endif %}
+            {% if menuItem.hasChild() %}
+            
+            {% set attributes = attributes ~ ' has-child' %}
+            
+            {% for childItem in menuItem.children %}
+
+            {% set childUrl = childItem.url %}
+
+            {% if childUrl == currentPath %}
+            {% set attributes = attributes ~ ' current-parent' %}
+            {% endif %}
+            
+            {% endfor %}
+            
+            {% endif %}
+
+            &lt;li class=&quot;{{ attributes }}&quot; role=&quot;menu-item&quot;&gt;
+                {% if menuItem.hasChild() %}
+                &lt;a href=&quot;{{ url }}&quot; class=&quot;parent&quot; {% if currentPath == url %} class=&quot;current&quot;{% endif %}&quot; {% if menuItem.target %} target=&quot;_blank&quot;{% endif %}&gt;{{ menuItem.name }}&lt;/a&gt;
+                {{ self.menu(menuItem.children, currentPath) }}
+                {% else %}
+                &lt;a href=&quot;{{ url }}&quot; {% if currentPath == url %} class=&quot;current&quot;{% endif %}&quot; {% if menuItem.target %} target=&quot;_blank&quot;{% endif %}&gt;{{ menuItem.name }}&lt;/a&gt;
+                {% endif %}
+            &lt;/li&gt;
+            {% endfor %}
+        &lt;/ul&gt;
+
+{% endmacro %}
+</pre></div>
+
+
+<p>On référence notre block dans nos services</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+services:
+    sonata.block.service.sonata_menu:
+        class: App\Block\SonataMenuBlockService
+        arguments: 
+           - &quot;sonata.block.service.sonata_menu&quot;
+           - &quot;@templating&quot;
+           - &quot;@sonata.admin.pool&quot;
+           - &quot;@doctrine.orm.entity_manager&quot;
+           - &quot;@sonata.page.manager.page&quot;
+        tags:
+            - { name: sonata.block }   
+</pre></div>
+
+
+<p>Et nous avons ensuite notre nouveau block qui est disponible dans notre liste de blocks. On peux faire en gros tout ce que l&rsquo;on veux dans un block, à la manière d&rsquo;un controller.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="525" src="https://www.partitech.com/wp-content/uploads/2020/07/Sélection_296-1024x525.png" alt="" class="wp-image-615" srcset="https://www.partitech.com/wp-content/uploads/2020/07/Sélection_296-1024x525.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_296-300x154.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_296-768x394.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_296-1536x788.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_296.png 1864w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>On peu donc créer notre menu footer</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="524" src="https://www.partitech.com/wp-content/uploads/2020/07/image-3-1024x524.png" alt="" class="wp-image-616" srcset="https://www.partitech.com/wp-content/uploads/2020/07/image-3-1024x524.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/image-3-300x154.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/image-3-768x393.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/image-3-1536x787.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/image-3.png 1859w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Et l&rsquo;utiliser dans note block</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="524" src="https://www.partitech.com/wp-content/uploads/2020/07/image-4-1024x524.png" alt="" class="wp-image-617" srcset="https://www.partitech.com/wp-content/uploads/2020/07/image-4-1024x524.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/image-4-300x153.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/image-4-768x393.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/image-4-1536x786.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/image-4.png 1863w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Voici le rendu de notre page</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="522" src="https://www.partitech.com/wp-content/uploads/2020/07/image-5-1024x522.png" alt="" class="wp-image-618" srcset="https://www.partitech.com/wp-content/uploads/2020/07/image-5-1024x522.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/image-5-300x153.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/image-5-768x391.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/image-5-1536x782.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/image-5.png 1867w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>En fait, non. Ça c&rsquo;est le rendu avec un template corrigé. Sinon le rendu ressemble a ceci :</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="522" src="https://www.partitech.com/wp-content/uploads/2020/07/Sélection_302-1024x522.png" alt="" class="wp-image-620" srcset="https://www.partitech.com/wp-content/uploads/2020/07/Sélection_302-1024x522.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_302-300x153.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_302-768x392.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_302-1536x784.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_302.png 1858w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>On va devoir donc dupliquer le template de base dans notre projet et corriger ce qui ne vas pas.<br><br>On créé notre base_layout et notre template de test test-layout dans le répertoire Layouts/</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{#/templates/Layouts/base_layout.html.twig#}
+{#
+
+This file is part of the Sonata package.
+
+(c) Thomas Rabaix &lt;thomas.rabaix@sonata-project.org&gt;
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+{%- block sonata_page_html_tag -%}
+&lt;!DOCTYPE html&gt;
+&lt;html {{ sonata_seo_html_attributes() }}&gt;
+{% endblock %}
+    {% block sonata_page_head %}
+        &lt;head {{ sonata_seo_head_attributes() }}&gt;
+
+            &lt;!--&#91;if IE]&gt;&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;&lt;!&#91;endif]--&gt;
+            {{ sonata_seo_title() }}
+            {{ sonata_seo_metadatas() }}
+
+            {% block sonata_page_stylesheets %}
+                {% block page_stylesheets %} {# Deprecated block #}
+                    {% for stylesheet in sonata_page.assets.stylesheets %}
+                        &lt;link rel=&quot;stylesheet&quot; href=&quot;{{ asset(stylesheet) }}&quot; media=&quot;all&quot;&gt;
+                    {% endfor %}
+                {% endblock %}
+            {% endblock %}
+
+            {% block sonata_page_javascripts %}
+                {% block page_javascripts %} {# Deprecated block #}
+                    &lt;!-- Le HTML5 shim, for IE6-8 support of HTML elements --&gt;
+                    &lt;!--&#91;if lt IE 9]&gt;
+                        &lt;script src=&quot;http://html5shim.googlecode.com/svn/trunk/html5.js&quot;&gt;&lt;/script&gt;
+                    &lt;!&#91;endif]--&gt;
+
+                    {% for js in sonata_page.assets.javascripts %}
+                        &lt;script src=&quot;{{ asset(js) }}&quot;&gt;&lt;/script&gt;
+                    {% endfor %}
+                {% endblock %}
+
+            {% endblock %}
+        &lt;/head&gt;
+    {% endblock %}
+
+    {% block sonata_page_body_tag %}
+        &lt;body class=&quot;sonata-bc&quot;&gt;
+    {% endblock %}
+
+        {% block sonata_page_top_bar %}
+        
+            {% block page_top_bar %} {# Deprecated block #}
+                {% if sonata_page.isEditor or ( app.user and is_granted('ROLE_PREVIOUS_ADMIN') ) %}
+
+                    {% if sonata_page.isEditor and sonata_page.isInlineEditionOn %}
+                        &lt;!-- CMS specific variables --&gt;
+                        &lt;script&gt;
+                            jQuery(document).ready(function() {
+                                Sonata.Page.init({
+                                    url: {
+                                        block_save_position: '{{ sonata_admin.objectUrl('sonata.page.admin.page', 'edit', page) }}',
+                                        block_edit:          '{{ sonata_admin.url('sonata.page.admin.page|sonata.page.admin.block', 'edit', {'id': 'BLOCK_ID'}) }}'
+                                    }
+                                });
+                            });
+                        &lt;/script&gt;
+                    {% endif %}
+
+                    &lt;header class=&quot;sonata-bc sonata-page-top-bar navbar navbar-inverse navbar-fixed-top&quot; role=&quot;banner&quot;
+                    {% if sonata_page.isEditor and sonata_page.isInlineEditionOn %}
+                        data-page-editor='{{ {
+                            url: {
+                                block_save_position: sonata_admin.objectUrl('sonata.page.admin.page', 'edit', page),
+                                block_edit:          sonata_admin.url('sonata.page.admin.page|sonata.page.admin.block', 'edit', {'id': 'BLOCK_ID'})
+                            }
+                        }|json_encode()|raw }}'
+                    {% endif %}&gt;
+                        &lt;div class=&quot;container&quot;&gt;
+                            &lt;ul class=&quot;nav navbar-nav&quot;&gt;
+                                {% if app.user and is_granted('ROLE_SONATA_ADMIN') %}
+                                    &lt;li&gt;&lt;a href=&quot;{{ path('sonata_admin_dashboard') }}&quot;&gt;{{ &quot;header.sonata_admin_dashboard&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                {% endif %}
+
+                                {% if sonata_page.isEditor %}
+                                    {% set sites = sonata_page.siteavailables %}
+
+                                    {% if sites|length &gt; 1 and site is defined %}
+                                        &lt;li class=&quot;dropdown&quot;&gt;
+                                            &lt;a href=&quot;#&quot; class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot;&gt;{{ site.name }} &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+                                            &lt;ul class=&quot;dropdown-menu&quot;&gt;
+                                                {% for site in sites %}
+                                                    &lt;li&gt;&lt;a href=&quot;{{ site.url }}&quot;&gt;{{ site.name }}&lt;/a&gt;&lt;/li&gt;
+                                                {% endfor %}
+                                            &lt;/ul&gt;
+                                        &lt;/li&gt;
+                                    {% endif %}
+
+                                    &lt;li class=&quot;dropdown&quot;&gt;
+                                        &lt;a href=&quot;#&quot; class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot;&gt;Page &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+                                        &lt;ul class=&quot;dropdown-menu&quot;&gt;
+                                            {% if page is defined %}
+                                                &lt;li&gt;&lt;a href=&quot;{{ sonata_admin.objectUrl('sonata.page.admin.page', 'edit', page) }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.edit_page&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                                &lt;li&gt;&lt;a href=&quot;{{ sonata_admin.objectUrl('sonata.page.admin.page|sonata.page.admin.snapshot', 'list', page) }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.create_snapshot&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                                &lt;li class=&quot;divider&quot;&gt;&lt;/li&gt;
+                                            {% endif %}
+
+                                            &lt;li&gt;&lt;a href=&quot;{{ sonata_admin.url('sonata.page.admin.page', 'list') }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.view_all_pages&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+
+                                            {% if error_codes is defined and error_codes|length %}
+                                                &lt;li class=&quot;divider&quot;&gt;&lt;/li&gt;
+                                                &lt;li&gt;&lt;a href=&quot;{{ path('sonata_page_exceptions_list') }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.view_all_exceptions&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                            {% endif %}
+                                        &lt;/ul&gt;
+                                    &lt;/li&gt;
+
+                                    {% if page is defined %}
+                                        &lt;li&gt;
+                                            &lt;a href=&quot;{{ sonata_admin.url('sonata.page.admin.page', 'compose', {'id': page.id}) }}&quot;&gt;
+                                                &lt;i class=&quot;fa fa-magic&quot;&gt;&lt;/i&gt;
+                                                {{ 'header.compose_page'|trans({}, 'SonataPageBundle')}}
+                                            &lt;/a&gt;
+                                        &lt;/li&gt;
+                                    {% endif %}
+
+                                    {% if page is defined and not page.enabled %}
+                                        &lt;li&gt;&lt;span style=&quot;padding-left: 20px; background: red;&quot;&gt;&lt;strong&gt;&lt;em&gt;{{ 'header.page_is_disabled'|trans(&#91;], 'SonataPageBundle') }}&lt;/em&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/li&gt;
+                                    {% endif %}
+
+                                    {% if sonata_page.isInlineEditionOn and page is defined %}
+                                        &lt;li&gt;
+                                            &lt;form class=&quot;form-inline&quot; style=&quot;margin: 0px&quot;&gt;
+                                                &lt;label class=&quot;checkbox inline&quot; for=&quot;page-action-enabled-edit&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;page-action-enabled-edit&quot;&gt;{{ 'header.show_zone'|trans({}, 'SonataPageBundle') }}&lt;/label&gt;
+                                                &lt;input type=&quot;submit&quot; class=&quot;btn&quot; value=&quot;{{ 'btn_save_position'|trans({}, 'SonataPageBundle') }}&quot; id=&quot;page-action-save-position&quot;&gt;
+                                            &lt;/form&gt;
+                                        &lt;/li&gt;
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if app.user and is_granted('ROLE_PREVIOUS_ADMIN') %}
+                                    &lt;li&gt;&lt;a href=&quot;{{ url('homepage', {'_switch_user': '_exit'}) }}&quot;&gt;{{ &quot;header.switch_user_exit&quot;|trans({}, 'SonataPageBundle')}}&lt;/a&gt;&lt;/li&gt;
+                                {% endif %}
+
+                            &lt;/ul&gt;
+                        &lt;/div&gt;
+                    &lt;/header&gt;
+
+                {% endif %}
+            {% endblock %}
+        {% endblock %}
+
+        {% block sonata_page_container %}
+            {% block page_container %}{% endblock %} {# Deprecated block #}
+        {% endblock %}
+
+        {% block sonata_page_asset_footer %}
+            {% block page_asset_footer %} {# Deprecated block #}
+                {% if page is defined %}
+                    {% if page.javascript is not empty %}
+                        &lt;script&gt;
+                            {{ page.javascript|raw }}
+                        &lt;/script&gt;
+                    {% endif %}
+                    {% if page.stylesheet is not empty %}
+                        &lt;style&gt;
+                            {{ page.stylesheet|raw }}
+                        &lt;/style&gt;
+                    {% endif %}
+                {% endif %}
+                {#
+                    These includes can be done only at this point as all blocks are loaded,
+                    Limition : this does not work if a global page is loaded from an ESI tag inside a container block
+                #}
+                {{ sonata_block_include_stylesheets('screen', app.request.basePath) }}
+                {{ sonata_block_include_javascripts('screen', app.request.basePath) }}
+            {% endblock %}
+        {% endblock %}
+
+        &lt;!-- monitoring:3e9fda56df2cdd3b039f189693ab7844fbb2d4f6 --&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+
+</pre></div>
+
+<p>et notre template</p>
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{#/templates/Layouts/test-layout.html.twig#}
+{#
+
+This file is part of the Sonata package.
+
+(c) Thomas Rabaix &lt;thomas.rabaix@sonata-project.org&gt;
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+{% extends '/Layouts/base_layout.html.twig' %}
+
+{% block sonata_page_container %}
+    &lt;div class=&quot;container&quot;&gt;
+        &lt;div class=&quot;content&quot;&gt;
+            &lt;div class=&quot;row page-header&quot;&gt;
+                {{ sonata_page_render_container('header', 'global') }}
+            &lt;/div&gt;
+
+           &lt;!----&gt;   {% block sonata_page_breadcrumb %}
+                &lt;div class=&quot;row&quot;&gt;
+                    {{ sonata_block_render_event('breadcrumb', { 'context': 'page', 'current_uri': app.request.requestUri }) }}
+                &lt;/div&gt;
+            {% endblock %}
+
+            {% if page is defined %}
+                &lt;div class=&quot;row&quot;&gt;
+                    {% if page.name != 'global'%}
+                        {{ sonata_page_render_container('content_top', 'global') }}
+                    {% endif %}
+                    {{ sonata_page_render_container('content_top', page) }}
+                &lt;/div&gt;
+            {% endif %}
+
+            &lt;div class=&quot;row&quot;&gt;
+                {% block page_content %}
+                    {% if content is defined %}
+                        {{ content|raw }}
+                    {% else %}
+                        {% set content = block('content') is defined ? block('content') : '' %}
+                        {% if content|length &gt; 0 %}
+                            {{ content|raw }}
+                        {% elseif page is defined %}
+                            {{ sonata_page_render_container('content', page) }}
+                        {% endif %}
+                    {% endif %}
+                {% endblock %}
+            &lt;/div&gt;
+
+            {% if page is defined %}
+                &lt;div class=&quot;row&quot;&gt;
+                    {{ sonata_page_render_container('content_bottom', page) }}
+
+                    {% if page.name != 'global'%}
+                        {{ sonata_page_render_container('content_bottom', 'global') }}
+                    {% endif %}
+                &lt;/div&gt;
+            {% endif %}
+        &lt;/div&gt;
+
+        &lt;footer class=&quot;row&quot;&gt;
+            {{ sonata_page_render_container('footer', 'global') }}
+        &lt;/footer&gt;
+    &lt;/div&gt;
+{% endblock %}
+
+</pre></div>
+
+
+<p>On le référence ensuite dans le fichier de configuration du bundle</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_page:
+       test:
+            path: 'Layouts/test-layout.html.twig'
+            name: 'test'
+            containers:
+                header:
+                    name: Header
+                content_top:
+                    name: Top content
+                content:
+                    name: Main content
+                content_bottom:
+                    name: Bottom content
+                footer:
+                    name: Footer
+            matrix:
+                layout: |
+                    HHHHHHHH
+                    HHHHHHHH
+                    TTTTTTTT
+                    TTTTTTTT
+                    CCCCCCCC
+                    CCCCCCCC
+                    BBBBBBBB
+                    BBBBBBBB
+                    FFFFFFFF
+                    FFFFFFFF
+
+                mapping:
+                    H: header
+                    T: content_top
+                    C: content
+                    B: content_bottom
+                    F: footer
+                    
+</pre></div>
+
+
+<p>Notre édition en front est presque fonctionnelle.<br>Nous avons bien une barre de navigation dans notre page. Lorsque l&rsquo;on active l&rsquo;édition des zones, tout s&rsquo;affiche correctement. Si on double clique sur une zone de bloc, une fenêtre s&rsquo;affiche avec l&rsquo;édition du block dans l&rsquo;admin. Et lorsque l&rsquo;on bouge les blocks d&rsquo;une zone a une autre, ça les déplace bien. Mais si on regarde la page, rien n&rsquo;est sauvegardé. <br>Nous allons devoir créer une méthode dédié de note coté pour sauver les paramètres.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="524" src="https://www.partitech.com/wp-content/uploads/2020/07/Sélection_303-1024x524.png" alt="" class="wp-image-624" srcset="https://www.partitech.com/wp-content/uploads/2020/07/Sélection_303-1024x524.png 1024w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_303-300x154.png 300w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_303-768x393.png 768w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_303-1536x786.png 1536w, https://www.partitech.com/wp-content/uploads/2020/07/Sélection_303.png 1860w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Nous allons donc créer un contrôleur dans notre bundle étendu, pour gérer la mise à jour de la donnée.</p>
+
+
+
+<p>On créé notre controller UpdatePositionController avec notre méthode sonata_page_update_position()</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Application\Sonata\PageBundle\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\User\UserInterface;
+use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
+
+
+
+
+use Symfony\Bridge\Twig\Mime\TemplatedEmail;
+use Sonata\MediaBundle\Entity\MediaManager; 
+use Sonata\MediaBundle\Provider\FileProvider;
+use Symfony\Component\HttpKernel\KernelInterface;
+use Psr\Container\ContainerInterface;
+
+class UpdatePositionController extends AbstractController
+{
+
+    
+    /**
+     * @Route(&quot;/sonata-page-update-position&quot;, methods={&quot;GET&quot;,&quot;POST&quot;}, name=&quot;sonata_page_update_position&quot;)
+     *
+     *
+     * @return array
+     */
+    public function sonata_page_update_position(Request $request)
+    {
+        $keyword=$request-&gt;request-&gt;all();
+ 
+        if(!empty($keyword&#91;'disposition']))
+        {
+            foreach($keyword&#91;'disposition'] as $i=&gt;$v)
+            {
+                $id=$keyword&#91;'disposition']&#91;$i]&#91;'id'];
+                $position=$keyword&#91;'disposition']&#91;$i]&#91;'position'];
+                $parent_id=$keyword&#91;'disposition']&#91;$i]&#91;'parent_id'];
+                $page_id=$keyword&#91;'disposition']&#91;$i]&#91;'page_id'];
+                
+                $connection = $this-&gt;getDoctrine()-&gt;getConnection();
+                $statement = $connection-&gt;prepare(&quot;UPDATE `page__block` SET `parent_id` = :parent_id, `position` = :position, `page_id`=:page_id WHERE `page__block`.`id` = :id &quot;);
+                
+                $statement-&gt;bindValue('id', $id);
+                $statement-&gt;bindValue('page_id', $page_id);
+                $statement-&gt;bindValue('position', $page_id);
+                $statement-&gt;bindValue('parent_id', $parent_id);
+                $statement-&gt;execute();
+            }
+        }
+        return new JsonResponse( (object) &#91;
+           'result' =&gt; 'ok'
+        ]);
+
+    }
+}
+?&gt;
+
+
+</pre></div>
+
+
+<p>Nous devons ensuite le référencer dans nos services :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+services:
+    App\Application\Sonata\PageBundle\Controller\:
+        resource: '../src/Application/Sonata/PageBundle/Controller'
+        tags: &#91;'controller.service_arguments']
+</pre></div>
+
+
+<p>On doit ensuite le référencer dans les annotations pour que la route soit automatiquement géré via Symfony :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+#config/routes/annotations.yaml
+controllers:
+    resource: ../../src/Controller/
+    type: annotation
+
+controllers_sonata_pages:
+    resource: ../../src/Application/Sonata/PageBundle/Controller/
+    type: annotation  
+</pre></div>
+
+
+<p>Et pour finir, nous devons modifier le lien de mise à jour de l&rsquo;ordre des blocs dans notre template qui doit être : block_save_position: &lsquo;{{ path(&lsquo;sonata_page_update_position&rsquo;, {}) }}&rsquo;,</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{#
+
+This file is part of the Sonata package.
+
+(c) Thomas Rabaix &lt;thomas.rabaix@sonata-project.org&gt;
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+{%- block sonata_page_html_tag -%}
+&lt;!DOCTYPE html&gt;
+&lt;html {{ sonata_seo_html_attributes() }}&gt;
+{% endblock %}
+    {% block sonata_page_head %}
+        &lt;head {{ sonata_seo_head_attributes() }}&gt;
+
+            &lt;!--&#91;if IE]&gt;&lt;meta http-equiv=&quot;X-UA-Compatible&quot; content=&quot;IE=edge&quot;&gt;&lt;!&#91;endif]--&gt;
+            {{ sonata_seo_title() }}
+            {{ sonata_seo_metadatas() }}
+
+            {% block sonata_page_stylesheets %}
+                {% block page_stylesheets %} {# Deprecated block #}
+                    {% for stylesheet in sonata_page.assets.stylesheets %}
+                        &lt;link rel=&quot;stylesheet&quot; href=&quot;{{ asset(stylesheet) }}&quot; media=&quot;all&quot;&gt;
+                    {% endfor %}
+                {% endblock %}
+            {% endblock %}
+
+            {% block sonata_page_javascripts %}
+                {% block page_javascripts %} {# Deprecated block #}
+                    &lt;!-- Le HTML5 shim, for IE6-8 support of HTML elements --&gt;
+                    &lt;!--&#91;if lt IE 9]&gt;
+                        &lt;script src=&quot;http://html5shim.googlecode.com/svn/trunk/html5.js&quot;&gt;&lt;/script&gt;
+                    &lt;!&#91;endif]--&gt;
+ 					
+                    {% for js in sonata_page.assets.javascripts %}
+                        &lt;script src=&quot;{{ asset(js) }}&quot;&gt;&lt;/script&gt;
+                    {% endfor %}
+                    &lt;script src=&quot;/bundles/pixsortablebehavior/js/jquery-ui.min.js&quot;&gt;&lt;/script&gt;
+                {% endblock %}
+
+            {% endblock %}
+        &lt;/head&gt;
+    {% endblock %}
+
+    {% block sonata_page_body_tag %}
+        &lt;body class=&quot;sonata-bc&quot;&gt;
+    {% endblock %}
+
+        {% block sonata_page_top_bar %}
+        
+      
+            {% block page_top_bar %} {# Deprecated block #}
+                {% if sonata_page.isEditor or ( app.user and is_granted('ROLE_PREVIOUS_ADMIN') ) %}
+
+                    {% if sonata_page.isEditor and sonata_page.isInlineEditionOn %}
+                        &lt;!-- CMS specific variables --&gt;
+                        &lt;script&gt;
+                            jQuery(document).ready(function() {
+                                Sonata.Page.init({
+                                    url: {
+                                    	block_save_position: '{{ path('sonata_page_update_position', {}) }}',
+                                        block_edit:          '{{ sonata_admin.url('sonata.page.admin.page|sonata.page.admin.block', 'edit', {'id': page.id , 'childId': 'BLOCK_ID'}) }}'
+                                    }
+                                });
+                            });
+                        &lt;/script&gt;
+                    {% endif %}
+
+                    &lt;header class=&quot;sonata-bc sonata-page-top-bar navbar navbar-inverse navbar-fixed-top&quot; role=&quot;banner&quot;
+                    {% if sonata_page.isEditor and sonata_page.isInlineEditionOn %}
+                        data-page-editor='{{ {
+                            url: {
+                            
+                                block_save_position: path('sonata_page_update_position', {}),
+                                block_edit:          sonata_admin.url('sonata.page.admin.page|sonata.page.admin.block', 'edit', {'id': page.id , 'childId': 'BLOCK_ID'})
+                            }
+                        }|json_encode()|raw }}'
+                    {% endif %}&gt;
+                        &lt;div class=&quot;container&quot;&gt;
+                            &lt;ul class=&quot;nav navbar-nav&quot;&gt;
+                                {% if app.user and is_granted('ROLE_SONATA_ADMIN') %}
+                                    &lt;li&gt;&lt;a href=&quot;{{ path('sonata_admin_dashboard') }}&quot;&gt;{{ &quot;header.sonata_admin_dashboard&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                {% endif %}
+
+                                {% if sonata_page.isEditor %}
+                                    {% set sites = sonata_page.siteavailables %}
+
+                                    {% if sites|length &gt; 1 and site is defined %}
+                                        &lt;li class=&quot;dropdown&quot;&gt;
+                                            &lt;a href=&quot;#&quot; class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot;&gt;{{ site.name }} &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+                                            &lt;ul class=&quot;dropdown-menu&quot;&gt;
+                                                {% for site in sites %}
+                                                    &lt;li&gt;&lt;a href=&quot;{{ site.url }}&quot;&gt;{{ site.name }}&lt;/a&gt;&lt;/li&gt;
+                                                {% endfor %}
+                                            &lt;/ul&gt;
+                                        &lt;/li&gt;
+                                    {% endif %}
+
+                                    &lt;li class=&quot;dropdown&quot;&gt;
+                                        &lt;a href=&quot;#&quot; class=&quot;dropdown-toggle&quot; data-toggle=&quot;dropdown&quot;&gt;Page &lt;span class=&quot;caret&quot;&gt;&lt;/span&gt;&lt;/a&gt;
+                                        &lt;ul class=&quot;dropdown-menu&quot;&gt;
+                                            {% if page is defined %}
+                                                &lt;li&gt;&lt;a href=&quot;{{ sonata_admin.objectUrl('sonata.page.admin.page', 'edit', page) }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.edit_page&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                                &lt;li&gt;&lt;a href=&quot;{{ sonata_admin.objectUrl('sonata.page.admin.page|sonata.page.admin.snapshot', 'list', page) }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.create_snapshot&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                                &lt;li class=&quot;divider&quot;&gt;&lt;/li&gt;
+                                            {% endif %}
+
+                                            &lt;li&gt;&lt;a href=&quot;{{ sonata_admin.url('sonata.page.admin.page', 'list') }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.view_all_pages&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+
+                                            {% if error_codes is defined and error_codes|length %}
+                                                &lt;li class=&quot;divider&quot;&gt;&lt;/li&gt;
+                                                &lt;li&gt;&lt;a href=&quot;{{ path('sonata_page_exceptions_list') }}&quot; target=&quot;_new&quot;&gt;{{ &quot;header.view_all_exceptions&quot;|trans({}, 'SonataPageBundle') }}&lt;/a&gt;&lt;/li&gt;
+                                            {% endif %}
+                                        &lt;/ul&gt;
+                                    &lt;/li&gt;
+
+                                    {% if page is defined %}
+                                        &lt;li&gt;
+                                            &lt;a href=&quot;{{ sonata_admin.url('sonata.page.admin.page', 'compose', {'id': page.id}) }}&quot;&gt;
+                                                &lt;i class=&quot;fa fa-magic&quot;&gt;&lt;/i&gt;
+                                                {{ 'header.compose_page'|trans({}, 'SonataPageBundle')}}
+                                            &lt;/a&gt;
+                                        &lt;/li&gt;
+                                    {% endif %}
+
+                                    {% if page is defined and not page.enabled %}
+                                        &lt;li&gt;&lt;span style=&quot;padding-left: 20px; background: red;&quot;&gt;&lt;strong&gt;&lt;em&gt;{{ 'header.page_is_disabled'|trans(&#91;], 'SonataPageBundle') }}&lt;/em&gt;&lt;/strong&gt;&lt;/span&gt;&lt;/li&gt;
+                                    {% endif %}
+
+                                    {% if sonata_page.isInlineEditionOn and page is defined %}
+                                        &lt;li&gt;
+                                            &lt;form class=&quot;form-inline&quot; style=&quot;margin: 0px&quot;&gt;
+                                                &lt;label class=&quot;checkbox inline&quot; for=&quot;page-action-enabled-edit&quot;&gt;&lt;input type=&quot;checkbox&quot; id=&quot;page-action-enabled-edit&quot;&gt;{{ 'header.show_zone'|trans({}, 'SonataPageBundle') }}&lt;/label&gt;
+                                                &lt;input type=&quot;submit&quot; class=&quot;btn&quot; value=&quot;{{ 'btn_save_position'|trans({}, 'SonataPageBundle') }}&quot; id=&quot;page-action-save-position&quot;&gt;
+                                            &lt;/form&gt;
+                                        &lt;/li&gt;
+                                    {% endif %}
+                                {% endif %}
+
+                                {% if app.user and is_granted('ROLE_PREVIOUS_ADMIN') %}
+                                    &lt;li&gt;&lt;a href=&quot;{{ url('homepage', {'_switch_user': '_exit'}) }}&quot;&gt;{{ &quot;header.switch_user_exit&quot;|trans({}, 'SonataPageBundle')}}&lt;/a&gt;&lt;/li&gt;
+                                {% endif %}
+
+                            &lt;/ul&gt;
+                        &lt;/div&gt;
+                    &lt;/header&gt;
+
+                {% endif %}
+            {% endblock %}
+        {% endblock %}
+
+        {% block sonata_page_container %}
+            {% block page_container %}{% endblock %} {# Deprecated block #}
+        {% endblock %}
+
+        {% block sonata_page_asset_footer %}
+            {% block page_asset_footer %} {# Deprecated block #}
+                {% if page is defined %}
+                    {% if page.javascript is not empty %}
+                        &lt;script&gt;
+                            {{ page.javascript|raw }}
+                        &lt;/script&gt;
+                    {% endif %}
+                    {% if page.stylesheet is not empty %}
+                        &lt;style&gt;
+                            {{ page.stylesheet|raw }}
+                        &lt;/style&gt;
+                    {% endif %}
+                {% endif %}
+                {#
+                    These includes can be done only at this point as all blocks are loaded,
+                    Limition : this does not work if a global page is loaded from an ESI tag inside a container block
+                #}
+                {{ sonata_block_include_stylesheets('screen', app.request.basePath) }}
+                {{ sonata_block_include_javascripts('screen', app.request.basePath) }}
+            {% endblock %}
+        {% endblock %}
+
+        &lt;!-- monitoring:3e9fda56df2cdd3b039f189693ab7844fbb2d4f6 --&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+
+</pre></div>
+
+
+<p>Voici le résultat :</p>
+
+
+
+<figure class="wp-block-video"><video controls src="https://www.partitech.com/wp-content/uploads/2020/07/front_end_ordering.mp4"></video></figure>

@@ -1,0 +1,19 @@
+<p>Lorsque l&rsquo;on install WPML pour gérer les traductions, celui-ci ajoute automatiquement des invites de traductions payantes dans la page d&rsquo;édition des post.<br />
+Pour les supprimer, un moyen simple consiste a suprimer la box du DOM.</p>
+<p>Insérez le code suivant dans votre fichier functions.php:</p>
+<pre class="brush: php; title: ; notranslate" title="">
+add_action( 'admin_footer', 'wpmlRemoveBox_hook' );
+function wpmlRemoveBox_hook( $hook_suffix )
+{
+?&amp;gt;
+&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+
+jQuery( document ).ready(function() {
+jQuery('.icl_cyan_box').remove();
+jQuery('#cpt_info_box').remove();
+
+});
+&amp;lt;/script&amp;gt;
+&amp;lt;?php
+}
+</pre>

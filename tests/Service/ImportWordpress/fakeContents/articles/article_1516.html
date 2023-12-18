@@ -1,0 +1,331 @@
+
+<h2>Appeler directement la librairie php ?</h2>
+
+
+
+<p>Et si on s&rsquo;amusait à réaliser un bout de code qui ne sert à rien ?&nbsp;Allez&nbsp;!!!&nbsp;Allez&nbsp;!!&nbsp;Allez&nbsp;!!!</p>
+
+
+
+<p>Bon OK.&nbsp;Je vous propose comme truc inutile d&rsquo;utiliser PHP pour appeler une lib en C qui utilise le Zend Engine.</p>
+
+
+
+<p>En réalité&nbsp;ce paragraphe n&rsquo;est pas aussi inutile que cela.&nbsp;Son but est de vous montrer un comportement particulier 🙂</p>
+
+
+
+<p>PHP-ffi a quelques limitations :&nbsp;impossible de lui passer une variable PHP directement pour récupérer sa valeur dynamiquement depuis la lib externe.</p>
+
+
+
+<p>Vous n&rsquo;avez accès qu&rsquo;au passage de type de données du langage C.&nbsp;La vraie bonne façon de passer des paramètres et de récupérer les valeurs est via :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$var = FFI::new('int'); 
+$var-&gt;cdata=33; </code></pre>
+
+
+
+<p>Il en sera de même pour récupérer les données. <br>Vous trouverez plus d&rsquo;infos sur le site officiel de PHP :&nbsp;<a href="https://www.php.net/manual/fr/class.ffi-cdata.php">https://www.php.net/manual/fr/class.ffi-cdata.php</a>.&nbsp;<br>Nous y reviendrons prochainement.</p>
+
+
+
+<p>Cela étant, dans cet exemple, nous allons utiliser zend pour récupérer la valeur d&rsquo;une variable directement via son nom. Ceci ne peut marcher que si la variable se trouve dans son contexte. Bon, sachez le, cette pratique ne sert strictement à rien. Mais elle nous permet d&rsquo;introduire comment utiliser le Zend Engine si jamais on en avait besoin.</p>
+
+
+
+<p>On va commencer par installer g++ et les header files de php 8.1</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo apt-get install g++ php8.1-dev</code></pre>
+
+
+
+<p>Voici donc notre code en C qui va nous permettre d’accéder à nos différentes valeurs :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">extern "C" {
+    #include "php.h"
+}
+
+// FROM : https://stackoverflow.com/questions/70771433/is-it-possible-to-pass-php-variable-to-ffi-c-function
+// https://github.com/mrsuh/php-var-sizeof/blob/master/library/ffi.cpp
+zval * get_zval_by_name(char * name) {
+
+    HashTable *symbol_table = zend_array_dup(zend_rebuild_symbol_table());
+
+    zend_string *key_name = zend_string_init(name, strlen(name), 0);
+    zval *data = zend_hash_find(symbol_table, key_name);
+
+    zend_string_release(key_name);
+    zend_array_destroy(symbol_table);
+
+    return data;
+}
+
+extern "C" void test_var(char * name) {
+    zval *zv_ptr = get_zval_by_name(name);
+
+    if(zv_ptr != NULL) {
+        // https://www.phpinternalsbook.com/php7/zvals/basic_structure.html#access-macros
+        try_again:
+            switch (Z_TYPE_P(zv_ptr)) {
+                case IS_NULL:
+                    php_printf("NULL: null\n");
+                    break;
+                case IS_LONG:
+                    php_printf("LONG: %ld\n", Z_LVAL_P(zv_ptr));
+                    break;
+                case IS_TRUE:
+                    php_printf("BOOL: true\n");
+                    break;
+                case IS_FALSE:
+                     php_printf("BOOL: false\n");
+                    break;
+                case IS_DOUBLE:
+                    php_printf("DOUBLE: %g\n", Z_DVAL_P(zv_ptr));
+                    break;
+                case IS_STRING:
+                   php_printf("STRING: value=\"");
+                   PHPWRITE(Z_STRVAL_P(zv_ptr), Z_STRLEN_P(zv_ptr));
+                   php_printf("\", length=%zd\n", Z_STRLEN_P(zv_ptr));
+                   break;
+                case IS_RESOURCE:
+                    php_printf("RESOURCE: id=%ld\n", Z_RES_HANDLE_P(zv_ptr));
+                    break;
+                case IS_ARRAY:
+                    php_printf("ARRAY: hashtable=%p\n", Z_ARRVAL_P(zv_ptr));
+                    break;
+                case IS_OBJECT:
+                    php_printf("OBJECT: object=%p\n", Z_OBJ_P(zv_ptr));
+                    break;
+                case IS_REFERENCE:
+                            php_printf("REFERENCE: ");
+                            zv_ptr = Z_REFVAL_P(zv_ptr);
+                            goto try_again;
+                EMPTY_SWITCH_DEFAULT_CASE()
+            }
+        }
+}</code></pre>
+
+
+
+<p>Pour l’explication,&nbsp;si jamais vous avez besoin d’accéder à des valeurs qui sont dans le contexte vous pouvez y accéder comme cela.</p>
+
+
+
+<p>Personne ne devrait avoir besoin de ça.&nbsp;J’ai choisi de démontrer les possibilités de ce module par un exemple à la marge.</p>
+
+
+
+<p>Le header file&nbsp;:&nbsp;export-vars-php.h</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">#define FFI_LIB "./php-export-vars.so"
+
+typedef struct zval zval;
+void test_var(char *name);</code></pre>
+
+
+
+<p>Le code Php :&nbsp;export-vars.php</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">#!/usr/bin/php8.1
+&lt;?php
+opcache_reset();
+
+$ffi = FFI::load(__DIR__ . '/export-vars-php.h');
+
+$testString='jjj';
+$ffi-&gt;test_var('testString');
+
+$testInt = 10;
+$ffi-&gt;test_var('testInt');
+
+$testBool=true;
+$ffi-&gt;test_var('testBool');
+
+
+$testBool=false;
+$ffi-&gt;test_var('testBool');
+
+$testNull=null;
+$ffi-&gt;test_var('testNull');
+
+$testArray=[1,2,'test'];
+$ffi-&gt;test_var('testArray');</code></pre>
+
+
+
+<p>Donc en exécutant notre code nous devrions obtenir ceci&nbsp;:</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">g++ -I/usr/include/php/20210902 \
+    -I/usr/include/php/20210902/main \
+    -I/usr/include/php/20210902/TSRM \
+    -I/usr/include/php/20210902/Zend \
+    -c php-export-vars.cpp &amp;&amp; \
+    gcc -shared -o php-export-vars.so  php-export-vars.o
+./export-vars.php
+STRING: value="jjj", length=3
+LONG: 10
+BOOL: true
+BOOL: false
+NULL: null
+ARRAY: hashtable=0x7f6cd1257428</code></pre>
+
+
+
+<p>Vous remarquerez que nous sommes passés par la fonction FFI::load et que nous avons directement sorti les informations de définition dans un header file.&nbsp;Ça clarifie un peu le code.</p>
+
+
+
+<p>Vous pouvez donc, comme étape intermédiaire,&nbsp;commencer à créer votre passerelle PHP sans devoir passer par la procédure de création de module PHP typique.</p>
+
+
+
+<p><strong>FFI\CData</strong></p>
+
+
+
+<p>Vous pouvez être confrontés à des fonctions prenant en paramètres différents types.&nbsp;Notamment des pointeurs sur des structures,&nbsp;des fonctions, etc.</p>
+
+
+
+<p>Lors de mes tests j’ai parfois tâtonné dans leurs mises en œuvre.&nbsp;Voici donc pèle mêle comment créer ces données&nbsp;:</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">#!/usr/bin/php8.1
+&lt;?php
+$test = FFI::new('int');
+$test-&gt;cdata = 32;
+var_dump($test);
+echo PHP_EOL;
+
+$value = FFI::new('char[2]');
+FFI::memcpy($value, 'ab', 2);
+var_dump($value);
+var_dump(FFI::cast('char[2]', $value));
+echo PHP_EOL;
+
+$test = FFI::new(FFI::arrayType(FFI::type('int'), [2]));
+$test[0] = 6541;
+$test[1] = 8731;
+var_dump($test);
+echo PHP_EOL;
+</code></pre>
+
+
+
+<p>Pas vraiment besoin de rentrer dans le détail,&nbsp;les exemples sont plutôt explicites.</p>
+
+
+
+<p>Voici le retour d’exécution du code :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">./cdata.php 
+object(FFI\CData:int32_t)#1 (1) {
+  ["cdata"]=&gt;
+  int(32)
+}
+
+object(FFI\CData:char[2])#2 (2) {
+  [0]=&gt;
+  string(1) "a"
+  [1]=&gt;
+  string(1) "b"
+}
+object(FFI\CData:char[2])#3 (2) {
+  [0]=&gt;
+  string(1) "a"
+  [1]=&gt;
+  string(1) "b"
+}
+
+object(FFI\CData:int32_t[2])#3 (2) {
+  [0]=&gt;
+  int(6541)
+  [1]=&gt;
+  int(8731)
+}
+</code></pre>
+
+
+
+<p>Vous pouvez avoir besoin de passer aux fonctions des adresses de structures. La documentation officielle est bien faite. (<a href="https://www.php.net/manual/fr/ffi.examples-basic.php">https://www.php.net/manual/fr/ffi.examples-basic.php</a>)</p>
+
+
+
+<p>Je vous propose l&rsquo;exemple suivant :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">&lt;?php
+$ffi = FFI::cdef("
+    typedef unsigned int time_t;
+    typedef unsigned int suseconds_t;
+ 
+    struct timeval {
+        time_t      tv_sec;
+        suseconds_t tv_usec;
+    };
+ 
+    struct timezone {
+        int tz_minuteswest;
+        int tz_dsttime;
+    };
+ 
+    int gettimeofday(struct timeval *tv, struct timezone *tz);    
+", "libc.so.6");
+
+$tv = $ffi-&gt;new("struct timeval");
+$tz = $ffi-&gt;new("struct timezone");
+
+
+var_dump($ffi-&gt;gettimeofday(FFI::addr($tv), FFI::addr($tz)));
+
+
+var_dump($tv-&gt;tv_sec);
+
+var_dump($tz);
+?&gt;</code></pre>
+
+
+
+<p>Vous voyez que&nbsp;**int gettimeofday(<em>struct timeval&nbsp;tv, struct timezone&nbsp;<em>tz);</em></em>&nbsp;prend en paramètres 2 structures.&nbsp;Il va donc falloir les créer via FFI::new et récupérer leurs adresses via FFI::addr.&nbsp;<br>Tout est bien fait&nbsp;!</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$ffi-&gt;new("struct timeval");
+$ffi-&gt;new("struct timezone");</code></pre>
+
+
+
+<p>Comme nous avons passé leur adresse,&nbsp;nous n&rsquo;avons qu&rsquo;a récupérer le contenu de notre structure avec les informations renseignées.&nbsp;Magique&nbsp;!</p>
+
+
+
+<p>En parlant de magie, nous allons traiter dans notre prochaine partie des fameux callbacks. Une magie dont on a du mal à se passer une fois qu&rsquo;on y a goûté !</p>
+
+
+
+<p><a href="/php-ffi/php-ffi-partie-3">PHP FFI : CallBack &#8211; partie 3</a></p>
+
+
+
+<p></p>
+
+
+
+<p>Merci à <a href="https://www.linkedin.com/in/thomas-bourdin-b332b630/">Thomas Bourdin</a>, <a href="https://www.linkedin.com/in/lejallec/">Cédric Le Jallé</a>, <a href="https://www.linkedin.com/in/stephanepechard/">Stéphane Péchard</a> pour leur aide, conseils et relecture.</p>

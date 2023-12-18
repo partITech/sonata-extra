@@ -1,0 +1,11 @@
+sonata-extra:
+  block_contact:
+    firstName_not_blank: "Le prénom est obligatoire."
+    lastName_not_blank: "Le nom est obligatoire."
+    companyName_not_blank: "Le nom de l'entreprise est obligatoire."
+    address_not_blank: "L'adresse est obligatoire."
+    email_not_blank: "L'adresse e-mail est obligatoire."
+    email_invalid: "L'adresse e-mail n'est pas valide."
+    phone_not_blank: "Le numéro de téléphone est obligatoire."
+    phone_invalid: "Le numéro de téléphone n'est pas valide."
+    additionalInformation_not_blank: "Le champ d'informations supplémentaires est obligatoire."

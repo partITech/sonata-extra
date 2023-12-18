@@ -1,0 +1,65 @@
+.sonata-ba-view-container th {
+    width: 300px;
+}
+div.mosaic-inner-box {
+    height: 300px;
+}
+.mosaic-inner-box-default {
+    display: flex;
+    justify-content: center;
+}
+div.mosaic-inner-box img {
+    width: unset;
+}
+
+
+
+.sidebar-menu  sup, .navbar-nav sup {
+    font-size: 14px;
+    background-color: #ff162f !important;
+    color: #fff !important;;
+    border-radius: 50%;
+    height: 22px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    width: 24px;
+    left: 4px;
+}
+.sidebar-menu sup, .navbar-nav  sup {
+    top: -0.5em;
+}
+.sidebar-menu  sub, .sidebar-menu  sup,
+.navbar-nav  sub, .navbar-nav  sup
+{
+    font-size: 75%;
+    line-height: 0;
+    position: relative;
+    vertical-align: baseline;
+}
+
+.navbar-nav li btn a{
+    padding-left: 0px;
+    padding-right: 5px;
+    padding-top: 10px;
+}
+
+.bg-primary {
+    background-color: #007bff !important;
+}
+.bg-success {
+    background-color: #28a745 !important;
+}
+.bg-danger {
+    background-color: #dc3545 !important;
+}
+
+.btn-disabled {
+    filter: grayscale(100%);
+    opacity: 0.6;
+}
+
+
+.form-separator {
+    border-bottom:dotted 1px black  !important;
+}

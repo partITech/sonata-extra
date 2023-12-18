@@ -1,0 +1,64 @@
+{% block content_blog %}
+<div class="single">
+    <article id="article-{{ article.getId() }}" class="minimal-style single-post hentry single-article article post  {% if article.getFeaturedImage() %}has-post-thumbnail{% endif %} ">
+
+        <header class="entry-header">
+            <h1 class="entry-title">{{ article }}</h1>
+            <div class="entry-meta">
+                <span class="cat-links">
+                    {% for tag in article.tags %}
+                        <a href="{{ tag.translations[tag.site.id]['routes']['sonata_extra_blog_tag'] }}" rel="category tag">{{ tag.name }}</a>
+                    {% endfor %}
+
+                </span>
+                <span class="entry-date">
+						<time class="entry-date" datetime="{{ article.getPublishedAt()|date('c') }}">
+							{{ article.getPublishedAt()|format_date('full','',locale='fr')}}
+						</time>
+				</span>
+            </div>
+        </header>
+
+
+    </article>
+    {% if article.getFeaturedImage() %}
+        {% set media = article.getFeaturedImage %}
+
+        <div class="featured-image">
+            {{ sonata_media(media, 'retina_large') }}
+        </div>
+    {% endif %}
+
+    <div class="entry-content">
+        {{ article.getHtmlContent()|raw }}
+    </div>
+
+    <div class="share-links">
+        <h3>{{ 'sonata-extra.blog.share_this_article'|trans({}, 'PartitechSonataExtraBundle') }}</h3>
+        <a data-share="facebook" data-href="https://www.facebook.com/sharer/sharer.php" data-text="{{ article.getTitle() }}"    data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}" class="bd-facebook-share bd-social-share"><i class="fab fa-facebook-f"></i></a>
+        <a data-share="twitter" data-href="https://twitter.com/share"                   data-text="{{ article.getTitle() }}"    data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}" class="bd-twitter-share bd-social-share"><i class="fab fa-twitter"></i></a>
+        <a data-share="linkedin" data-href="https://www.linkedin.com/shareArticle"      data-text="{{ article.getTitle() }}"    data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}" class="bd-linkedin-share bd-social-share"><i class="fab fa-linkedin-in"></i></a>
+        <a data-share="pinterest" data-href="https://pinterest.com/pin/create/button/"  data-text="{{ article.getTitle() }}"   data-mdia="" data-description=""  data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}"  class="bd-pinterest-share bd-social-share"> <i class="fab fa-pinterest-p"></i></a>
+    </div>
+
+
+
+
+    <aside class="about-author">
+        <h3>{{ 'sonata-extra.blog.about_the_author'|trans({}, 'PartitechSonataExtraBundle') }}</h3>
+        <div class="author-bio">
+            <div class="author-img">
+                <a href="#">
+                    <img alt="{{ article.getAuthor() }}" src="https://secure.gravatar.com/avatar/3b4c889a75c9c6228064798fc65800eb?s=180&amp;d=mm&amp;r=g" srcset="https://secure.gravatar.com/avatar/3b4c889a75c9c6228064798fc65800eb?s=360&amp;d=mm&amp;r=g 2x" class="avatar avatar-180 photo" height="180" width="180" loading="lazy" decoding="async">							</a>
+            </div>
+            <div class="author-info">
+                <h4 class="author-name">{{ article.getAuthor() }}</h4>
+                <p></p>
+            </div>
+        </div>
+    </aside>
+
+
+</div>
+
+{% endblock %}

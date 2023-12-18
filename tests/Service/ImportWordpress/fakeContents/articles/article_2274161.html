@@ -1,0 +1,75 @@
+<p><br style="clear:both"><br />
+Cet exemple permet d&rsquo;ajouter une page d&rsquo;options pour un theme wordpress.<br />
+Le fichier dois s&rsquo;appeler theme-options.php et doit être placé dans le répertoire functions de votre theme.<br />
+Cet exemple est tiré du projet Pubicis-Verbe.</p>
+<pre class="brush: php; title: ; notranslate" title="">
+&amp;lt;?php
+
+add_action('admin_menu','verbe_menu_page');
+
+function verbe_menu_page(){
+add_theme_page('Verbe Theme Options', 'Theme Option', 'manage_options', 'verbe-theme-option', 'verbe_setting_page');
+}
+
+add_action('admin_init', 'verbe_register_setting');
+
+function verbe_register_setting(){
+
+// block footer
+register_setting('verbe-group', 'verbe_footer_name');
+register_setting('verbe-group', 'verbe_footer_link_name');
+register_setting('verbe-group', 'verbe_footer_group');
+register_setting('verbe-group', 'verbe_footer_link_group');
+register_setting('verbe-group', 'verbe_footer_street');
+register_setting('verbe-group', 'verbe_footer_address');
+//register_setting('verbe-group', 'verbe_footer_description');
+}
+
+function verbe_setting_page(){?&amp;gt;
+
+&amp;lt;div class=&quot;wrap&quot;&amp;gt;
+&amp;lt;?php screen_icon(); ?&amp;gt;
+&amp;lt;h2&amp;gt;Verbe Setting Page&amp;lt;/h2&amp;gt;
+&amp;lt;form id=&quot;verbe_setting&quot; method=&quot;post&quot; action=&quot;options.php&quot; enctype=&quot;multipart/form-data&quot;&amp;gt;
+&amp;lt;?php settings_fields('verbe-group'); ?&amp;gt;
+&amp;lt;?php do_settings_sections( 'verbe-group' ); ?&amp;gt;
+
+&amp;lt;table&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;h3&amp;gt;Block Footer&amp;lt;/h3&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td height=&quot;40&quot; width=&quot;170&quot;&amp;gt;Company&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;input type=&quot;text&quot; name=&quot;verbe_footer_name&quot; value=&quot;&amp;lt;?php echo get_option('verbe_footer_name'); ?&amp;gt;&quot; size=&quot;80&quot; /&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td height=&quot;40&quot; width=&quot;170&quot;&amp;gt;Link Company&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;input type=&quot;text&quot; name=&quot;verbe_footer_link_name&quot; value=&quot;&amp;lt;?php echo get_option('verbe_footer_link_name'); ?&amp;gt;&quot; size=&quot;80&quot; /&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td height=&quot;40&quot; width=&quot;170&quot;&amp;gt;Group&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;input type=&quot;text&quot; name=&quot;verbe_footer_group&quot; value=&quot;&amp;lt;?php echo get_option('verbe_footer_group'); ?&amp;gt;&quot; size=&quot;80&quot; /&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td height=&quot;40&quot; width=&quot;170&quot;&amp;gt;Link Group&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;input type=&quot;text&quot; name=&quot;verbe_footer_link_group&quot; value=&quot;&amp;lt;?php echo get_option('verbe_footer_link_group'); ?&amp;gt;&quot; size=&quot;80&quot; /&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td height=&quot;40&quot; width=&quot;170&quot;&amp;gt;Street&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;input type=&quot;text&quot; name=&quot;verbe_footer_street&quot; value=&quot;&amp;lt;?php echo get_option('verbe_footer_street'); ?&amp;gt;&quot; size=&quot;80&quot; /&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;tr&amp;gt;
+&amp;lt;td height=&quot;40&quot; width=&quot;170&quot;&amp;gt;Address&amp;lt;/td&amp;gt;
+&amp;lt;td&amp;gt;&amp;lt;input type=&quot;text&quot; name=&quot;verbe_footer_address&quot; value=&quot;&amp;lt;?php echo get_option('verbe_footer_address'); ?&amp;gt;&quot; size=&quot;80&quot; /&amp;gt;&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+&amp;lt;/table&amp;gt;
+
+&amp;lt;input type=&quot;hidden&quot; name=&quot;update_settings&quot; value=&quot;Y&quot; /&amp;gt;
+&amp;lt;?php submit_button(); ?&amp;gt;
+&amp;lt;/form&amp;gt;
+&amp;lt;/div&amp;gt;
+&amp;lt;?php
+}
+?&amp;gt;
+
+</pre>

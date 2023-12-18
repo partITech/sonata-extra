@@ -1,0 +1,6 @@
+<p>Pour changer la taille d&rsquo;un disque, il faut le cloner en vdi, augmenter la taille, et ensuite</p>
+<p>VBoxManage clonehd « source.vmdk » « cloned.vdi » &#8211;format vdi<br />
+VBoxManage modifyhd « cloned.vdi » &#8211;resize 51200<br />
+VBoxManage clonehd « cloned.vdi » « resized.vmdk » &#8211;format vmdk</p>
+<p>Pour changer le UUID du disque, il suffit de passer cette commande :<br />
+VBoxManage internalcommands sethduuid disk2.vdi</p>

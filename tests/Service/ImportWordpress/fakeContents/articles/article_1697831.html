@@ -1,0 +1,192 @@
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_237.png"><img decoding="async" loading="lazy" width="1024" height="378" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1024x378.png" alt="" class="wp-image-1742" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1024x378.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-300x111.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-768x283.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-800x295.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-550x203.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237.png 1038w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p><strong>Dropbox</strong> est un service de stockage et de partage de copies de fichiers locaux en ligne proposé par Dropbox Inc. <br>Via un agent installé sur votre ordinateur ou mobile, il est capable de synchroniser une arborescence sur le cloud et permet ainsi une sauvegarde et un versionning de celui-ci.<br>L&rsquo;usage classique de Dropbox est d&rsquo;utiliser un outil sur votre Desktop. Un usage moins évident est de l&rsquo;utiliser sans le programme Desktop Windows sur un serveur LINUX.<br>Nous allons voir comment l&rsquo;installer et le configurer sur un serveur LINUX DEBIAN. <br></p>
+
+
+
+<p>La première étape consiste à mettre à jour le système.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+apt-get update
+apt-get upgrade
+</pre></div>
+
+
+<p>Ensuite on télécharge Dropbox depuis le serveur officiel.<br>Pour un système 32bit :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+cd ~ &amp;&amp; wget -O - &quot;https://www.dropbox.com/download?plat=lnx.x86&quot; | tar xzf -
+</pre></div>
+
+
+<p>Pour un système 64bit :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+cd ~ &amp;&amp; wget -O - &quot;https://www.dropbox.com/download?plat=lnx.x86_64&quot; | tar xzf -
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_234.png"><img decoding="async" loading="lazy" width="1024" height="166" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-1024x166.png" alt="" class="wp-image-1739" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-1024x166.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-300x49.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-768x125.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-1536x249.png 1536w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-1440x234.png 1440w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-800x130.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234-550x89.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_234.png 1841w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>La décompression de l&rsquo;archive se fait dans un répertoire .dropbox-dist<br>Lancez la commande suivante pour exécuter le programme :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+~/.dropbox-dist/dropboxd
+</pre></div>
+
+
+<p>Le programme va alors détecter que l&rsquo;ordinateur n&rsquo;est lié à aucun compte et va vous demander de vous authentifier. Pour lier le serveur le programme vous fournit une url à ouvrir sur votre navigateur. <br>Tant que cette manipulation n&rsquo;aura pas été faite le programme continuera à vous demander cette action.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_236.png"><img decoding="async" loading="lazy" width="1024" height="277" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_236-1024x277.png" alt="" class="wp-image-1741" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_236-1024x277.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_236-300x81.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_236-768x208.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_236-800x216.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_236-550x149.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_236.png 1342w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Sur le navigateur Dropbox nous demande de confirmer cette liaison :</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1.png"><img decoding="async" loading="lazy" width="1024" height="378" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1-1024x378.png" alt="" class="wp-image-1743" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1-1024x378.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1-300x111.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1-768x283.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1-800x295.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1-550x203.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_237-1.png 1038w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Une fois acceptée, la liaison est immédiatement prise en compte.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1.png"><img decoding="async" loading="lazy" width="1024" height="249" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1-1024x249.png" alt="" class="wp-image-1745" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1-1024x249.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1-300x73.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1-768x186.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1-800x194.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1-550x134.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_238-1.png 1071w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_239.png"><img decoding="async" loading="lazy" width="1024" height="359" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_239-1024x359.png" alt="" class="wp-image-1746" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_239-1024x359.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_239-300x105.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_239-768x270.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_239-800x281.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_239-550x193.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_239.png 1322w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p><br>Il faut maintenant créer le service Dropbox et pour cela un fichier est disponible ici : https://github.com/joeroback/dropbox</p>
+
+
+
+<p>Et si le fichier disparait un jour vous pouvez le télécharger ici : </p>
+
+
+
+<div class="wp-block-file"><a id="wp-block-file--media-f35086ab-6883-45fd-b675-2e665f079cf4" href="https://www.partitech.com/wp-content/uploads/2021/09/dropbox-master.zip">dropbox-master</a><a href="https://www.partitech.com/wp-content/uploads/2021/09/dropbox-master.zip" class="wp-block-file__button wp-element-button" download aria-describedby="wp-block-file--media-f35086ab-6883-45fd-b675-2e665f079cf4">Télécharger</a></div>
+
+
+
+<p>On l’installe comme ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+wget -O /etc/systemd/system/dropbox@.service https://raw.githubusercontent.com/joeroback/dropbox/master/dropbox%40.service
+</pre></div>
+
+
+<p>On active le démarrage au boot de la machine :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+systemctl enable dropbox@root
+</pre></div>
+
+
+<p>On valide l&rsquo;installation en relançant le  deamon systemctl</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+systemctl daemon-reload
+</pre></div>
+
+
+<p>Et on lance le service :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+systemctl start dropbox@root
+</pre></div>
+
+
+<p>On regarde ensuite le statut :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+systemctl status dropbox@root
+</pre></div>
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_240.png"><img decoding="async" loading="lazy" width="930" height="109" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_240.png" alt="" class="wp-image-1751" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_240.png 930w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_240-300x35.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_240-768x90.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_240-800x94.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_240-550x64.png 550w" sizes="(max-width: 930px) 100vw, 930px" /></a></figure>
+
+
+
+<p>Visiblement il y a un problème. On voit que le service va chercher le fichier /home/root/.dropbox-dist/dropboxd<br>Chez nous le fichier est dans /root/.dropbox-dist/dropboxd<br>Il faut modifier le script du service : /etc/systemd/system/dropbox@.service</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_241.png"><img decoding="async" loading="lazy" width="549" height="255" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_241.png" alt="" class="wp-image-1752" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_241.png 549w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_241-300x139.png 300w" sizes="(max-width: 549px) 100vw, 549px" /></a></figure>
+
+
+
+<p>On recharge et on relance le service :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+systemctl daemon-reload
+systemctl start dropbox@root
+</pre></div>
+
+
+<p>La pastille est verte, on est bon.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/09/Selection_242.png"><img decoding="async" loading="lazy" width="1024" height="198" src="https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-1024x198.png" alt="" class="wp-image-1754" srcset="https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-1024x198.png 1024w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-300x58.png 300w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-768x148.png 768w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-1536x296.png 1536w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-1440x278.png 1440w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-800x154.png 800w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242-550x106.png 550w, https://www.partitech.com/wp-content/uploads/2021/09/Selection_242.png 1773w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Tous nos fichiers sont bien synchronisés.</p>
+
+
+
+<p>Si Dropbox est maintenant fonctionnel sur votre serveur il n&rsquo;en reste pas moins pénible à utiliser en ligne de commande. Pour nous faciliter la vie l&rsquo;éditeur fournit un script Python à utiliser en CLI pour dialoguer avec le programme.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+cd /usr/bin &amp;&amp; curl -LO https://www.dropbox.com/download?dl=packages/dropbox.py &amp;&amp; chmod +x dropbox.py
+</pre></div>
+
+
+<p>Au cas où, vous pouvez le télécharger ici :</p>
+
+
+
+<div class="wp-block-file"><a id="wp-block-file--media-3d9c8a6e-5d39-4630-910d-9882b1b70062" href="https://www.partitech.com/wp-content/uploads/2021/10/dropbox.py_.zip">dropbox.py_</a><a href="https://www.partitech.com/wp-content/uploads/2021/10/dropbox.py_.zip" class="wp-block-file__button wp-element-button" download aria-describedby="wp-block-file--media-3d9c8a6e-5d39-4630-910d-9882b1b70062">Télécharger</a></div>
+
+
+
+<p>En le plaçant dans /usr/bin vous permettez au système de vous en donner accès quelque soit l&rsquo;endroit où vous vous trouvez.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2021/10/Selection_245.png"><img decoding="async" loading="lazy" width="650" height="418" src="https://www.partitech.com/wp-content/uploads/2021/10/Selection_245.png" alt="" class="wp-image-1766" srcset="https://www.partitech.com/wp-content/uploads/2021/10/Selection_245.png 650w, https://www.partitech.com/wp-content/uploads/2021/10/Selection_245-300x193.png 300w, https://www.partitech.com/wp-content/uploads/2021/10/Selection_245-550x354.png 550w" sizes="(max-width: 650px) 100vw, 650px" /></a></figure>
+
+
+
+<p>Une des commandes les plus utile est de vérifier le statut d&rsquo;un fichier. Dropbox va pouvoir vous donner son statut via un code couleur lors de l’exécution de ls.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2021/10/Selection_246.png"><img decoding="async" loading="lazy" width="438" height="43" src="https://www.partitech.com/wp-content/uploads/2021/10/Selection_246.png" alt="" class="wp-image-1769" srcset="https://www.partitech.com/wp-content/uploads/2021/10/Selection_246.png 438w, https://www.partitech.com/wp-content/uploads/2021/10/Selection_246-300x29.png 300w" sizes="(max-width: 438px) 100vw, 438px" /></a></figure>
+
+
+
+<p><br>Lorsqu&rsquo;on lit la source de l&rsquo;utilitaire on peut voir les statuts suivants avec le code couleur correspondant :<br> <font color="green">up to date : 32</font> <br><font color="cyan">syncing : 36</font><br> <font color="red ">unsyncable: 41</font><br> <font color="#D3D3D3">selsync : 37</font><br> </p>

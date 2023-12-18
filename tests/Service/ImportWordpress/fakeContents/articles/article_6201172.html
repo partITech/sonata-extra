@@ -1,0 +1,27 @@
+<p>En fait, RabbitVcs est très simple à installer..Sauf lorsqu&rsquo;il y a un problème, et là&#8230; on peux chercher longtemps 🙁</p>
+<p>Voici comment régler la plupart des problèmes d&rsquo;installation sous Ubuntu 14.04LTS.</p>
+<p>1 &#8211; Ajouter la source</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo add-apt-repository ppa:rabbitvcs/ppa </pre>
+<p>ou bien rajouter la source dans votre fichier  /etc/apt/sources.list</p>
+<pre class="brush: bash; title: ; notranslate" title="">deb http://ppa.launchpad.net/rabbitvcs/ppa/ubuntu trusty main</pre>
+<p>2 &#8211; Installer les packages</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+
+sudo apt-get update
+sudo apt-get install rabbitvcs-cli rabbitvcs-core rabbitvcs-gedit rabbitvcs-nautilus3
+</pre>
+<p>3 &#8211; Gérer les problèmes</p>
+<p>Problèmes de librairies avec python (si il y a un problème, cela ne se verras pas forcément, il faut donc tester si cela débloque les choses, ou pas) :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+#remplacer les numero de versions selon votre systeme
+sudo ln -sf /usr/lib/x86_64-linux-gnu/libpython2.7.so.1.0 /usr/lib/
+sudo ln -sf /usr/lib/x86_64-linux-gnu/libpython2.7.so.1 /usr/lib/
+</pre>
+<p>Remplacer le script avec la derniere version :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo wget http://rabbitvcs.googlecode.com/svn/trunk/clients/nautilus-3.0/RabbitVCS.py  /usr/share/nautilus-python/extensions</pre>
+<p>Changer les droits</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo chown -R $USER:$USER ~/.config/rabbitvcs</pre>
+<p>Activer les icônes des dossiers/fichiers dans Nautilus :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo gconftool-2 –type bool –set /desktop/gnome/interface/menus_have_icons true </pre>
+<p>Si Nautilus est bloqué sur l’icône de l&rsquo;horloge sur les dossiers/fichiers  :</p>
+<pre class="brush: bash; title: ; notranslate" title="">sudo pgrep -f service.py | xargs kill; nautilus -q; nautilus</pre>

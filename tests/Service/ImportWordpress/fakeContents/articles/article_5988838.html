@@ -1,0 +1,297 @@
+
+<h2>Le CallBack</h2>
+
+
+
+<p>J&rsquo;ai pu remarquer pendant la préparation de cet article que pas mal de ressources sur le net utilisent la libc directement pour faire leurs exemples.&nbsp;<br>Vous trouverez facilement des exemples assez démonstratifs et simples.&nbsp;Mais pour faire cool et original,&nbsp;je me suis dit “allez moi aussi je vais trouver un truc à montrer avec cette libc”.&nbsp;<br>M&rsquo;enfin&#8230;&nbsp;si c&rsquo;est juste passer une structure comme le font la plus part des exemples ça ne servira à rien.&nbsp;Et puis je tombe sur une fonction dans un forum ou les gens pestent en disant que c&rsquo;est mal foutu,&nbsp;qu&rsquo;on ne peut pas s&rsquo;en servir facilement etc.&nbsp;<br>Je me suis donc documenté, et effectivement les fonctions « <strong><em>nftw</em></strong> » et « <strong><em>ftw</em></strong> » ont un coté peu pratique. Elle ont besoin d’une fonction en paramètres.</p>
+
+
+
+<p>Comme vous pouvez le voir dans la man page&nbsp;<a href="http://manpages.ubuntu.com/manpages/bionic/en/man3/ftw.3posix.html" target="_blank" rel="noreferrer noopener">http://manpages.ubuntu.com/manpages/bionic/en/man3/ftw.3posix.html</a></p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">#include &lt;ftw.h&gt;
+
+       int ftw(const char *path, int (*fn)(const char *, const struct stat *ptr, int flag), int ndirs);
+</code></pre>
+
+
+
+<p>Nous avons donc un pointeur sur fonction en second paramètre.&nbsp;Okeyyyy&#8230;&nbsp;<br>Donc à ce moment là on fait quoi&nbsp;?&nbsp;FFI::new un truc comme ça&nbsp;??<br>Allez je vous explique en quelques minutes comment on gère cela.</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">#!/usr/bin/php8.1
+&lt;?php
+    /**
+     * quelques références:
+     * https://www.ibm.com/docs/en/zos/2.3.0?topic=functions-nftw-nftw64-traverse-file-tree
+     * http://www.sde.cs.titech.ac.jp/~gondow/dwarf2-xml/HTML-rxref/app/gcc-3.3.2/lib/gcc-lib/sparc-sun-solaris2.8/3.3.2/include/sys/types.h.html
+     * http://www.doc.ic.ac.uk/~svb/oslab/Minix/usr/include/sys/types.h
+     * http://manpages.ubuntu.com/manpages/trusty/fr/man2/stat.2.html
+     */
+opcache_reset();
+
+$ffi = FFI::cdef(
+    "
+            typedef long		blkcnt_t;	
+            typedef	long		time_t;
+            /* Types used in disk, inode, etc. data structures. */
+            typedef short          dev_t;	   /* holds (major|minor) device pair */
+            typedef char           gid_t;	   /* group id */
+            typedef unsigned short ino_t; 	   /* i-node number */
+            typedef unsigned short mode_t;	   /* file type and permissions bits */
+            typedef char         nlink_t;	   /* number of links to a file */
+            typedef unsigned long  off_t;	   /* offset within a file */
+            typedef int            pid_t;	   /* process id (must be signed) */
+            typedef short          uid_t;	   /* user id */
+            typedef unsigned long zone_t;	   /* zone number */
+            typedef unsigned long block_t;	   /* block number */
+            typedef unsigned long  bit_t;	   /* bit number in a bit map */
+            typedef unsigned short zone1_t;	   /* zone number for V1 file systems */
+            typedef unsigned short bitchunk_t; /* collection of bits in a bitmap */
+            
+            typedef unsigned char   u8_t;	   /* 8 bit type */
+            typedef unsigned short u16_t;	   /* 16 bit type */
+            typedef unsigned long  u32_t;	   /* 32 bit type */
+    
+
+    
+            typedef	int		blksize_t;	/* used for block sizes */
+    
+            struct timespec {
+                         time_t          tv_sec;
+                         long            tv_nsec;
+            };
+            
+            /** 
+             * http://manpages.ubuntu.com/manpages/trusty/fr/man2/stat.2.html
+             * /usr/include/x86_64-linux-gnu/sys/types.h 
+             */
+            struct stat {
+               dev_t     st_dev;         /* Périphérique                     */
+               ino_t     st_ino;         /* Numéro d’inœud                   */
+               mode_t    st_mode;        /* Protection                       */
+               nlink_t   st_nlink;       /* Nombre de liens physiques        */
+               uid_t     st_uid;         /* UID du propriétaire              */
+               gid_t     st_gid;         /* GID du propriétaire              */
+               dev_t     st_rdev;        /* Type de périphérique             */
+               off_t     st_size;        /* Taille totale en octets          */
+               blksize_t st_blksize;     /* Taille de bloc pour E/S          */
+               blkcnt_t  st_blocks;      /* Nombre de blocs de 512 o alloués */
+            
+               /* Depuis Linux 2.6, le noyau permet une précision à la
+                  nanoseconde pour les champs temporels suivants. Pour
+                  plus de précisions avant Linux 2.6, consultez les NOTES. */
+            
+               struct timespec st_atim;  /* Heure dernier accès              */
+               struct timespec st_mtim;  /* Heure dernière modification      */
+               struct timespec st_ctim;  /* Heure dernier changement état    */
+            
+               #define st_atime st_atim.tv_sec      /* Rétrocompatibilité        */
+               #define st_mtime st_mtim.tv_sec
+               #define st_ctime st_ctim.tv_sec
+            };
+
+            typedef struct FTW{
+                int base;
+                int level;
+            };
+
+            typedef int (*fn)(const char *, const struct stat *, int, struct FTW *);
+            int nftw(const char *path, int (*fn)(const char *, const struct stat *, int, struct FTW *),  int fd_limit, int flags);
+            int ftw(const char *path, int (*fn)(const char *, const struct stat *, int, struct FTW *),  int fd_limit);
+        ",
+    "libc.so.6"
+);
+
+$values = [];
+$fn = function ($fpath, $stat, $tflag, $ftwbuf) {
+    global $values;
+
+    /**
+     * https://sites.uclouvain.be/SystInfo/usr/include/ftw.h.html
+     * FTW_CONTINUE = 0,     Continue with next sibling or for FTW_D with the  first child.
+     * FTW_STOP = 1,         Return from `ftw' or `nftw' with FTW_STOP as return value.
+     * FTW_SKIP_SUBTREE = 2  Only meaningful for FTW_D: Don't walk through the  subtree, instead just continue with its next sibling.
+     * FTW_SKIP_SIBLINGS = 3 Continue with FTW_DP callback for current directory (if FTW_DEPTH) and then its siblings.
+     */
+    $values[] = sprintf(
+        "level: %s, Path: %-40s",
+        $ftwbuf-&gt;level,
+        $fpath
+    );
+    return 0;
+};
+
+$ffi-&gt;nftw('/var/lib', $fn, 1, 0);
+print_r(array_slice($values, 0, 5));
+echo PHP_EOL;
+
+
+$ffi-&gt;ftw('/var/lib', $fn, 1);
+print_r(array_slice($values, 0, 5));
+echo PHP_EOL;
+</code></pre>
+
+
+
+<p>Je vous pose le code tel quel,&nbsp;avec les références qui m&rsquo;ont permis de monter l&rsquo;exemple.&nbsp;Pour la faire courte, &nbsp;je suis partis de la man page qui me donne les premières informations.&nbsp;On peut donc commencer par poser la définition avec les 2 fonctions.</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">
+int nftw(const char *path, int (*fn)(const char *, const struct stat *, int, struct FTW *),  int fd_limit, int flags);
+int ftw(const char *path, int (*fn)(const char *, const struct stat *, int, struct FTW *),  int fd_limit);
+
+</code></pre>
+
+
+
+<p>On remarque vite que nous avons un pointeur sur fonction donc on l&rsquo;ajoute à notre définition :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">
+typedef int (*fn)(const char *, const struct stat *, int, struct FTW *);
+</code></pre>
+
+
+
+<p>Là on identifie qu&rsquo;on a besoin de spécifier 2 structures&nbsp;:&nbsp;<strong>FTW</strong>&nbsp;mais aussi&nbsp;<strong>stat</strong></p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">typedef struct FTW{
+                int base;
+                int level;
+};
+            struct stat {
+               dev_t     st_dev;         /* Périphérique                     */
+               ino_t     st_ino;         /* Numéro d’inœud                   */
+               mode_t    st_mode;        /* Protection                       */
+               nlink_t   st_nlink;       /* Nombre de liens physiques        */
+               uid_t     st_uid;         /* UID du propriétaire              */
+               gid_t     st_gid;         /* GID du propriétaire              */
+               dev_t     st_rdev;        /* Type de périphérique             */
+               off_t     st_size;        /* Taille totale en octets          */
+               blksize_t st_blksize;     /* Taille de bloc pour E/S          */
+               blkcnt_t  st_blocks;      /* Nombre de blocs de 512 o alloués */
+            
+               /* Depuis Linux 2.6, le noyau permet une précision à la
+                  nanoseconde pour les champs temporels suivants. Pour
+                  plus de précisions avant Linux 2.6, consultez les NOTES. */
+            
+               struct timespec st_atim;  /* Heure dernier accès              */
+               struct timespec st_mtim;  /* Heure dernière modification      */
+               struct timespec st_ctim;  /* Heure dernier changement état    */
+            
+               #define st_atime st_atim.tv_sec      /* Rétrocompatibilité        */
+               #define st_mtime st_mtim.tv_sec
+               #define st_ctime st_ctim.tv_sec
+            };
+
+            typedef struct FTW{
+                int base;
+                int level;
+            };
+</code></pre>
+
+
+
+<p>Une petite recherche sur le net et on trouve rapidement d&rsquo;où copier coller les infos&nbsp;:</p>
+
+
+
+<p><a href="http://manpages.ubuntu.com/manpages/trusty/fr/man2/stat.2.html">http://manpages.ubuntu.com/manpages/trusty/fr/man2/stat.2.html</a>&nbsp;mais surtout&nbsp;<em>/usr/include/x86_64-linux-gnu/sys/types.h</em>.</p>
+
+
+
+<p>Pratique, j&rsquo;ai à priori déjà l&rsquo;info sur moi&nbsp;🙂&nbsp;On continue de dérouler le fil et on ajoute l&rsquo;ensemble des types.&nbsp;J&rsquo;ai eu un peu de mal à les trouver&#8230;</p>
+
+
+
+<p><a href="http://www.sde.cs.titech.ac.jp/~gondow/dwarf2-xml/HTML-rxref/app/gcc-3.3.2/lib/gcc-lib/sparc-sun-solaris2.8/3.3.2/include/sys/types.h.html" target="_blank" rel="noreferrer noopener">http://www.sde.cs.titech.ac.jp/~gondow/dwarf2-xml/HTML-rxref/app/gcc-3.3.2/lib/gcc-lib/sparc-sun-so</a><a href="http://www.sde.cs.titech.ac.jp/~gondow/dwarf2-xml/HTML-rxref/app/gcc-3.3.2/lib/gcc-lib/sparc-sun-solaris2.8/3.3.2/include/sys/types.h.html">laris2.8/3.3.2/include/sys/types.h.html</a>&nbsp;<br><a href="http://www.doc.ic.ac.uk/~svb/oslab/Minix/usr/include/sys/types.h">http://www.doc.ic.ac.uk/~svb/oslab/Minix/usr/include/sys/types.h</a></p>
+
+
+
+<p>Voila notre définition faite ! On arrive enfin à la fonctionnalité géniale que j’essaie de démontrer ici : <strong>Le callback !</strong><br>Oui oui vous avez bien entendu.&nbsp;<br>Comme nous n&rsquo;avons aucune limite, nous allons passer directement une fonction anonyme PHP à notre fonction ftw&#8230;&nbsp;wow <strong>wow</strong> WOOOOW&nbsp; <strong>WOOOOW</strong>!!!</p>
+
+
+
+<p>Je m&#8217;emballe,&nbsp;mais en vrai c&rsquo;est super cool,&nbsp;regardez le code&nbsp;:</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">$values = [];
+$fn = function ($fpath, $stat, $tflag, $ftwbuf) {
+    global $values;
+
+    /**
+     * https://sites.uclouvain.be/SystInfo/usr/include/ftw.h.html
+     * FTW_CONTINUE = 0,     Continue with next sibling or for FTW_D with the  first child.
+     * FTW_STOP = 1,         Return from `ftw' or `nftw' with FTW_STOP as return value.
+     * FTW_SKIP_SUBTREE = 2  Only meaningful for FTW_D: Don't walk through the  subtree, instead just continue with its next sibling.
+     * FTW_SKIP_SIBLINGS = 3 Continue with FTW_DP callback for current directory (if FTW_DEPTH) and then its siblings.
+     */
+    $values[] = sprintf(
+        "level: %s, Path: %-40s",
+        $ftwbuf-&gt;level,
+        $fpath
+    );
+    return 0;
+};
+
+$ffi-&gt;nftw('/var/lib', $fn, 1, 0);
+</code></pre>
+
+
+
+<p>Ok, bon, je ne pensais pas réécrire un global dans ma vie,&nbsp;le dernier remonte à il y a 15 ans peut être,&nbsp;et encore&#8230;&nbsp;Mais pour les besoins de la démo,&nbsp;OSEF&nbsp;,&nbsp;YOLO&nbsp;(à vous de trouver un autre acronyme&#8230;).&nbsp;<br>Comme vous le voyez pas besoin de passer un FFI::addr,&nbsp;la fonction anonyme se suffit à elle même.</p>
+
+
+
+<p>Le résultat&nbsp;:</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">./nftw.php 
+Array
+(
+    [0] =&gt; level: 0, Path: /var/lib                                
+    [1] =&gt; level: 1, Path: /var/lib/php                            
+    [2] =&gt; level: 2, Path: /var/lib/php/sessions                   
+    [3] =&gt; level: 2, Path: /var/lib/php/modules                    
+    [4] =&gt; level: 3, Path: /var/lib/php/modules/7.4                
+)
+
+Array
+(
+    [0] =&gt; level: 0, Path: /var/lib                                
+    [1] =&gt; level: 1, Path: /var/lib/php                            
+    [2] =&gt; level: 2, Path: /var/lib/php/sessions                   
+    [3] =&gt; level: 2, Path: /var/lib/php/modules                    
+    [4] =&gt; level: 3, Path: /var/lib/php/modules/7.4                
+)
+</code></pre>
+
+
+
+<p>La doc nous met tout de même en garde sur les callbacks.&nbsp;Il ne faut pas en abuser.</p>
+
+
+
+<p>Dans notre prochaine partie de dossier, nous allons aborder comment jouer la carte de l’interopérabilité avec des langages prévus pour le mobile. KMP (<a href="https://kotlinlang.org/docs/multiplatform.html">Kotlin Multiplateform</a>).</p>
+
+
+
+<p><a href="/blog-technique/php-ffi/php-ffi-partie-4" target="_blank" rel="noreferrer noopener">PHP FFI : utilisation d&rsquo;une lib Kotlin Multiplateforme &#8211; partie 4</a></p>
+
+
+
+<p></p>
+
+
+
+<p>Merci à <a href="https://www.linkedin.com/in/thomas-bourdin-b332b630/">Thomas Bourdin</a>, <a href="https://www.linkedin.com/in/lejallec/">Cédric Le Jallé</a>, <a href="https://www.linkedin.com/in/stephanepechard/">Stéphane Péchard</a> pour leur aide, conseils et relecture.</p>

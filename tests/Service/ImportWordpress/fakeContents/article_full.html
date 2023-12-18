@@ -1,0 +1,251 @@
+
+<p>Dans cet article, nous allons apprendre comment ajouter un panel d&rsquo;administration sans entité dans un projet Symfony 6.2 en utilisant Sonata Admin 5. <br><br>Notre base de projet sera de créer une interface d&rsquo;upload de fichier simple. Mais vous pouvez faire n&rsquo;importe quelle application. Y compris ajouter un simple texte.</p>
+
+
+
+<h2>1. Installation de Sonata Admin Bundle<br></h2>
+
+
+
+<p>Si vous n&rsquo;avez pas déjà installé Sonata Admin, vous pouvez le faire avec composer :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require sonata-project/admin-bundle
+</pre></div>
+
+
+<p>Je vous invite à parcourir notre site pour installer Sonata Admin Bundle proprement. <a href="https://www.my_website.com/blog-technique/symfony/symfony-6-sonata-initialiser-un-projet-symfony-6-sonata-fosuser-media/">ici</a></p>
+
+
+
+<h2>2. Création d&rsquo;une classe Admin</h2>
+
+
+
+<p>Dans votre dossier <code>src/Admin</code>, créez un nouveau fichier <code>UploadFileAdmin.php</code>:</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+// src/Admin/UploadFileAdmin.php
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
+
+class UploadFileAdmin extends AbstractAdmin
+{
+    protected $baseRouteName = 'upload_file';
+    protected $baseRoutePattern = 'upload-file';
+
+    protected function configureRoutes(RouteCollectionInterface $collection): void
+    {
+        $collection
+            -&gt;remove('create')
+            -&gt;remove('delete')
+            -&gt;remove('edit')
+            -&gt;remove('export')
+            -&gt;remove('list')
+            -&gt;remove('batch')
+            -&gt;remove('show')
+            -&gt;add('upload');
+    }
+}
+
+</pre></div>
+
+
+<p>Dans cette classe, nous avons supprimé toutes les actions CRUD par défaut de Sonata Admin et ajouté une nouvelle action <code>upload</code>.</p>
+
+
+
+<h2>3. Création d&rsquo;un Controller Admin</h2>
+
+
+
+<p>Dans le dossier <code>src/Controller/Admin</code>, créez un nouveau fichier <code>UploadFileController.php</code>:</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+// src/Admin/UploadFileController.php
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Controller\CRUDController;
+use Symfony\Component\HttpFoundation\Response;
+
+class UploadFileController extends CRUDController
+{
+    public function uploadAction()
+    {
+
+        return $this-&gt;renderWithExtraParams('admin/upload.html.twig', &#91;
+            'title'=&gt; 'Upload de fichier excell'
+        ]
+
+        );
+    }
+}
+
+</pre></div>
+
+
+<p>Dans ce controller, nous avons défini une action <code>upload</code> qui affiche une vue <code>upload.html.twig</code>.</p>
+
+
+
+<h2>4. Création d&rsquo;un template pour l&rsquo;action upload</h2>
+
+
+
+<p>Créez un nouveau fichier <code>templates/admin/upload.html.twig</code>:</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+{# templates/admin/upload.html.twig #}
+
+{% extends '@SonataAdmin/standard_layout.html.twig' %}
+
+{% block title %} - {{ title }}{% endblock %}
+
+{% block breadcrumb %}
+    &lt;li&gt;&lt;a href=&quot;/admin/dashboard&quot;&gt;&lt;i class=&quot;fa fa-home&quot;&gt;&lt;/i&gt;&lt;/a&gt;&lt;/li&gt;
+    &lt;li class=&quot;active&quot;&gt;&lt;span&gt;{{ title }}&lt;/span&gt;&lt;/li&gt;
+{% endblock %}
+
+{% block sonata_page_title %}
+    &lt;h2 class=&quot;sonata-page-title&quot;&gt;
+        {{ title }}
+    &lt;/h2&gt;
+{% endblock %}
+
+{% block sonata_page_content %}
+    &lt;section class=&quot;content&quot;&gt;
+        &lt;div class=&quot;box box-success&quot;&gt;
+            &lt;div class=&quot;box-header with-border&quot;&gt;
+                &lt;h3 class=&quot;box-title&quot;&gt;Contenu supplémentaire&lt;/h3&gt;
+            &lt;/div&gt;
+            &lt;div class=&quot;box-body&quot;&gt;
+                Ici, vous pouvez ajouter du contenu supplémentaire.
+            &lt;/div&gt;
+        &lt;/div&gt;
+    &lt;/section&gt;
+{% endblock %}
+
+</pre></div>
+
+
+<h2>5. Déclaration du service Admin</h2>
+
+
+
+<p>Dans le fichier config/services.yaml, ajoutez la déclaration de votre service admin :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+services:
+    app.admin.upload_file:
+        class: App\Admin\UploadFileAdmin
+        arguments: &#91;~, Symfony\Component\HttpFoundation\File\File, App\Admin\UploadFileController]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: &quot;Contenu&quot;, label: &quot;Upload fichier excell&quot; }
+
+</pre></div>
+
+
+<p>Notez que dans les arguments, nous utilisons Symfony\Component\HttpFoundation\File\File comme placeholder pour l&rsquo;entité. Comme nous n&rsquo;utilisons pas d&rsquo;entité, cela n&rsquo;a pas d&rsquo;importance.</p>
+
+
+
+<h2>6. Configuration de Sonata Admin</h2>
+
+
+
+<p>Pour finir, nous allons ajouter notre nouvel admin au tableau de bord de Sonata Admin. Modifiez le fichier config/packages/sonata_admin.yaml :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+sonata_admin:
+    dashboard:
+        groups:
+            uploads:
+                label: Uploads
+                icon: '&lt;i class=&quot;fa fa-upload&quot;&gt;&lt;/i&gt;'
+                items:
+                    - route: upload_file_upload
+                      label: &quot;Upload fichier excell&quot;
+
+</pre></div>
+
+
+<h2>7. Ajout d&rsquo;une action personnalisée à votre tableau de bord</h2>
+
+
+
+<p>Modifiez votre classe UploadFileAdmin pour inclure la méthode configureDashboardActions :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+// src/Admin/UploadFileAdmin.php
+
+// ...
+
+class UploadFileAdmin extends AbstractAdmin
+{
+    // ...
+
+    protected function configureDashboardActions(array $actions): array
+    {
+        $actions&#91;'upload'] = &#91;
+            'template' =&gt; 'admin/dashboard_upload_action.html.twig',
+            'label'    =&gt; 'Chargement des fichiers',
+            'icon'     =&gt; 'fa-upload',
+            'route'    =&gt; 'upload'
+        ];
+
+        return $actions;
+    }
+}
+</pre></div>
+
+
+<p>Dans cette méthode, nous avons ajouté une action personnalisée upload à notre tableau de bord.</p>
+
+
+
+<h2>8. Création du template pour l&rsquo;action personnalisée</h2>
+
+
+
+<p>Créez un nouveau fichier templates/admin/dashboard_upload_action.html.twig :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;a class=&quot;btn btn-link btn-flat&quot; href=&quot;{{ admin.generateUrl(action.route) }}&quot;&gt;
+    &lt;i class=&quot;fas {{ action.icon | default('')}}&quot;&gt;&lt;/i&gt;
+    {{ action.label | default('') | trans({}, 'default') }}
+&lt;/a&gt;
+
+</pre></div>
+
+
+<p>Ce template sera utilisé pour afficher le bouton d&rsquo;action personnalisée sur le tableau de bord.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.my_website.com/wp-content/uploads/2023/06/Selection_018.png"><img decoding="async" loading="lazy" width="1024" height="411" src="https://www.my_website.com/wp-content/uploads/2023/06/Selection_018-1024x411.png" alt="" class="wp-image-2715" srcset="https://www.my_website.com/wp-content/uploads/2023/06/Selection_018-1024x411.png 1024w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_018-300x120.png 300w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_018-768x308.png 768w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_018-800x321.png 800w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_018-550x221.png 550w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_018.png 1069w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Maintenant, lorsque vous naviguez vers <code>/admin/dashboard</code>, vous devriez voir un nouveau bouton « Chargement des fichiers » sur votre tableau de bord. En cliquant sur ce bouton, vous devriez être redirigé vers votre page d&rsquo;upload.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.my_website.com/wp-content/uploads/2023/06/Selection_017.png"><img decoding="async" loading="lazy" width="1024" height="552" src="https://www.my_website.com/wp-content/uploads/2023/06/Selection_017-1024x552.png" alt="" class="wp-image-2716" srcset="https://www.my_website.com/wp-content/uploads/2023/06/Selection_017-1024x552.png 1024w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_017-300x162.png 300w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_017-768x414.png 768w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_017-800x431.png 800w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_017-550x296.png 550w, https://www.my_website.com/wp-content/uploads/2023/06/Selection_017.png 1076w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Et voilà ! Vous avez réussi à créer un panel d&rsquo;administration sans entité dans Sonata Admin. Cela peut être très utile pour ajouter des fonctionnalités personnalisées à votre panel d&rsquo;admin.</p>

@@ -1,0 +1,262 @@
+<p>Pour utiliser une table différente de celle par défaut pour l&rsquo;authentification,</p>
+<p>Il faut d’abords créer notre entity qui va gérer nos utilisateurs.</p>
+<p>Cette entity doit ensuite être implémenté à UserInterface.</p>
+<p>Il faut donc ajouter un référence au composant et l&rsquo;implémenter :</p>
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Entity;
+
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Index;
+use Symfony\Component\Security\Core\User\UserInterface;
+
+/**
+ * @ORM\Entity(repositoryClass=&quot;App\Repository\WcoconRepository&quot;)
+ * @Table(name=&quot;wcocon&quot;)
+ */
+class Wcocon implements UserInterface
+{
+</pre></div>
+
+
+<p>Maintenant que l&rsquo;entity est un implément de userInterface, il faut ajouter les méthodes de l&rsquo;implémentation.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    
+    /*Authentication méthods implements interface User*/
+    public function getRoles(){
+        return &#91;'ROLE_USER'];
+    }
+    
+
+    public function getPassword(){
+        return $this-&gt;getWcoPassword();
+    }
+
+    public function getSalt() {
+        return false;
+    }
+    
+
+    public function getUsername(){
+        return $this-&gt;getWcoDossier();
+    }
+    
+
+    public function eraseCredentials(){
+        
+    }
+    
+</pre></div>
+
+
+<p>La fonction getRoles par défaut devra renvoyer un tableau des rôles. Ici &lsquo;ROLE_USER&rsquo; mais on pourrais  ajouter une logique plus complexe ici.<br><br>Ensuite il faut créer le controller qui va gérer notre authentification.<br>Via les commandes CLI il suffit de lancer : php bin/console make:controller <br>Et de créer notre SecurityController.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="669" height="252" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_038.png" alt="" class="wp-image-385" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_038.png 669w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_038-300x113.png 300w" sizes="(max-width: 669px) 100vw, 669px" /></figure>
+
+
+
+<p> Dans notre base.html.twig (/templates/base.html.twig), nous allons créer un block login, qui nous servira de placeholder pour notre formulaire</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+    &lt;head&gt;
+        &lt;meta charset=&quot;UTF-8&quot;&gt;
+        &lt;title&gt;{% block title %}Welcome!{% endblock %}&lt;/title&gt;
+        &lt;link href=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot; integrity=&quot;sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh&quot; crossorigin=&quot;anonymous&quot;&gt;
+        &lt;script src=&quot;https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.bundle.min.js&quot; integrity=&quot;sha384-6khuMg9gaYr5AxOqhkVIODVIvm9ynTT5J4V1cfthmT+emCG6yVmEZsRHdxlotUnm&quot; crossorigin=&quot;anonymous&quot;&gt;&lt;/script&gt;
+        {% block stylesheets %}{% endblock %}
+    &lt;/head&gt;
+    &lt;body&gt;
+    
+        &lt;div class=&quot;container&quot;&gt;
+          &lt;div class=&quot;row&quot;&gt;
+            &lt;div class=&quot;col-sm-3&quot;&gt;
+                {% block login %}{% endblock %}
+            &lt;/div&gt;
+            &lt;div class=&quot;col-sm-9&quot;&gt; 
+                {% block body %}{% endblock %}
+            &lt;/div&gt;
+        
+          &lt;/div&gt;
+        &lt;/div&gt;    
+        {% block javascripts %}{% endblock %}
+    &lt;/body&gt;
+&lt;/html&gt;
+
+</pre></div>
+
+
+<p>Et nous allons créer notre template de formulaire de login dans /var/www/cfc/delef/templates/security/login.html.twig.<br>Celui-ci étant une extention de notre base html et pour notre block login :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{% extends 'base.html.twig' %}
+
+{% block login %}
+	&lt;h1&gt;Connexion !&lt;/h1&gt;
+	&lt;form action=&quot;{{ path('security_login') }}&quot; method=&quot;post&quot;&gt;
+    	&lt;div class=&quot;form-group&quot;&gt;
+    		&lt;input placeholder=&quot;N° de dosser&quot; 	required name=&quot;_username&quot; type=&quot;text&quot; 		class=&quot;form-control&quot;&gt;
+    	&lt;div class=&quot;form-group&quot;&gt;
+    	&lt;/div&gt;
+    		&lt;input placeholder=&quot;password&quot; 		required name=&quot;_password&quot; type=&quot;password&quot; 	class=&quot;form-control&quot;&gt;
+    	&lt;/div&gt;
+    	&lt;div class=&quot;form-group&quot;&gt;
+    		&lt;button type=&quot;submit&quot; class=&quot;btn btn-success&quot;&gt;Connexion&lt;/button&gt;
+    	&lt;/div&gt;
+	&lt;/form&gt;
+{% endblock %}
+</pre></div>
+
+
+<p>A ce stade nous avons le rendu suivant :</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="374" height="282" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_040.png" alt="" class="wp-image-390" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_040.png 374w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_040-300x226.png 300w" sizes="(max-width: 374px) 100vw, 374px" /></figure>
+
+
+
+<p>Attention, le formulaire de login doit contenir les champs _username et _password.</p>
+
+
+
+<p>Il faut ensuite configurer l&rsquo;encoder, puis le provider, et le firwall.<br>Notez que l&rsquo;encoder pour du plain text est « plaintext ». il faudrait pour bien faire plutôt utiliser du bcrypt ou un autre sha.<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+security:
+    encoders:
+        App\Entity\Wcocon:
+            algorithm: plaintext
+    providers:
+        frontend_users:
+            entity:
+              class: App\Entity\Wcocon
+              property: wco_dossier
+    firewalls:
+        main:
+            anonymous: true
+            provider: frontend_users
+            form_login:
+                login_path: security_login
+                check_path: security_login
+</pre></div>
+
+
+<p>Le fichier entier donne ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+security:
+    # https://symfony.com/doc/current/security.html#where-do-users-come-from-user-providers
+    encoders:
+        FOS\UserBundle\Model\UserInterface: bcrypt
+        App\Entity\Wcocon:
+            algorithm: plaintext
+    providers:
+        in_memory: { memory: null }
+        fos_userbundle:
+            id: fos_user.user_provider.username
+        frontend_users:
+            entity:
+              class: App\Entity\Wcocon
+              property: wco_dossier
+        
+
+
+
+    firewalls:
+        # Disabling the security for the web debug toolbar, the profiler and Assetic.
+        dev:
+            pattern:  ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        # -&gt; custom firewall for the admin area of the URL
+        admin:
+            pattern:            /admin(.*)
+            context:            user
+            form_login:
+                provider:       fos_userbundle
+                login_path:     /admin/login
+                use_forward:    false
+                check_path:     /admin/login_check
+                failure_path:   null
+            logout:
+                path:           /admin/logout
+                target:         /admin/login
+            anonymous:          true
+
+        # -&gt; end custom configuration
+
+        # default login area for standard users
+
+        # This firewall is used to handle the public login area
+        # This part is handled by the FOS User Bundle
+        main:
+            anonymous: true
+            provider: frontend_users
+            form_login:
+                login_path: security_login
+                check_path: security_login
+            
+    # Easy way to control access for large sections of your site
+    # Note: Only the *first* access control that matches will be used
+    access_control:
+        # Admin login page needs to be accessed without credential
+        - { path: ^/admin/login$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/logout$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/login_check$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/admin/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
+
+        # Secured part of the site
+        # This config requires being logged for the whole site and having the admin role for the admin part.
+        # Change these rules to adapt them to your needs
+        - { path: ^/admin/, role: &#91;ROLE_ADMIN, ROLE_SONATA_ADMIN, ROLE_SUPER_ADMIN] }
+        - { path: ^/.*, role: IS_AUTHENTICATED_ANONYMOUSLY }
+</pre></div>
+
+
+<p>Il nous faut ensuite configurer notre url de logout.<br>Pour cela, nous devons rajouter une route dans notre controller, et l&rsquo;enregistrer dans la configuration.<br><br>Dans le controller ajouter la méthode : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    /**
+     * @Route(&quot;/deconnexion&quot;, name=&quot;security_logout&quot;)
+     */    
+    public function logout(){}
+</pre></div>
+
+
+<p>Et dans la configuration :<br>Path fait référence à la route, et target permet de donner une url de redirection une fois l&rsquo;authentification resetté.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+        main:
+            anonymous: true
+            provider: frontend_users
+            form_login:
+                login_path: security_login
+                check_path: security_login
+            logout:
+                path: security_logout
+                target: /
+</pre></div>
+
+
+<p></p>

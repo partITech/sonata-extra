@@ -1,0 +1,35 @@
+<p>Pour ajouter une cron et la rendre accessible dans le shell il faut d&rsquo;abords configurer votre environnement pour qu&rsquo;il puisse pointer sur les librairies.</p>
+<p>Etape 1 : Ajouter le script zf dans le repertoir /usr/bin/  ( zf.sh et zf.php )<br />
+Ces fichiers sont disponible dans le répertoire bin de la librairie ZendFramwork 1.x. Vous pouvez soit les copier, soit en faire un lien symbolique.</p>
+<p>Étape 2 : configurer votre bash pour qu&rsquo;il puisse reconnaitre l&rsquo;alias zf.<br />
+Éditez le fichier ~/.bashrc et insérez la ligne suivante</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+alias zf=&quot;/usr/bin/zf.sh&quot;
+</pre>
+<p>Étape 3 : Ajouter la variable globale ZEND_TOOL_INCLUDE_PATH dans votre bash. Celle-ci permettra au script zf.sh de trouver la librairie zend<br />
+Editez le fichier ~/.bashrc et insérez la ligne suivante</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+ZEND_TOOL_INCLUDE_PATH=/var/www/monProjet/library/Zend
+</pre>
+<p>Étape 4 : Faire le squelette de votre tache cli.<br />
+Voici comment MOI je les implémentes. Bien entendu, vous ete libres de placer votre fichier ou bon vous semble ! Zend est assez souple pour pouvoir être configuré/adapté de différentes manières.<br />
+Dans cet exemple nous avons configuré une librairie dédié pour notre projet que nous avons appelé foo, et placé l&rsquo;ensemble de nos fichiers CLI dans un répertoir « Cronjobs ».<br />
+Notre fichier devras donc être placé dans le répertoire : /var/www/monProjet/library/Foo/Cronjobs/MytaskProvider.php<br />
+Notre tache s&rsquo;appellera « Mytask » et l&rsquo;action de celle-ci sera « doit ».</p>
+<pre class="brush: php; title: ; notranslate" title="">
+class Foo_Cronjobs_MytaskProvider extends Zend_Tool_Framework_Provider_Abstract
+{
+public function DoitCronjobs()
+{
+echo &quot;Hello World !&quot;;
+}
+}
+</pre>
+<p>L&rsquo;ensemble des function public seront ensuite disponible en tant que tache distinctes.</p>
+<p>Étape 5 : Enregistrez votre tache pour qu&rsquo;elle soit accessible depuis la liste des commandes de Zend.<br />
+Editez le fichier ~/.zf.ini et insérez la ligne suivante</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+php.include_path = &quot;/var/www/monProjet/library/:.:/usr/share/php:/usr/share/pear&quot;
+basicloader.classes.21 = &quot;Foo_Cronjobs_MytaskProvider&quot;
+</pre>
+<p>Pour ajouter une nouvelle tache, il suffit d&rsquo;incrémenter la classe (ici 21, donc passez a 22 .. et ainsi de suite).</p>

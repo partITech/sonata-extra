@@ -1,0 +1,9 @@
+<td>
+{% if object.seoOgImage %}
+    {% set media = object.seoOgImage %}
+    {% set mediaPublicUrl = sonata_media.pool.getProvider(media.providerName).generatePublicUrl(media, 'reference') %}
+    <img src="{{ mediaPublicUrl }}" alt="{{ media.name }}" width="100">
+{% else %}
+    <span class="text-muted"></span>
+{% endif %}
+</td>

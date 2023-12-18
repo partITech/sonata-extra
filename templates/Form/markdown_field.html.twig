@@ -1,0 +1,124 @@
+{% block markdown_widget %}
+
+
+    {% for stylesheet in markdown_assets.css %}
+        <link rel="stylesheet" href="{{ asset(stylesheet) }}">
+    {% endfor %}
+
+<div id="{{ form.vars.id }}-editor-container">
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+    <div id="editor-container">
+
+    {% for script in markdown_assets.js %}
+        <script src="{{ asset(script) }}"></script>
+    {% endfor %}
+
+    <script>
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const defaultToolbar = EasyMDE.prototype.toolbar;
+
+
+
+            var easyMDE = new EasyMDE({
+                renderingConfig: {
+                    singleLineBreaks: false,
+                    codeSyntaxHighlighting: true,
+                },
+                autoDownloadFontAwesome: false,
+                element: document.getElementById('{{ form.vars.id }}') ,
+                showIcons: ["code", "table", "ordered-list", "heading", "heading-smaller", "heading-bigger", "ordered-list"],
+                spellChecker: false,
+                uploadImage: true,
+                imageUploadEndpoint :'{{ path('sonata_extra_eme_media_upload', {'context': 'default'}) }}',
+                toolbar:[
+                    'bold',
+                    'italic',
+                    'strikethrough',
+                    {
+                        name: "heading",
+                        className: "fa fa-header",
+                        title: "heading",
+                        children: [
+                            'heading',
+                            'heading-1',
+                            'heading-2',
+                            'heading-3',
+                        ]
+                    },
+                    'heading-smaller',
+                    'heading-bigger',
+
+                    'code',
+                    'quote',
+                    'unordered-list',
+                    'ordered-list',
+                    'clean-block',
+                    'link',
+                    {
+                        name: "Medias",
+                        className: "fa fa-picture-o",
+                        title: "Médias",
+                        children: [
+                            {
+                                name: "mediaGallery",
+                                action: function customFunction(editor) {
+                                    const widthPercent = 90;
+                                    const heightPercent = 80;
+
+                                    const width = screen.width * (widthPercent / 100);
+                                    const height = screen.height * (heightPercent / 100);
+
+                                    const left = (screen.width - width) / 2;
+                                    const top = (screen.height - height) / 2;
+                                    window.open('{{ path('sonata_extra_ckeditor_media_browser', {'CKEditorFuncNum': 'update_link'}) }}', 'MediaGallery', `width=${width},height=${height},left=${left},top=${top}`);
+                                },
+                                className: "fa fa-crosshairs title-text", // Utilisez une icône appropriée
+                                title: "Galerie",
+                            },
+                            {
+                                name: "image",
+                                action: editor => EasyMDE.drawImage(editor),
+                                className: "fa fa-picture-o title-text",
+                                title: "Image",
+                            },
+                            {
+                                name: "upload-image",
+                                action: EasyMDE.drawUploadedImage,
+                                className: "fa fa-upload title-text",
+                                title: "Upload",
+                            },
+                        ]
+                    },
+                    'upload-image', // workaround (to get the dropdown on working)
+                    'table',
+                    'horizontal-rule',
+                    'preview',
+                    'side-by-side',
+                    'fullscreen',
+                    'guide',
+                    'undo',
+                    'redo',
+
+
+                ]
+            });
+
+            window.updateLink = function(url) {
+                const cm = easyMDE.codemirror;
+                const markdownImageText = `![Image](${url})`;
+                cm.replaceSelection(markdownImageText);
+                window.close();
+            }
+            $('.upload-image:eq(1)').hide();
+        });
+
+    </script>
+<style>
+    .editor-toolbar.fullscreen, .editor-toolbar.fullscreen, .CodeMirror-fullscreen{
+        z-index: 9000 !important;
+    }
+</style>
+    </div>
+</div>
+{% endblock %}

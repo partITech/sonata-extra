@@ -1,0 +1,325 @@
+
+<p>Voici une liste de forms types comums utilisés dans les interfaces d&rsquo;admin.</p>
+
+
+
+<h2>Date time picker</h2>
+
+
+
+Ajouter le template dans le fichier config/packages/twig.yaml </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+twig:
+    form_themes:
+        - '@SonataCore/Form/datepicker.html.twig'
+</pre></div>
+
+
+<p>Et dans le controller :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+            $formMapper-&gt;with('Date d\'activation', &#91;'class' =&gt; 'col-md-4 abcdaire'])
+                -&gt;add('activation_debut', DatePickerType::class, &#91;'required' =&gt; false,  'label'=&gt;'Activation début','attr' =&gt; &#91;'placeholder' =&gt; '']])
+                -&gt;add('activation_fin', DatePickerType::class, &#91;'required' =&gt; false,  'label'=&gt;'Activation fin','attr' =&gt; &#91;'placeholder' =&gt; '']])
+            -&gt;end();
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="533" height="482" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_071.png" alt="" class="wp-image-397" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_071.png 533w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_071-300x271.png 300w" sizes="(max-width: 533px) 100vw, 533px" /></figure>
+
+
+
+<h2>Html Area</h2>
+
+
+
+<p>Il faut installer le bundle formatter :<br>https://sonata-project.org/bundles/formatter/3-x/doc/reference/installation.html<br><br>Ajouter une configuration dans le composer.json</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    &quot;replace&quot;: {
+        &quot;egeloen/ckeditor-bundle&quot;: &quot;*&quot;
+    },
+</pre></div>
+
+
+<p>Creer le fichier de configuration /config/sonata_formatter.yml avec le contenu suivant : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_formatter:
+    default_formatter: richhtml
+    formatters:
+        markdown:
+            service: sonata.formatter.text.markdown
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig #keep this commented unless you are using media bundle.
+
+
+        text:
+            service: sonata.formatter.text.text
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig
+
+
+        rawhtml:
+            service: sonata.formatter.text.raw
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig
+
+
+        richhtml:
+            service: sonata.formatter.text.raw
+            extensions:
+                - sonata.formatter.twig.control_flow
+                - sonata.formatter.twig.gist
+        #        - sonata.media.formatter.twig
+
+
+        twig:
+            service: sonata.formatter.text.twigengine
+            extensions: &#91;] # Twig formatter cannot have extensions
+            
+    ckeditor:
+        templates:
+            browser: 'CaueEdpBundle:Ckeditor:browser.html.twig'
+            upload: 'CaueEdpBundle:Ckeditor:upload.html.twig'
+            
+            
+fos_ck_editor:
+    default_config: default
+    configs:
+        default:
+            # default toolbar plus Format button
+            toolbar:
+            - &#91;Bold, Italic, Underline, -, 'JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock' ,-, Cut, Copy, Paste, PasteText, PasteFromWord, -, Undo, Redo, -, NumberedList, BulletedList, -, Outdent, Indent, -,Blockquote, -, Image, Link, Unlink, Table]
+            - &#91;Format, Maximize, Source, Iframe]
+
+               
+</pre></div>
+
+
+<p>Dans config/sonata_admin.yaml ajoutez les css et js</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_admin:
+       &#91;...]                      
+    assets:
+        extra_stylesheets:
+            - bundles/sonataformatter/markitup/skins/sonata/style.css
+            - bundles/sonataformatter/markitup/sets/markdown/style.css
+            - bundles/sonataformatter/markitup/sets/html/style.css
+            - bundles/sonataformatter/markitup/sets/textile/style.css
+        extra_javascripts:
+            - bundles/fosckeditor/ckeditor.js
+            - bundles/sonataformatter/vendor/markitup-markitup/markitup/jquery.markitup.js
+            - bundles/sonataformatter/markitup/sets/markdown/set.js
+            - bundles/sonataformatter/markitup/sets/html/set.js
+            - bundles/sonataformatter/markitup/sets/textile/set.js
+</pre></div>
+
+
+<p>Dans config/twig.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+twig:
+&#91;..]
+    form_themes:
+        - '@SonataFormatter/Form/formatter.html.twig'
+</pre></div>
+
+
+<p>Lancez les commandes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require sonata-project/formatter-bundle
+composer dump-autoload
+php bin/console assets:install public
+php bin/console ckeditor:install
+</pre></div>
+
+
+<p>Et dans votre controller : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use Sonata\FormatterBundle\Form\Type\SimpleFormatterType;
+
+                $formMapper-&gt;add('introduction', SimpleFormatterType::class, &#91;
+                    'format' =&gt; 'richhtml',
+                    'ckeditor_context' =&gt; 'default',
+                    'required' =&gt; false,  'label'=&gt;'Introduction','attr' =&gt; &#91;'placeholder' =&gt; '']]);
+
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="317" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_072-1024x317.png" alt="" class="wp-image-400" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_072-1024x317.png 1024w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_072-300x93.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_072-768x238.png 768w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_072.png 1044w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<h2>Checkbox (boolean)</h2>
+
+
+
+<p>Il faudra configurer le champs en boolean dans l&rsquo;entity</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    /**
+     * @var int
+     *
+     * @ORM\Column(name=&quot;actif&quot;, type=&quot;boolean&quot;, nullable=false)
+     */
+    private $actif = '0';
+
+    public function getActif(): ?bool
+    {
+        return $this-&gt;actif;
+    }
+
+    public function setActif(bool $actif): self
+    {
+        $this-&gt;actif = $actif;
+
+        return $this;
+    }
+</pre></div>
+
+
+<p>Et utiliser la configuration suivante pour le formulaire</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
+
+$formMapper-&gt;with('Status', &#91;'class' =&gt; 'col-md-4 abcdaire'])
+     -&gt;add('actif', CheckboxType::class, &#91;'required' =&gt; false])
+&gt;end();
+</pre></div>
+
+
+<p>Et pour afficher un bouton on/off dans la liste</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+protected function configureListFields(ListMapper $listMapper)
+{
+		$listMapper-&gt;add('actif', null, &#91;'editable' =&gt; true])
+}
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="525" height="155" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_075.png" alt="" class="wp-image-410" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_075.png 525w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_075-300x89.png 300w" sizes="(max-width: 525px) 100vw, 525px" /></figure>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="932" height="205" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_077.png" alt="" class="wp-image-409" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_077.png 932w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_077-300x66.png 300w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_077-768x169.png 768w" sizes="(max-width: 932px) 100vw, 932px" /></figure>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+Et pour finir les filtres
+</pre></div>
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+$datagridMapper-&gt;add('actif', null, &#91;'label'=&gt;'PRIX'])
+</pre></div>
+
+
+<h2>Listbox</h2>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+
+-&gt;add('etape', ChoiceType::class, &#91;
+                        'choices' =&gt; array(
+                            'coordonnees' =&gt; 'coordonnees',
+                            'declaration' =&gt; 'declaration',
+                        ),
+                        'placeholder' =&gt; 'Selection du champs',
+                        'required' =&gt; false,
+                        'label' =&gt; 'Destination du champs'
+                    ])
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="517" height="165" src="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_079.png" alt="" class="wp-image-413" srcset="https://www.partitech.com/wp-content/uploads/2020/02/Sélection_079.png 517w, https://www.partitech.com/wp-content/uploads/2020/02/Sélection_079-300x96.png 300w" sizes="(max-width: 517px) 100vw, 517px" /></figure>
+
+
+
+<p>Il est a noter que les listes comprennent un champs de recherche automatique au delà de 25 éléments.<br>Il n&rsquo;est pas possible de le supprimer, sauf à surcharger la fonction d&rsquo;initialisation. <br>Pour cela nous allons ajouter un fichier js à notre admin dans sonata_admin.yml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_admin:
+    assets:
+        extra_javascripts:
+            - js/admin.js
+</pre></div>
+
+
+<p>Nous allons ajouter une fonction à l&rsquo;identique que l&rsquo;original de l&rsquo;initialisation de la librairie select2 dans Sonata mais avec un paramétrage différent.<br>Au lieux de minimumResultsForSearch: 25 on va le mettre à 100000, comme cela, la recherche se déclenchera pas pour nos listes de moins de 100k (en gros, toutes nos listes).<br>Et dans notre initialisation de liste, nous allons ajouter une classe css pour pointer dessus.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; highlight: [22]; title: ; notranslate" title="">
+jQuery(document).ready(function() {
+jQuery('select.select2-search-hidden, .select2-search-hidden select').each(function() {
+        var select            = jQuery(this);
+        var allowClearEnabled = false;
+        var popover           = select.data('popover');
+
+        select.removeClass('form-control');
+
+        if (select.find('option&#91;value=&quot;&quot;]').length || select.attr('data-sonata-select2-allow-clear')==='true') {
+            allowClearEnabled = true;
+        } else if (select.attr('data-sonata-select2-allow-clear')==='false') {
+            allowClearEnabled = false;
+        }
+
+        select.select2({
+            width: function(){
+                // Select2 v3 and v4 BC. If window.Select2 is defined, then the v3 is installed.
+                // NEXT_MAJOR: Remove Select2 v3 support.
+                return Admin.get_select2_width(window.Select2 ? this.element : select);
+            },
+            dropdownAutoWidth: true,
+            minimumResultsForSearch: 100000,
+            allowClear: allowClearEnabled
+        });
+
+        if (undefined !== popover) {
+            select
+                .select2('container')
+                .popover(popover.options)
+            ;
+        }
+    });
+
+});
+
+</pre></div>
+
+
+<p>Et notre champs avec la classe « select2-search-hidden » :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+-&gt;add('numberStudent', ChoiceType::class, &#91;
+                         'label' =&gt; 'Nombre maximum d\'élèves par classe',
+                         'choices' =&gt; array_combine(range(5,50), range(5,50)),
+                         'placeholder' =&gt; '',
+                         'attr' =&gt; &#91;'class' =&gt; 'select2-search-hidden']
+                     ])
+</pre></div>

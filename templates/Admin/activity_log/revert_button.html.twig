@@ -1,0 +1,5 @@
+{% if object.actionType == 'update' %}
+    <a href="{{ admin.generateUrl('revert', { 'id': object.id })  }}" class="btn btn-sm btn-warning" onclick="return confirm('{{ 'sonata-extra.approve.cancel_modification'|trans({}, 'PartitechSonataExtraBundle') }}');">
+        {{ 'sonata-extra.approve.cancel_modification_btn'|trans({}, 'PartitechSonataExtraBundle') }}
+    </a>
+{% endif %}

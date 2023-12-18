@@ -1,0 +1,367 @@
+
+<p>Avec Stéphane Péchard&nbsp;<a href="https://www.linkedin.com/in/stephanepechard/" target="_blank" rel="noreferrer noopener">https://www.linkedin.com/in/stephanepechard/</a>,&nbsp;expert Android et guru KMP, on s’est demandé si développer un algorithme sous KMP et l&rsquo;exécuter directement en PHP serait réalisable.&nbsp;<br>Le cahier des charges était simple :&nbsp;le dev Android (Stéphane donc) me fournit un header file,&nbsp;un&nbsp;.so et je me débrouille.&nbsp;<br>Avec le header file,&nbsp;le contrat,&nbsp;à priori on devrait arriver à quelque chose…&nbsp;Alors on a réussi à faire notre appel de fonction.&nbsp;Mais en toute franchise j&rsquo;ai tout de même pas mal galéré avant d&rsquo;y arriver.</p>
+
+
+
+<p>Voici le fichier header fourni :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c line-numbers">#ifndef KONAN_LIBALGOBSCURE_H
+#define KONAN_LIBALGOBSCURE_H
+#ifdef __cplusplus
+extern "C" {
+#endif
+#ifdef __cplusplus
+typedef bool            libalgobscure_KBoolean;
+#else
+typedef _Bool           libalgobscure_KBoolean;
+#endif
+typedef unsigned short     libalgobscure_KChar;
+typedef signed char        libalgobscure_KByte;
+typedef short              libalgobscure_KShort;
+typedef int                libalgobscure_KInt;
+typedef long long          libalgobscure_KLong;
+typedef unsigned char      libalgobscure_KUByte;
+typedef unsigned short     libalgobscure_KUShort;
+typedef unsigned int       libalgobscure_KUInt;
+typedef unsigned long long libalgobscure_KULong;
+typedef float              libalgobscure_KFloat;
+typedef double             libalgobscure_KDouble;
+typedef float __attribute__ ((__vector_size__ (16))) libalgobscure_KVector128;
+typedef void*              libalgobscure_KNativePtr;
+struct libalgobscure_KType;
+typedef struct libalgobscure_KType libalgobscure_KType;
+
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Byte;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Short;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Int;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Long;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Float;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Double;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Char;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Boolean;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Unit;
+
+
+typedef struct {
+  /* Service functions. */
+  void (*DisposeStablePointer)(libalgobscure_KNativePtr ptr);
+  void (*DisposeString)(const char* string);
+  libalgobscure_KBoolean (*IsInstance)(libalgobscure_KNativePtr ref, const libalgobscure_KType* type);
+  libalgobscure_kref_kotlin_Byte (*createNullableByte)(libalgobscure_KByte);
+  libalgobscure_kref_kotlin_Short (*createNullableShort)(libalgobscure_KShort);
+  libalgobscure_kref_kotlin_Int (*createNullableInt)(libalgobscure_KInt);
+  libalgobscure_kref_kotlin_Long (*createNullableLong)(libalgobscure_KLong);
+  libalgobscure_kref_kotlin_Float (*createNullableFloat)(libalgobscure_KFloat);
+  libalgobscure_kref_kotlin_Double (*createNullableDouble)(libalgobscure_KDouble);
+  libalgobscure_kref_kotlin_Char (*createNullableChar)(libalgobscure_KChar);
+  libalgobscure_kref_kotlin_Boolean (*createNullableBoolean)(libalgobscure_KBoolean);
+  libalgobscure_kref_kotlin_Unit (*createNullableUnit)(void);
+
+  /* User functions. */
+  struct {
+    struct {
+      libalgobscure_KLong (*factoriel)(libalgobscure_KLong n);
+      libalgobscure_KLong (*fibonacci)(libalgobscure_KLong n);
+      void (*main)();
+    } root;
+  } kotlin;
+} libalgobscure_ExportedSymbols;
+extern libalgobscure_ExportedSymbols* libalgobscure_symbols(void);
+#ifdef __cplusplus
+}  /* extern "C" */
+#endif
+#endif  /* KONAN_LIBALGOBSCURE_H */</code></pre>
+
+
+
+<p>Mauvaise surprise, le header faisait planter PHP &#x1f642; En nettoyant un peu on arrive à ce contenu :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c line-numbers">#define FFI_LIB "./linuxX64/releaseShared/libalgobscure.so"
+
+typedef bool            libalgobscure_KBoolean;
+typedef unsigned short     libalgobscure_KChar;
+typedef signed char        libalgobscure_KByte;
+typedef short              libalgobscure_KShort;
+typedef int                libalgobscure_KInt;
+typedef long long          libalgobscure_KLong;
+typedef unsigned char      libalgobscure_KUByte;
+typedef unsigned short     libalgobscure_KUShort;
+typedef unsigned int       libalgobscure_KUInt;
+typedef unsigned long long libalgobscure_KULong;
+typedef float              libalgobscure_KFloat;
+typedef double             libalgobscure_KDouble;
+typedef float   libalgobscure_KVector128;
+typedef void*              libalgobscure_KNativePtr;
+struct libalgobscure_KType;
+typedef struct libalgobscure_KType libalgobscure_KType;
+
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Byte;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Short;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Int;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Long;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Float;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Double;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Char;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Boolean;
+typedef struct {
+  libalgobscure_KNativePtr pinned;
+} libalgobscure_kref_kotlin_Unit;
+
+
+typedef struct {
+  /* Service functions. */
+  void (*DisposeStablePointer)(libalgobscure_KNativePtr ptr);
+  void (*DisposeString)(const char* string);
+  libalgobscure_KBoolean (*IsInstance)(libalgobscure_KNativePtr ref, const libalgobscure_KType* type);
+  libalgobscure_kref_kotlin_Byte (*createNullableByte)(libalgobscure_KByte);
+  libalgobscure_kref_kotlin_Short (*createNullableShort)(libalgobscure_KShort);
+  libalgobscure_kref_kotlin_Int (*createNullableInt)(libalgobscure_KInt);
+  libalgobscure_kref_kotlin_Long (*createNullableLong)(libalgobscure_KLong);
+  libalgobscure_kref_kotlin_Float (*createNullableFloat)(libalgobscure_KFloat);
+  libalgobscure_kref_kotlin_Double (*createNullableDouble)(libalgobscure_KDouble);
+  libalgobscure_kref_kotlin_Char (*createNullableChar)(libalgobscure_KChar);
+  libalgobscure_kref_kotlin_Boolean (*createNullableBoolean)(libalgobscure_KBoolean);
+  libalgobscure_kref_kotlin_Unit (*createNullableUnit)(void);
+
+  /* User functions. */
+  struct {
+    struct {
+      libalgobscure_KLong (*factoriel)(libalgobscure_KLong n);
+      libalgobscure_KLong (*fibonacci)(libalgobscure_KLong n);
+      void (*main)();
+    } root;
+  } kotlin;
+} libalgobscure_ExportedSymbols;
+
+extern libalgobscure_ExportedSymbols* libalgobscure_symbols(void);</code></pre>
+
+
+
+<p>Pour mieux saisir les arguments du header qui ne sont pas compatibles voici le diff. Ce n&rsquo;est pas très compliqué de faire le nettoyage finalement.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/11/image.png"><img decoding="async" loading="lazy" width="1024" height="256" src="https://www.partitech.com/wp-content/uploads/2022/11/image-1024x256.png" alt="" class="wp-image-2016" srcset="https://www.partitech.com/wp-content/uploads/2022/11/image-1024x256.png 1024w, https://www.partitech.com/wp-content/uploads/2022/11/image-300x75.png 300w, https://www.partitech.com/wp-content/uploads/2022/11/image-768x192.png 768w, https://www.partitech.com/wp-content/uploads/2022/11/image-1536x384.png 1536w, https://www.partitech.com/wp-content/uploads/2022/11/image-1440x360.png 1440w, https://www.partitech.com/wp-content/uploads/2022/11/image-800x200.png 800w, https://www.partitech.com/wp-content/uploads/2022/11/image-550x137.png 550w, https://www.partitech.com/wp-content/uploads/2022/11/image.png 1665w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/11/image-1.png"><img decoding="async" loading="lazy" width="1024" height="102" src="https://www.partitech.com/wp-content/uploads/2022/11/image-1-1024x102.png" alt="" class="wp-image-2017" srcset="https://www.partitech.com/wp-content/uploads/2022/11/image-1-1024x102.png 1024w, https://www.partitech.com/wp-content/uploads/2022/11/image-1-300x30.png 300w, https://www.partitech.com/wp-content/uploads/2022/11/image-1-768x76.png 768w, https://www.partitech.com/wp-content/uploads/2022/11/image-1-1536x153.png 1536w, https://www.partitech.com/wp-content/uploads/2022/11/image-1-1440x143.png 1440w, https://www.partitech.com/wp-content/uploads/2022/11/image-1-800x80.png 800w, https://www.partitech.com/wp-content/uploads/2022/11/image-1-550x55.png 550w, https://www.partitech.com/wp-content/uploads/2022/11/image-1.png 1680w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Grosso modo,&nbsp;KMP nous exporte une fonction qui nous fournit <strong>une structure&nbsp;-&gt;&nbsp;dans une structure&nbsp;-&gt;&nbsp;dans une structure</strong> avec deux pointeurs sur fonction :&nbsp;<strong>factoriel</strong> et <strong>fibonacci</strong>.</p>
+
+
+
+<p>L’astuce pour accéder aux fonctions est de remonter dans les structures :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">$ffi = FFI::load(__DIR__ . '/kmp.h');
+// On vient chercher la methode libalgobscure_symbols()
+// qui nous renvoie une structure libalgobscure_ExportedSymbols
+$libalgobscure = $ffi-&gt;libalgobscure_symbols();
+// ensuite on remonte le fil et on récupère l'adresse de nos fonction : 
+$factoriel = FFI::addr($libalgobscure-&gt;kotlin-&gt;root-&gt;factoriel)[0];
+$fibonacci = FFI::addr($libalgobscure-&gt;kotlin-&gt;root-&gt;fibonacci)[0];
+
+// Et on peut exécuter directement notre fonction anonyme : 
+$factoriel(5)</code></pre>
+
+
+
+<p>Voici le code complet :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php line-numbers">#!/usr/bin/php8.1
+&lt;?php
+opcache_reset();
+$ffi = FFI::load(__DIR__ . '/kmp.h');
+$libalgobscure = $ffi-&gt;libalgobscure_symbols();
+$factoriel = FFI::addr($libalgobscure-&gt;kotlin-&gt;root-&gt;factoriel)[0];
+echo "factoriel 5 = ";
+var_dump($factoriel(5));
+
+echo "factoriel 12 = ";
+var_dump($factoriel(12));
+
+$fibonacci = FFI::addr($libalgobscure-&gt;kotlin-&gt;root-&gt;fibonacci)[0];
+echo "fibonacci 6 = ";
+
+var_dump($fibonacci(6));
+
+echo "fibonacci 12 = ";
+var_dump($fibonacci(12));
+
+var_dump($libalgobscure);</code></pre>
+
+
+
+<p>Et le retour&nbsp;d’exécution :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">factoriel 5 = int(120)
+factoriel 12 = int(479001600)
+fibonacci 6 = int(8)
+fibonacci 12 = int(144)
+object(FFI\CData:struct &lt;anonymous&gt;*)#2 (1) {
+  [0]=&gt;
+  object(FFI\CData:struct &lt;anonymous&gt;)#5 (13) {
+    ["DisposeStablePointer"]=&gt;
+    object(FFI\CData:void(*)())#6 (1) {
+      [0]=&gt;
+      object(FFI\CData:void())#19 (0) {
+      }
+    }
+    ["DisposeString"]=&gt;
+    object(FFI\CData:void(*)())#7 (1) {
+      [0]=&gt;
+      object(FFI\CData:void())#19 (0) {
+      }
+    }
+    ["IsInstance"]=&gt;
+    object(FFI\CData:bool(*)())#8 (1) {
+      [0]=&gt;
+      object(FFI\CData:bool())#19 (0) {
+      }
+    }
+    ["createNullableByte"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#9 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableShort"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#10 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableInt"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#11 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableLong"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#12 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableFloat"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#13 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableDouble"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#14 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableChar"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#15 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableBoolean"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#16 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["createNullableUnit"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;(*)())#17 (1) {
+      [0]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;())#19 (0) {
+      }
+    }
+    ["kotlin"]=&gt;
+    object(FFI\CData:struct &lt;anonymous&gt;)#18 (1) {
+      ["root"]=&gt;
+      object(FFI\CData:struct &lt;anonymous&gt;)#19 (3) {
+        ["factoriel"]=&gt;
+        object(FFI\CData:int64_t(*)())#20 (1) {
+          [0]=&gt;
+          object(FFI\CData:int64_t())#23 (0) {
+          }
+        }
+        ["fibonacci"]=&gt;
+        object(FFI\CData:int64_t(*)())#21 (1) {
+          [0]=&gt;
+          object(FFI\CData:int64_t())#23 (0) {
+          }
+        }
+        ["main"]=&gt;
+        object(FFI\CData:void(*)())#22 (1) {
+          [0]=&gt;
+          object(FFI\CData:void())#23 (0) {
+          }
+        }
+      }
+    }
+  }
+}</code></pre>
+
+
+
+<p>Il est donc clairement réalisable de faire un algo très spécifique avec KMP et de le récupérer dans PHP.&nbsp;Il faudrait comparer sur le type d&rsquo;opérations réalisées,&nbsp;mais si cela permet d&rsquo;éviter des semaines de développement pour porter la librairie en PHP, c&rsquo;est une solution à envisager.<br>Comparativement,&nbsp;il n’est pas dit qu&rsquo;un algorithme en PHP soit plus rapide qu&rsquo;un appel à une lib exportée par kotlin via php-ffi.&nbsp;En tout cas je trouve que ça vaut le coup d&rsquo;explorer cette voie là. Surtout si vous avez décidé de passer d&rsquo;un backend PHP à un backend KMP et d&rsquo;y aller petit à petit ou simplement mutualiser une partie de code. </p>
+
+
+
+<p>Toujours dans une optique de coolitude extrême, on va voir dans notre prochaine partie de notre dossier voir comment <strong>intégrer une vraie librairie pour en faire vraiment quelque chose</strong>. <br>On va s&rsquo;intéresser à <a href="https://bellard.org/quickjs/" target="_blank" rel="noreferrer noopener">QuickJs</a> de Fabrice Bellard qui va nous permettre d’exécuter du code Javascript directement depuis PHP. <br>Vous pourriez penser que cela ne sert à rien mais je vous assure que j&rsquo;ai vu des intégrations hyper intéressantes de JS exécutées par PHP. <br>Bref pour aller plus loin c&rsquo;est par ici : </p>
+
+
+
+<p><a href="http://PHP FFI: Partie 5" target="_blank" rel="noreferrer noopener">PHP FFI: Partie 5</a> (en cours de rédaction)</p>
+
+
+
+<p></p>
+
+
+
+<p>Merci à <a href="https://www.linkedin.com/in/thomas-bourdin-b332b630/">Thomas Bourdin</a>, <a href="https://www.linkedin.com/in/lejallec/">Cédric Le Jallé</a>, <a href="https://www.linkedin.com/in/stephanepechard/">Stéphane Péchard</a> pour leur aide, conseils et relecture.</p>

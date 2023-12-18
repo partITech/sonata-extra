@@ -1,0 +1,183 @@
+
+<p>Nous allons voir comment configurer Exim4 pour envoyer des emails système avec Gmail. Cela permettrait que vos emails envoyés avec vos CRON soient correctement routés et n&rsquo;atterrissent pas dans les spams.</p>
+
+
+
+<p><strong>Installons Exim4</strong></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+apt-get install exim4
+</pre></div>
+
+
+<p>Configuration</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+dpkg-reconfigure exim4-config
+</pre></div>
+
+
+<p>Choisissez : <strong>mail sent by smarthost; no local mail</strong></p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/Selection_310.png"><img decoding="async" loading="lazy" width="719" height="431" src="https://www.partitech.com/wp-content/uploads/2022/12/Selection_310.png" alt="" class="wp-image-2098" srcset="https://www.partitech.com/wp-content/uploads/2022/12/Selection_310.png 719w, https://www.partitech.com/wp-content/uploads/2022/12/Selection_310-300x180.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/Selection_310-550x330.png 550w" sizes="(max-width: 719px) 100vw, 719px" /></a></figure>
+
+
+
+<p>Ensuite répondez aux questions comme suit :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+System mail name: YOUR_HOSTNAME
+
+IP-addresses to listen on for incoming SMTP connections: 127.0.0.1 ; ::1
+
+Other destinations for which mail is accepted: &lt;BLANK&gt;
+
+Visible domain name for local users: &lt;BLANK&gt;
+
+IP address or host name of the outgoing smarthost: smtp.gmail.com::587
+
+Keep number of DNS-queries minimal (Dial-on-Demand)? No
+
+Split configuration into small files? No
+
+Root and postmaster mail recipient: &lt;BLANK&gt;
+
+</pre></div>
+
+
+<p>Ouvrez et éditez le fichier : <code>/etc/exim4/exim4.conf.template</code></p>
+
+
+
+<p>Recherchez : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+.ifdef DCconfig_smarthost DCconfig_satellite
+</pre></div>
+
+
+<p>Et ajoutez ces lignes juste après :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+send_via_gmail:
+    driver = manualroute
+    domains = ! +local_domains
+    transport = gmail_smtp
+    route_list = * smtp.gmail.com
+</pre></div>
+
+
+<p>Il faut supprimer tous les autres blocks smarthost contenants : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+domains = ! +local_domains
+</pre></div>
+
+
+<p>Commentez les avec un # en début de ligne</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/Selection_311.png"><img decoding="async" loading="lazy" width="517" height="343" src="https://www.partitech.com/wp-content/uploads/2022/12/Selection_311.png" alt="" class="wp-image-2100" srcset="https://www.partitech.com/wp-content/uploads/2022/12/Selection_311.png 517w, https://www.partitech.com/wp-content/uploads/2022/12/Selection_311-300x199.png 300w" sizes="(max-width: 517px) 100vw, 517px" /></a></figure>
+
+
+
+<p>Recherchez les authenticators avec l’occurrence : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+begin authenticators
+</pre></div>
+
+
+<p>Et ajoutez ces lignes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+gmail_login:
+    driver = plaintext
+    public_name = LOGIN
+    client_send = : VOTRE_EMAIL@gmail.com : VOTRE_PASS_GMAIL
+</pre></div>
+
+
+<p>Supprimez tous les autres blocs qui contiennent :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+public_name = LOGIN
+</pre></div>
+
+
+<p>Vous pouvez aussi juste les renommer comme ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+login:
+  driver = plaintext
+  public_name = LOGIN_BACK
+
+</pre></div>
+
+
+<p>Cela évite d&rsquo;avoir un conflit de nom.</p>
+
+
+
+<p>Recherchez ensuite :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+transport/30_exim4-config_remote_smtp_smarthost
+</pre></div>
+
+
+<p>Et ajoutez ces lignes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+gmail_smtp:
+    driver = smtp
+    port = 587
+    hosts_require_auth = $host_address
+    hosts_require_tls = $host_address
+</pre></div>
+
+
+<p>Fermez et enregistrez votre fichier de configuration : <code>/etc/exim4/exim4.conf.template</code></p>
+
+
+
+<p>On recharge le fichier de conf :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+update-exim4.conf
+</pre></div>
+
+
+<p>Et on relance le service :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+/etc/init.d/exim4 restart
+</pre></div>
+
+
+<p>On peut tester notre envoi d&#8217;emails :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+echo 'Test' | mail -s 'Message test' VOTRE_EMAIL@ADDRESSE
+</pre></div>
+
+
+<p></p>

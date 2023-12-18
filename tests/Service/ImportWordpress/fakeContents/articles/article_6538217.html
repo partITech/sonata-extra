@@ -1,0 +1,71 @@
+
+<p>Les filtres sont géré dans la méthode configureDatagridFilters<br><br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+	{
+$filers=$datagridMapper-&gt;getAdmin()-&gt;getFilterParameters();
+}
+
+
+
+</pre></div>
+
+
+<p>On peu rajouter un filtre simple sur un titre ou n&rsquo;importe quel paramètre de notre entité.<br>Le paramètre show_filter permet d&rsquo;afficher celui-ci au chargement de la page.  Combiné avec la valeur de $filters on peut spécifier de garder l&rsquo;élément affiché après soumission du filtre.<br><br>Par axample , on peut dire d&rsquo;afficher en permanence le filtre :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+$datagridMapper
+            -&gt;add('title', null, &#91;'show_filter' =&gt; true , 'label' =&gt; 'Titre'])
+</pre></div>
+
+
+<p>Ou alors dire de l&rsquo;afficher uniquement si il a été utilisé </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+-&gt;add('enabled',null,&#91;'show_filter' =&gt;!empty($filers&#91;'enabled']&#91;'value'])?true:null, 'label' =&gt; 'Actvé'])
+</pre></div>
+
+
+<p>Pour une liaison oneToMany, nous allons si votre entité est correctement configuré, vous pouvez configurer simplement comme suit :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+$datagridMapper-&gt;add('field', null, &#91;'show_filter' =&gt; true , 'label' =&gt; 'nom du champs']);
+</pre></div>
+
+
+<p>En gros il n&rsquo;y a rien a faire. Mais on pourrais avoir besoin de filtrer les valeurs. Dans ce cas, on utilisera doctrine pour modifier la requête de sélection des valeurs :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+-&gt;add('slug', 'doctrine_orm_callback', &#91;'show_filter' =&gt;!empty($filers&#91;'slug']&#91;'value'])?true:null,  'label' =&gt; 'SEO Slug',
+                'callback'  =&gt; function($queryBuilder, $alias, $field, $value)
+                        {
+                            $queryBuilder-&gt;andWhere($queryBuilder-&gt;expr()-&gt;like('o.slug', &quot;'%&quot;.$value&#91;&quot;value&quot;].&quot;%'&quot;));
+		                }
+            ])
+</pre></div>
+
+
+<p>On pourrais aussi vouloir faire une liste construit dynamiquement par nos soins :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+ -&gt;add('liste', 'doctrine_orm_choice', array(
+                'label' =&gt; 'ma liste'),
+                'choice',
+                array(
+                    'choices' =&gt; array(
+                        'label value1' =&gt; 'value1',
+                        'label value2' =&gt; 'value2',
+                    ),
+                    'expanded' =&gt; true,
+                    'multiple' =&gt; true))
+</pre></div>
+
+
+<p></p>

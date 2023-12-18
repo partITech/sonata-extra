@@ -1,0 +1,402 @@
+
+<p>Dans cet exemple nous allons prendre le cas concret d&rsquo;une interface simple qui comprend des éléments multiples. <br>Nous avons choisis d&rsquo;utiliser une table « Projets » dans laquelle nous allons affecter des documents. <br>Donc pour un projet, nous pouvons affecter plusieurs documents. Et pour faciliter l&rsquo;administration, nous allons faire en sorte de pouvoir gérer notre interface imbriquée directement dans la vue d&rsquo;édition de notre projet.<br><br>Il nous faut créer le schéma. <br>Au préalable on importe notre schéma actuel dans MysqlWorbench avec la fonction « Database/reverse engineer ». Ce qui nous permettra d&rsquo;avoir les tables par défaut de Sonata puisque nous allons jouer avec les médias.<br></p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/11/image-2.png"><img decoding="async" loading="lazy" width="541" height="426" src="https://www.partitech.com/wp-content/uploads/2022/11/image-2.png" alt="" class="wp-image-2039" srcset="https://www.partitech.com/wp-content/uploads/2022/11/image-2.png 541w, https://www.partitech.com/wp-content/uploads/2022/11/image-2-300x236.png 300w" sizes="(max-width: 541px) 100vw, 541px" /></a></figure></div>
+
+
+<p><br><br>Avec MysqlWorbench on choisit une relation 1-&gt;N entre notre table « projets » et la table « <strong>projets_medias</strong> » et ensuite une relation N-&gt;1 entre la table « <strong>projets_medias</strong> » et la table « <strong>media__media</strong>« .<br><br>1-&gt;N = OneToMany <br>N-&gt;1 = ManyToOne</p>
+
+
+
+<p><strong>La subtilité consiste à mettre un id auto incrément par défaut dans notre table de liaison et de ne pas mettre nos clés étrangères en primary.</strong></p>
+
+
+
+<p>Ça nous donne ceci :<br></p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/11/image-6.png"><img decoding="async" loading="lazy" width="541" height="296" src="https://www.partitech.com/wp-content/uploads/2022/11/image-6.png" alt="" class="wp-image-2049" srcset="https://www.partitech.com/wp-content/uploads/2022/11/image-6.png 541w, https://www.partitech.com/wp-content/uploads/2022/11/image-6-300x164.png 300w" sizes="(max-width: 541px) 100vw, 541px" /></a></figure></div>
+
+
+<p><strong>projet_id</strong> contiendra l&rsquo;id de la table<strong> projets</strong> et <strong>media_id</strong> contiendra l&rsquo;id de la table  <strong>media__media</strong>.<br>On rajoute un champ ordre mais on peut rajouter autant de champs que l&rsquo;on souhaite. Car nous allons voir comment gérer l&rsquo;ensemble du formulaire d&rsquo;édition des éléments de projets_medias.</p>
+
+
+
+<p>Dans MysqlWorbench, on choisit « Forward/reverse engineer » pour pousser notre schéma dans mysql.<br><br>On fait un dernier tour de passe/passe avec les commandes de Symfony pour générer nos entités et nos interfaces d&rsquo;admin par défaut.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">bin/console doctrine:mapping:import "App\Entity" annotation --path=src/Entity
+bin/console make:entity --regenerate App
+bin/console make:sonata:admin App/Entity/Projets
+bin/console make:sonata:admin App/Entity/ProjetsMedias</code></pre>
+
+
+
+<p>C&rsquo;est magique mais incomplet. Il nous faut corriger les relations dans nos 2 entités.<br>Nous allons déjà définir les propriétés d’accès dans les deux sens.</p>
+
+
+
+<p>Pour l&rsquo;entité App\Entity\Projets ce sera la propriété <strong>documents</strong>, avec les accesseurs <strong>addDocument</strong> et <strong>removeDocument</strong></p>
+
+
+
+<pre title="App\Entity\Projets" class="wp-block-code"><code lang="php" class="language-php line-numbers">
+use Doctrine\Common\Collections\Collection;
+...
+...
+private $documents;
+
+public function getDocuments(): Collection
+{
+
+    return $this-&gt;documents;
+}
+
+public function addDocument(ProjetsMedias $document): self
+{
+    if (!$this-&gt;documents-&gt;contains($document)) {
+        $this-&gt;documents[] = $document;
+        $document-&gt;setProjets($this);
+    }
+
+    return $this;
+}
+
+public function removeDocument(ProjetsMedias $document): self
+{
+    if ($this-&gt;documents-&gt;removeElement($document)) {
+        // set the owning side to null (unless already changed)
+        if ($document-&gt;getProjets() === $this) {
+            $document-&gt;setProjets(null);
+        }
+    }
+
+    return $this;
+}</code></pre>
+
+
+
+<p><br>Pour l&rsquo;entité <strong><em>App\Entity\ProjetsMedias</em></strong> ce sera la propriété <strong>projets</strong>, avec les accesseurs <strong>getProjets()</strong> et <strong>setProjets()</strong>.</p>
+
+
+
+<pre title="App\Entity\ProjetsMedias" class="wp-block-code"><code lang="php" class="language-php line-numbers">private $projets;
+
+public function getProjets(): ?Projets
+{
+    return $this-&gt;projets;
+}
+
+public function setProjets(?Projets $projets): self
+{
+    $this-&gt;projets = $projets;
+    return $this;
+}</code></pre>
+
+
+
+<p>Concentrons nous sur la configuration de la relation Projets-&gt;ProjetsMedias car c&rsquo;est là que tout se joue.</p>
+
+
+
+<pre title="\App\Entity\Projets::$documents" class="wp-block-code"><code lang="php" class="language-php line-numbers">/**
+ * @var \Doctrine\Common\Collections\Collection
+ *
+ * @ORM\OneToMany(targetEntity="App\Entity\ProjetsMedias", mappedBy="projets", cascade={"persist", "remove" })
+ * @ORM\JoinTable(name="projets_medias",
+ *   joinColumns={
+ *     @ORM\JoinColumn(name="projets_id", referencedColumnName="id")
+ *   }
+ * )
+ */
+private $documents;</code></pre>
+
+
+
+<p>La propriété targetEntity de notre OnToMany doit pointer sur l&rsquo;entité de notre table qui contient la liste des documents et on doit lui donner la propriété de notre relation ManyToOne de cette entité.<br>Donc ici c&rsquo;est  \App\Entity\ProjetsMedias qui a une propriété <strong>projets</strong>. On lui donne ensuite le nom de la table mysql qu&rsquo;il doit joindre : <strong>projets_media</strong>. JoinColumn définit le nom du champ de la table jointe qui contiendra nos clés primaires de projets, soit la valeur de notre propriété <strong>id</strong>, qui doit être stockée dans la table <strong>projets_id</strong> de <strong>projets_media</strong>.</p>
+
+
+
+<p>Ensuite nous configurons notre relation dans ProjetsMedia.</p>
+
+
+
+<pre title="\App\Entity\ProjetsMedias::$projets" class="wp-block-code"><code lang="php" class="language-php line-numbers">/**
+ * @var \Projets
+ *
+ * @ORM\ManyToOne(targetEntity="Projets",inversedBy="documents")
+ * @ORM\JoinColumns({
+ *   @ORM\JoinColumn(name="projets_id", referencedColumnName="id")
+ * })
+ */
+private $projets;
+
+public function getProjets(): ?Projets
+{
+    return $this-&gt;projets;
+}
+
+public function setProjets(?Projets $projets): self
+{
+    $this-&gt;projets = $projets;
+
+    return $this;
+}</code></pre>
+
+
+
+<p>La propriété targetEntity de notre ManyToOne doit pointer sur l&rsquo;entité de notre table qui gère les projets et on doit lui donner la propriété de notre relation OneToMany de cette entité.<br>Donc ici c&rsquo;est <strong>Projets</strong> qui a une propriété <strong>documents</strong>.<br>On lui donne ensuite le champ de notre table courante (ProjetsMedia) qui stocke la clef primaire du projet. Donc <strong>id</strong> de la table <strong>projets</strong> qui est stockée dans <strong>projets_id</strong> de <strong>projets_media</strong><br></p>
+
+
+
+<p>C’est ni plus ni moins que l’inverse de ce que l’on a configuré pour notre définition de <strong>\App\Entity\Projets::$documents</strong></p>
+
+
+
+<p>Dernière étape, comme on a choisit de jouer avec des médias, on doit configurer notre relation avec la médiathèque de Sonata et configurer les accesseurs.</p>
+
+
+
+<pre title="\App\Entity\ProjetsMedias::$mediaMedia" class="wp-block-code"><code lang="php" class="language-php line-numbers">use Sonata\MediaBundle\Model\MediaInterface;
+...
+...
+/**
+ * @var \MediaMedia
+ *
+ * @ORM\ManyToOne(targetEntity="App\Application\Sonata\MediaBundle\Entity\Media")
+ * @ORM\JoinColumns({
+ *   @ORM\JoinColumn(name="media_id", referencedColumnName="id")
+ * })
+ */
+private $mediaMedia;
+
+public function __toString(): string
+{
+    return $this-&gt;getMediaMedia();
+}
+
+public function getMediaMedia(): ?MediaInterface
+{
+
+    return $this-&gt;mediaMedia;
+}
+
+public function setMediaMedia(?MediaInterface $mediaMedia): self
+{
+    $this-&gt;mediaMedia = $mediaMedia;
+
+    return $this;
+}</code></pre>
+
+
+
+<p>Idem que plus haut. On commence par donner l&rsquo;entité cible, ici « App\Application\Sonata\MediaBundle\Entity\Media ». Car c&rsquo;est l&rsquo;entité que nous avons étendue dans notre configuration du bundle Sonata/Media.</p>
+
+
+
+<p>Dans sonata_media.yml nous avons ceci :</p>
+
+
+
+<pre title="config\packages\sonata_media.yml" class="wp-block-code"><code lang="yaml" class="language-yaml line-numbers">sonata_media:
+   class:
+        media: App\Application\Sonata\MediaBundle\Entity\Media
+        gallery: App\Application\Sonata\MediaBundle\Entity\Gallery
+        gallery_item: App\Application\Sonata\MediaBundle\Entity\GalleryItem
+        category: App\Application\Sonata\ClassificationBundle\Entity\SonataClassificationCategory
+</code></pre>
+
+
+
+<p>Ça semble évident mais si vous tombez sur cet article sans avoir toutes les bases il me parait judicieux de le rappeler. Ça pourrait en débloquer plus d&rsquo;un 😉</p>
+
+
+
+<p>Ensuite JoinColumn définit comment on enregistre la relation. Donc c&rsquo;est le champ <strong>media_id</strong> de notre table <strong>projets_media</strong> qui contiendra le champ id de notre table qui gère les médias (<strong>media__media</strong>).</p>
+
+
+
+<p>Il nous reste à configurer le champs média de notre admin que nous avons généré automatiquement plus haut (ProjetsMediasAdmin.php).<br>Pour gérer un champ média il faut juste utiliser le ModelListType de Sonata. Libre à vous d&rsquo;activer les boutons optionnels ajout/edition/liste/delete.</p>
+
+
+
+<pre title="\App\Admin\ProjetsMediasAdmin::configureFormFields" class="wp-block-code"><code lang="php" class="language-php line-numbers">use Sonata\AdminBundle\Form\Type\ModelListType;
+...
+...
+protected function configureFormFields(FormMapper $form): void
+{
+    $form
+        -&gt;add('projets')
+        -&gt;add('mediaMedia', ModelListType::class, [
+            'required' =&gt; false,
+            'btn_add'=&gt;true,
+            'btn_edit'=&gt;false,
+            'btn_list'=&gt;false,
+            'btn_delete'=&gt;false,
+        ])
+        -&gt;add('ordre')
+    ;
+}</code></pre>
+
+
+
+<p>Les relations sont maintenant complètes. On peut vérifier que tout fonctionne en activant notre admin de ProjetsMedia.</p>
+
+
+
+<p>Dans nos services la génération de nos interfaces nous a configuré ceci :</p>
+
+
+
+<pre title="config/services.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml line-numbers">    admin.projets:
+        class: App\Admin\ProjetsAdmin
+        tags:
+            - { name: sonata.admin, model_class: App\Entity\Projets, controller: App\Controller\ProjetsAdminController, manager_type: orm, group: admin, label: Projets }
+
+    admin.projets_medias:
+        class: App\Admin\ProjetsMediasAdmin
+        tags:
+            - { name: sonata.admin, model_class: App\Entity\ProjetsMedias, controller: App\Controller\ProjetsMediasAdminController, manager_type: orm, group: admin, label: ProjetsMedias }
+        arguments: [~, App\Entity\ProjetsMediasAdmin, ~]</code></pre>
+
+
+
+<p>On peut donc aller directement sur notre interface pour voir si ça fonctionne.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/11/image-4.png"><img decoding="async" loading="lazy" width="793" height="409" src="https://www.partitech.com/wp-content/uploads/2022/11/image-4.png" alt="" class="wp-image-2046" srcset="https://www.partitech.com/wp-content/uploads/2022/11/image-4.png 793w, https://www.partitech.com/wp-content/uploads/2022/11/image-4-300x155.png 300w, https://www.partitech.com/wp-content/uploads/2022/11/image-4-768x396.png 768w, https://www.partitech.com/wp-content/uploads/2022/11/image-4-550x284.png 550w" sizes="(max-width: 793px) 100vw, 793px" /></a></figure></div>
+
+
+<p>Mais ce qui nous intéresse c&rsquo;est d&rsquo;avoir cette interface de gestion directement dans notre gestion de Projets.</p>
+
+
+
+<p>Et pour cela nous allons utiliser les <strong>CollectionType</strong> de Sonata. <br>Nous ajoutons à notre admin généré automatiquement, dans la méthode qui gère la configuration de formulaire d&rsquo;édition (configureFormFields), un champ <strong>documents</strong> qui aura comme type <strong>CollectionType</strong> avec sa configuration, et chose la plus importante, on ajoute le paramètre <strong>admin_code</strong> qui pointe sur le nom du service de notre admin de <strong>projets_media</strong>.</p>
+
+
+
+<pre title="\App\Admin\ProjetsAdmin::configureFormFields" class="wp-block-code"><code lang="php" class="language-php line-numbers">$form-&gt;add('documents', \Sonata\Form\Type\CollectionType::class,
+    [
+        'required' =&gt; false,
+        'by_reference' =&gt; false,
+        'label'=&gt; false],
+    [
+        'edit' =&gt; 'inline',
+        'inline' =&gt; 'table',
+        'sortable' =&gt; 'position',
+        'link_parameters' =&gt; [
+            'context' =&gt; 'default',
+            'provider' =&gt; 'sonata.media.provider.file',
+            'hide_context' =&gt; true
+        ],
+        'admin_code' =&gt; 'admin.projets_medias'
+    ]
+);</code></pre>
+
+
+
+<p>Accessoirement, dans <strong>\App\Admin\ProjetsMediasAdmin</strong>, on supprime notre champ <strong>projets</strong> puisque la valeur sera renseignée automatiquement lorsque l&rsquo;admin sera imbriqué dans projets.</p>
+
+
+
+<pre title="\App\Admin\ProjetsMediasAdmin " class="wp-block-code"><code lang="php" class="language-php line-numbers">protected function configureFormFields(FormMapper $form): void
+{
+    $form
+        //-&gt;add('projets')
+        -&gt;add('mediaMedia', \Sonata\AdminBundle\Form\Type\ModelListType::class, [
+            'required' =&gt; false,
+            'btn_add'=&gt;true,
+            'btn_edit'=&gt;false,
+            'btn_list'=&gt;false,
+            'btn_delete'=&gt;false,
+        ])
+        -&gt;add('ordre')
+    ;
+}</code></pre>
+
+
+
+<p>Et la magie opère. On peut maintenant ajouter/supprimer des médias directement dans notre interface.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/11/image-5.png"><img decoding="async" loading="lazy" width="856" height="840" src="https://www.partitech.com/wp-content/uploads/2022/11/image-5.png" alt="" class="wp-image-2047" srcset="https://www.partitech.com/wp-content/uploads/2022/11/image-5.png 856w, https://www.partitech.com/wp-content/uploads/2022/11/image-5-300x294.png 300w, https://www.partitech.com/wp-content/uploads/2022/11/image-5-768x754.png 768w, https://www.partitech.com/wp-content/uploads/2022/11/image-5-800x785.png 800w, https://www.partitech.com/wp-content/uploads/2022/11/image-5-550x540.png 550w, https://www.partitech.com/wp-content/uploads/2022/11/image-5-611x600.png 611w" sizes="(max-width: 856px) 100vw, 856px" /></a></figure></div>
+
+
+<p>Mais ce n&rsquo;est pas tout à fait terminé. On a un champ pour déterminer l&rsquo;ordre de notre affichage. Il nous faut juste configurer l&rsquo;admin de <strong>ProjetsMedia</strong> pour modifier le type du champs <strong>ordre</strong>.</p>
+
+
+
+<pre title="\App\Admin\ProjetsMediasAdmin::configureFormFields" class="wp-block-code"><code lang="php" class="language-php line-numbers">use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+...
+...
+protected function configureFormFields(FormMapper $form): void
+{
+    $form
+        //-&gt;add('projets')
+        -&gt;add('mediaMedia', ModelListType::class, [
+            'required' =&gt; false,
+            'btn_add'=&gt;true,
+            'btn_edit'=&gt;false,
+            'btn_list'=&gt;false,
+            'btn_delete'=&gt;false,
+        ])
+        -&gt;add('ordre', HiddenType::class)
+    ;
+}</code></pre>
+
+
+
+<p>Ensuite on configure notre Collection dans Projets, pour que le paramètre sortable pointe sur notre bon champ.</p>
+
+
+
+<pre title="\App\Admin\ProjetsAdmin::configureFormFields" class="wp-block-code"><code lang="php" class="language-php line-numbers">$form-&gt;add('documents', \Sonata\Form\Type\CollectionType::class,
+    [
+        'required' =&gt; false,
+        'by_reference' =&gt; false,
+        'label'=&gt; false],
+    [
+        'edit' =&gt; 'inline',
+        'inline' =&gt; 'table',
+        'sortable' =&gt; 'ordre',
+        'link_parameters' =&gt; [
+            'context' =&gt; 'default',
+            'provider' =&gt; 'sonata.media.provider.file',
+            'hide_context' =&gt; true
+        ],
+        'admin_code' =&gt; 'admin.projets_medias'
+    ]
+);</code></pre>
+
+
+
+<p>Et dernier point, on modifie notre relation Projets-&gt;ProjetsMedia pour donner l&rsquo;ordre souhaité.</p>
+
+
+
+<pre title="\App\Entity\Projets::$documents" class="wp-block-code"><code lang="php" class="language-php line-numbers">/**
+ * @var \Doctrine\Common\Collections\Collection
+ *
+ * @ORM\OneToMany(targetEntity="App\Entity\ProjetsMedias", mappedBy="projets", cascade={"persist", "remove" })
+ * @ORM\JoinTable(name="projets_medias",
+ *   joinColumns={
+ *     @ORM\JoinColumn(name="projets_id", referencedColumnName="id")
+ *   }
+ * )
+ * @ORM\OrderBy({"ordre" = "ASC"})
+ */
+private Collection $documents;</code></pre>
+
+
+
+<p>Notre collection peut maintenant être ordonnée par simple drag&rsquo;n drop.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/11/Selection_262.png"><img decoding="async" loading="lazy" width="736" height="390" src="https://www.partitech.com/wp-content/uploads/2022/11/Selection_262.png" alt="" class="wp-image-2062" srcset="https://www.partitech.com/wp-content/uploads/2022/11/Selection_262.png 736w, https://www.partitech.com/wp-content/uploads/2022/11/Selection_262-300x159.png 300w, https://www.partitech.com/wp-content/uploads/2022/11/Selection_262-550x291.png 550w" sizes="(max-width: 736px) 100vw, 736px" /></a></figure></div>

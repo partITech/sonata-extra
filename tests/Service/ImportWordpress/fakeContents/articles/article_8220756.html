@@ -1,0 +1,249 @@
+
+<p></p>
+
+
+
+<h2>Configuration de PHP/Docker</h2>
+
+
+
+<p>Si vous développez sous Symfony, installé dans un docker compose et que vous n&rsquo;utilisez pas encore le debugger, alors cet article est fait pour vous. Nous allons vous montrer comment préparer votre environnement pour ne plus avoir à faire de dd() ni de var_dump. Une fois que vous aurez goûté aux joies du debugger vous ne pourrez plus vous en passer tellement vous allez gagner en confort. </p>
+
+
+
+<p>Pour cet article vous devez avoir une app Symfony propulsée avec apache/php (ou bien nginx et fpm, peu importe) avec un fichier docker-compose.yml</p>
+
+
+
+<p>La première étape consiste à installer xdebug et configurer votre environnement PHP. Si ce n&rsquo;est pas déjà fait, voici les éléments que vous devrez avoir installés dans votre Dockerfile.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">RUN pecl install xdebug-3.1.6 &amp;&amp; docker-php-ext-enable  xdebug;</code></pre>
+
+
+
+<p>A noter que si vous utilisez PHP 8.1 vous devrez installer la version 3.2.0</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">RUN pecl install xdebug-3.2.0 &amp;&amp; docker-php-ext-enable  xdebug;</code></pre>
+
+
+
+<p>Personnellement je configure mon php.ini directement en copiant le fichier depuis le build du Dockerfile.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">COPY php.ini /usr/local/etc/php/conf.d/app.ini</code></pre>
+
+
+
+<p>Voici son contenu, libre à vous de l&rsquo;installer comme vous le désirez. </p>
+
+
+
+<pre class="wp-block-code"><code lang="apacheconf" class="language-apacheconf">; conf/php.ini
+date.timezone = Europe/Paris
+
+opcache.enable = 1
+opcache.enable_cli = 1
+opcache.memory_consumption = 256
+opcache.max_accelerated_files=20000
+opcache.revalidate_freq = 0
+
+upload_max_filesize = 16M
+post_max_size = 16M
+
+realpath_cache_size = 4096k
+realpath_cache_ttl=600
+
+display_errors = Off
+display_startup_errors = Off
+max_execution_time=5000
+memory_limit = -1
+
+xdebug.mode=debug,develop,trace
+xdebug.idekey=docker
+xdebug.start_with_request=yes
+xdebug.log=/dev/stdout
+xdebug.log_level=0
+xdebug.client_port=9003
+xdebug.client_host=host.docker.internal</code></pre>
+
+
+
+<p>Notez toute la partie <em>xdebug</em> du fichier. C&rsquo;est important pour le bon fonctionnement de la suite de cet article. Le mode nous permet de dire à <em>xdebug</em> les options dont nous avons besoin. </p>
+
+
+
+<p><strong><strong>develop</strong></strong> : Vous permettra d&rsquo;obtenir un var_dump amélioré dans votre application mais aussi un complément d&rsquo;informations concernant les warning, notices. Plus d&rsquo;info ici : <a href="https://xdebug.org/docs/develop">https://xdebug.org/docs/develop</a></p>
+
+
+
+<p><strong>debug</strong> : Vous permettra d&rsquo;utiliser le <em>step debug</em>, mettre des points d’arrêts et d&rsquo;aller de ligne en ligne.</p>
+
+
+
+<p><strong>trace</strong> : Enregistre l&rsquo;ensemble des appels de fonctions, les assignations de variables&#8230;tout ! C&rsquo;est gourmand mais peu importe.</p>
+
+
+
+<p><strong>idekey</strong> : Est la cléf qui est envoyée par xdebug pour dire à PhpStorm &lsquo;<em>hey, je suis en debug de cette application, utilise moi !</em>&lsquo;</p>
+
+
+
+<p><strong>client_port</strong> : Le port sur lequel est envoyé la socket de connection de notre session de debug.</p>
+
+
+
+<p><strong>client_host</strong> : C&rsquo;est l&rsquo;ip sur laquelle envoyer notre connection pour l&rsquo;initialisation de notre session de debug. Nous utilisons Docker donc nous allons spécifier comment sortir de notre environnement docker pour attaquer le host sur notre machine Linux. </p>
+
+
+
+<p>Une fois que votre docker est ok vous devriez avoir ceci dans votre environnement PHP : </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-36.png"><img decoding="async" loading="lazy" width="340" height="234" src="https://www.partitech.com/wp-content/uploads/2023/01/image-36.png" alt="" class="wp-image-2360" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-36.png 340w, https://www.partitech.com/wp-content/uploads/2023/01/image-36-300x206.png 300w" sizes="(max-width: 340px) 100vw, 340px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-37.png"><img decoding="async" loading="lazy" width="979" height="928" src="https://www.partitech.com/wp-content/uploads/2023/01/image-37.png" alt="" class="wp-image-2361" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-37.png 979w, https://www.partitech.com/wp-content/uploads/2023/01/image-37-300x284.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-37-768x728.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-37-800x758.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-37-550x521.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-37-633x600.png 633w" sizes="(max-width: 979px) 100vw, 979px" /></a></figure>
+
+
+
+<p>Voici un exemple de docker-compose :</p>
+
+
+
+<pre class="wp-block-code"><code class="">version: "3.8"
+services:
+  php-7.3:
+    image: 'devpartitech/php:7.3-apache'
+    ports:
+      - "80:80"
+    volumes:
+      - "./:/var/www/"
+    extra_hosts:
+      - host.docker.internal:host-gateway</code></pre>
+
+
+
+<p></p>
+
+
+
+<p>Ne passez pas à la suite tant que cette étape n&rsquo;est pas validée. </p>
+
+
+
+<h2>Configuration de PhpStorm </h2>
+
+
+
+<p>Bien ! Nous avons notre environnement Docker d&rsquo;installé avec une page Symfony. Nous allons configurer PhpStorm pour qu&rsquo;il puisse recevoir la session de <em>debug</em>.</p>
+
+
+
+<p>Ouvrez les settings de PhpStorm.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-38.png"><img decoding="async" loading="lazy" width="523" height="752" src="https://www.partitech.com/wp-content/uploads/2023/01/image-38.png" alt="" class="wp-image-2363" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-38.png 523w, https://www.partitech.com/wp-content/uploads/2023/01/image-38-209x300.png 209w, https://www.partitech.com/wp-content/uploads/2023/01/image-38-417x600.png 417w" sizes="(max-width: 523px) 100vw, 523px" /></a></figure>
+
+
+
+<p>Si se n&rsquo;est pas encore fait, installez le plugin Symfony. </p>
+
+
+
+<p>Sous le menu <strong>PHP</strong> vous avez les menus <strong>Debug</strong>.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-39.png"><img decoding="async" loading="lazy" width="996" height="418" src="https://www.partitech.com/wp-content/uploads/2023/01/image-39.png" alt="" class="wp-image-2364" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-39.png 996w, https://www.partitech.com/wp-content/uploads/2023/01/image-39-300x126.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-39-768x322.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-39-800x336.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-39-550x231.png 550w" sizes="(max-width: 996px) 100vw, 996px" /></a></figure>
+
+
+
+<p>Dans le premier menu spécifiez à votre IDE qu&rsquo;il doit écouter le port <strong>9003</strong>. Vous pouvez changer le port si vous le désirez mais il faudra qu&rsquo;il soit spécifié également dans le <strong>php.ini</strong>.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-40.png"><img decoding="async" loading="lazy" width="968" height="757" src="https://www.partitech.com/wp-content/uploads/2023/01/image-40.png" alt="" class="wp-image-2365" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-40.png 968w, https://www.partitech.com/wp-content/uploads/2023/01/image-40-300x235.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-40-768x601.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-40-800x626.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-40-550x430.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-40-767x600.png 767w" sizes="(max-width: 968px) 100vw, 968px" /></a></figure>
+
+
+
+<p>Sous le menu Templates mettez le lien vers le répertoire var/cache de Symfony. Ne mettez pas le path qu&rsquo;il y a dans votre conteneur. Il s&rsquo;agit ici du path sur votre disque à vous (votre machine, pour ma part ubuntu). Sans cela l&rsquo;IDE ne sera pas capable d&rsquo;utiliser des points d’arrêts dans vos templates TWIG.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-50.png"><img decoding="async" loading="lazy" width="945" height="740" src="https://www.partitech.com/wp-content/uploads/2023/01/image-50.png" alt="" class="wp-image-2375" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-50.png 945w, https://www.partitech.com/wp-content/uploads/2023/01/image-50-300x235.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-50-768x601.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-50-800x626.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-50-550x431.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-50-766x600.png 766w" sizes="(max-width: 945px) 100vw, 945px" /></a></figure>
+
+
+
+<p>Sous le menu DBGp Proxi :</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-43.png"><img decoding="async" loading="lazy" width="987" height="741" src="https://www.partitech.com/wp-content/uploads/2023/01/image-43.png" alt="" class="wp-image-2368" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-43.png 987w, https://www.partitech.com/wp-content/uploads/2023/01/image-43-300x225.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-43-768x577.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-43-800x601.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-43-550x413.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-43-799x600.png 799w" sizes="(max-width: 987px) 100vw, 987px" /></a></figure>
+
+
+
+<p>Rappelez vous, l&rsquo;ide key, et le port de tout à l’heure.</p>
+
+
+
+<p>Sous le menu Servers, créez un nouveau serveur en cliquant sur le « + »</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-44.png"><img decoding="async" loading="lazy" width="975" height="741" src="https://www.partitech.com/wp-content/uploads/2023/01/image-44.png" alt="" class="wp-image-2369" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-44.png 975w, https://www.partitech.com/wp-content/uploads/2023/01/image-44-300x228.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-44-768x584.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-44-800x608.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-44-550x418.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-44-789x600.png 789w" sizes="(max-width: 975px) 100vw, 975px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-45.png"><img decoding="async" loading="lazy" width="1024" height="517" src="https://www.partitech.com/wp-content/uploads/2023/01/image-45-1024x517.png" alt="" class="wp-image-2370" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-45-1024x517.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-45-300x151.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-45-768x387.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-45-1440x726.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-45-800x404.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-45-550x277.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-45-1189x600.png 1189w, https://www.partitech.com/wp-content/uploads/2023/01/image-45.png 1453w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Une foi votre serveur web spécifié nous pouvons enfin tester le debugger de PhpStorm !</p>
+
+
+
+<p>Pour tester vous pouvez aller dans n&rsquo;importe quel Controller et template et y mettre des points d’arrêts. Pour cela cliquez dans la marge (là ou vous avez les numéros de ligne).</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-46.png"><img decoding="async" loading="lazy" width="821" height="587" src="https://www.partitech.com/wp-content/uploads/2023/01/image-46.png" alt="" class="wp-image-2371" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-46.png 821w, https://www.partitech.com/wp-content/uploads/2023/01/image-46-300x214.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-46-768x549.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-46-800x572.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-46-550x393.png 550w" sizes="(max-width: 821px) 100vw, 821px" /></a></figure>
+
+
+
+<p>Cliquez sur le petit « bug » en haut de votre IDE</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-47.png"><img decoding="async" loading="lazy" width="1024" height="457" src="https://www.partitech.com/wp-content/uploads/2023/01/image-47-1024x457.png" alt="" class="wp-image-2372" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-47-1024x457.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-47-300x134.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-47-768x343.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-47-800x357.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-47-550x245.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-47-1345x600.png 1345w, https://www.partitech.com/wp-content/uploads/2023/01/image-47.png 1390w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Il devrait passer en mode « écoute »</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-48.png"><img decoding="async" loading="lazy" width="1024" height="482" src="https://www.partitech.com/wp-content/uploads/2023/01/image-48-1024x482.png" alt="" class="wp-image-2373" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-48-1024x482.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-48-300x141.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-48-768x362.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-48-800x377.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-48-550x259.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-48-1273x600.png 1273w, https://www.partitech.com/wp-content/uploads/2023/01/image-48.png 1422w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Rafraîchissez votre page web et vous devriez avoir accès aux options de debug 🙂</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-49.png"><img decoding="async" loading="lazy" width="1024" height="588" src="https://www.partitech.com/wp-content/uploads/2023/01/image-49-1024x588.png" alt="" class="wp-image-2374" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-49-1024x588.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-300x172.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-768x441.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-1536x882.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-1440x826.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-800x459.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-550x316.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-49-1045x600.png 1045w, https://www.partitech.com/wp-content/uploads/2023/01/image-49.png 1765w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-51.png"><img decoding="async" loading="lazy" width="1024" height="800" src="https://www.partitech.com/wp-content/uploads/2023/01/image-51-1024x800.png" alt="" class="wp-image-2376" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-51-1024x800.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-51-300x234.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-51-768x600.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-51-800x625.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-51-550x430.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-51.png 1337w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Et voilà !</p>

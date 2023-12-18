@@ -1,0 +1,5 @@
+<p>Les révisions c&rsquo;est bien, mais ca bouffe de la BDD. Un petit clean s&rsquo;impose de temps en temps.</p>
+<p><code>DELETE a,b,c FROM wp_posts a<br />
+LEFT JOIN wp_term_relationships b ON (a.ID = b.object_id)<br />
+LEFT JOIN wp_postmeta c ON (a.ID = c.post_id)<br />
+WHERE a.post_type = 'revision'</code></p>

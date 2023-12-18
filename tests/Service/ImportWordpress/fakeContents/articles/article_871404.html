@@ -1,0 +1,8 @@
+<p>Pour supprimer récursivement l&rsquo;ensemble des fichiers de gestion de svn (.svn) d&rsquo;une working copy il suffit de se placer dans le repertoir root de votre working copie et d&rsquo;executer la commande suivante :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+find . -name &quot;.svn&quot; -exec rm -rf {} \;
+</pre>
+<p>Une autre solution consiste a faire un alias dans votre ~/.bashrc et d&rsquo;executer ensuite la commande lorsque vous en avez besoin :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+alias rmsvn='find . -name &quot;.svn&quot; -exec rm -rf {} \;'
+</pre>

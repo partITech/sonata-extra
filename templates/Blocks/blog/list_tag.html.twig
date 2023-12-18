@@ -1,0 +1,19 @@
+<aside id="tag_cloud-2" class="widget widget_tag_cloud">
+    <h3 class="widget-title">{{title|trans }}</h3>
+    <div class="tagcloud">
+        {% for item in tags %}
+            {% set tag=item.tag %}
+            {% if tag.translations[tag.site.getId()] is defined %}
+                {% if item.percentage < 33 %}
+                    {% set sizeClass = 'tag-small' %}
+                {% elseif item.percentage < 66 %}
+                    {% set sizeClass = 'tag-medium' %}
+                {% else %}
+                    {% set sizeClass = 'tag-large' %}
+                {% endif %}
+                <a href="{{ tag.translations[tag.site.getId()]['routes']['sonata_extra_blog_tag'] }}" class="tag-cloud-link tag-link-{{ tag.id}} tag-link-position-1 {{ sizeClass }}" aria-label="{{ tag.name }} ({{ item.articleCount }} éléments)">{{ tag.name }}</a>
+            {% endif %}
+        {% endfor %}
+    </div>
+    </ul>
+</aside>

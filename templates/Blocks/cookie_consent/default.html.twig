@@ -1,0 +1,24 @@
+
+
+{% block block %}
+    <div id="app"></div>
+    <div id="orejime"></div>
+
+
+    <script>
+        $('.consent-modal-button').click(function() {
+            event.preventDefault();
+            orejime.show();
+        });
+
+        $('.reset-button').click(function() {
+            event.preventDefault();
+            orejime.internals.manager.resetConsent();
+            location.reload();
+        });
+
+    </script>
+
+{% endblock %}
+
+

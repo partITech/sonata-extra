@@ -1,0 +1,29 @@
+
+<div class="post-text">
+<p>À partir d&rsquo;Ubuntu 18.04, un fichier d&rsquo;échange plutôt qu&rsquo;une partition d&rsquo;échange dédiée est utilisé. Le fichier d&rsquo;échange est nommé « swapfile ». Pour modifier la taille de ce fichier d&rsquo;échange: </p>
+<ol>
+<li>Désactivez le fichier d&rsquo;échange et supprimez-le (pas vraiment nécessaire car vous allez l&rsquo;écraser) 
+<pre><code>sudo swapoff /swapfile
+sudo rm  /swapfile
+</code></pre>
+</li>
+<li>Créez un nouveau fichier d&rsquo;échange de la taille souhaitée. <br> Déterminez la taille de votre fichier d&rsquo;échange. Si vous souhaitez créer un fichier d&rsquo;échange de 4 Go, vous devrez écrire 4 * 1024 blocs de 1024 <sup>2</sup> bytes (= 1 MiB). Cela rendra votre compte égal à  4 * 1024 = 4096. Créez le fichier de cette taille avec la commande 
+<p>&nbsp;</p>
+<pre><code>sudo dd if=/dev/zero of=/swapfile bs=1M count=4096
+</code></pre>
+</li>
+<li>Assignez lui les permissions read/write pour le root uniquement (pas strictement nécessaire, mais cela renforce la sécurité )
+<pre><code>sudo chmod 600 /swapfile
+</code></pre>
+</li>
+<li>Formater le fichier comme swap :
+<pre><code>sudo mkswap /swapfile
+</code></pre>
+</li>
+<li>Le fichier sera activé au prochain redémarrage. Si vous souhaitez l&rsquo;activer pour la session en cours:
+<pre><code>sudo swapon /swapfile
+</code></pre>
+</li>
+</ol>
+<p>Vous pouvez vérifier le swap disponible avec la commande  <code>swapon -s</code> (pas besoin de permissions root).</p>
+</div>

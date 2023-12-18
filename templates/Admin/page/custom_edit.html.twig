@@ -1,0 +1,164 @@
+
+{% set sonata_name=app.request.attributes.get('_sonata_name') %}
+{% if sonata_name == 'admin_app_sonatapagepage_compose' %}
+    {% set extends_template = '@SonataPage/PageAdmin/compose.html.twig' %}
+    {% set action_name = 'compose' %}
+{% endif %}
+{% if sonata_name == 'admin_app_sonatapagepage_edit' %}
+    {% set extends_template = '@SonataAdmin/CRUD/base_edit.html.twig' %}
+    {% set action_name = 'edit' %}
+{% endif %}
+
+{% if sonata_name == 'admin_app_sonatapagepage_create' %}
+    {% set extends_template = '@SonataAdmin/CRUD/base_edit.html.twig' %}
+    {% set action_name = 'create' %}
+{% endif %}
+
+{% extends extends_template %}
+
+{% block tab_menu %}
+    {{ parent() }}
+
+
+
+
+    <div class="nav navbar-nav navbar-right sonata-page-extra-action-flags">
+
+        {% include '@PartitechSonataExtra/Admin/page/seo_proposal.html.twig' with {'page': object,'admin': admin,'action_name':action_name} %}
+        {% include '@PartitechSonataExtra/Admin/page/realtime_preview.html.twig' with {'page': object,'admin': admin,'action_name':action_name} %}
+
+        {% set page=object %}
+        {% for details in page.translations %}
+            {% set flagClass = 'fi-' ~ details.lang %}
+            {% set buttonClass = details.entity_id is defined and details.entity_id ? 'flag-button-edit' : 'flag-button-create btn-disabled' %}
+            {% set currentClass = details.entity_id is defined and details.entity_id and page.id==details.entity_id? 'flag-button-selected' : 'flag-button-opacity' %}
+
+            {% if details.entity_id is defined and details.entity_id %}
+
+                <a  class="btn btn-app  flag-button {{ currentClass }} {{ buttonClass}} "
+                    href="{{ path('admin_app_sonatapagepage_'~action_name, {'id': details.entity_id  }) }}?site={{ details.site }}"
+                    data-site="{{ details.site }}"
+                    title="{{ 'sonata-extra.page_admin.tree_view.edit'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"
+                ><i class="fi {{ flagClass }} fis"></i></a>
+
+            {% else %}
+
+                <a  class="btn btn-app  flag-button {{ currentClass }} {{ buttonClass}}  chooseLocaleModalLink{{ object.id  }} "
+                    href="#"
+                    data-site="{{ details.site }}"
+                    title="{{ 'sonata-extra.page_admin.tree_view.create'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"
+                ><i class="fi {{ flagClass }} fis"></i></a>
+
+
+            {% endif %}
+        {% endfor %}
+
+        <div id="chooseLocaleModal{{ page.id }}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="chooseLocaleModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                        <h4 class="modal-title" id="chooseLocaleModalLabel">{{ page.name }}</h4>
+                        <h5 class="modal-title" >
+                            {{ 'sonata-extra.page_admin.tree_view.create_translation_popin'|trans({}, 'PartitechSonataExtraBundle') }}
+                        </h5>
+
+
+                    </div>
+                    <div class="modal-body">
+                        <!-- Flags -->
+                        <div id="flags-container">
+                            {% for  details in page.translations %}
+                                {% if details.entity_id is defined and details.entity_id %}
+                                    {% set flagClass = 'fi-' ~ details.lang %}
+                                    {% set url_patern = path('sonata_extra_page_create_page_from_locale', {'id': page.id, 'from_site': 'from_site',  'to_site': 'to_site'  }) %}
+                                    <a class="mr-2 flag-link"  href="#"  title="{{ details.label }}" onclick="sonata_extra_page_create_page_from_locale('{{ url_patern }}','{{ details.site }}')"><span class="fi {{ flagClass }} fis  "></span></a>
+                                {% endif %}
+
+                            {% endfor %}
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+<script type="text/javascript">
+    var locale_to='';
+    $(document).ready(function() {
+        $('.chooseLocaleModalLink{{ page.id  }}').on('click', function(e) {
+            $('#chooseLocaleModal{{ page.id  }}').modal('show');
+            to_site=$(this).data('site');
+        });
+
+    });
+
+
+function sonata_extra_page_create_page_from_locale(url_partern,from_site){
+    var newUrl = url_partern.replace('from_site', from_site);
+    newUrl = newUrl.replace('to_site', to_site);
+    window.location.href = newUrl;
+}
+
+</script>
+
+<style>
+
+.flag-button {
+    height: 35px;
+    padding: 0;
+    margin: 0;
+    line-height: 1.5;
+    font-size: 14px;
+}
+
+.flag-button-selected {
+    border-bottom: #00a65a 3px solid;
+}
+.sonata-page-extra-action-flags{
+    padding:10px;
+}
+.flag-button > i {
+    height: 25px;
+    width: 1.5em !important;
+}
+
+.flag-button-create::after {
+    font-family: "Font Awesome 5 Free";
+    content: "\f067"; /* Code Unicode pour l'icône fa-cog */
+    position: absolute;
+    top: 0px;
+    right: 0;
+    font-size: 10px;
+    color: #777;
+    background: none;
+    border-radius: 50%;
+    padding: 2px;
+    font-weight: 900;
+
+}
+
+.flag-button-edit::after {
+    font-family: "Font Awesome 5 Free"; /* Important pour les icônes FontAwesome */
+    content: "\f013"; /* Code Unicode pour l'icône fa-cog */
+    position: absolute;
+    top: 0px;
+    right: 0;
+    font-size: 10px;
+    color: #777;
+    background: none;
+    border-radius: 50%;
+    padding: 2px;
+    font-weight: 900;
+
+}
+</style>
+{% endblock tab_menu %}

@@ -1,0 +1,69 @@
+<div id="chooseLocaleModal{{ object.id }}" class="modal fade" tabindex="-1" role="dialog"
+     aria-labelledby="chooseLocaleModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+                <h4 class="modal-title"
+                    id="chooseLocaleModalLabel">{{ admin.toString(object)|u.truncate(100, '...') }}</h4>
+                <h5 class="modal-title">
+                    {{ 'sonata-extra.page_admin.tree_view.create_translation_popin'|trans({}, 'PartitechSonataExtraBundle') }}
+                </h5>
+
+
+            </div>
+            <div class="modal-body">
+                <!-- Flags -->
+                <div id="flags-container">
+                    {% for  details in object.translations %}
+                        {% if details.entity_id is defined and details.entity_id %}
+                            {% set flagClass = 'fi-' ~ details.lang %}
+                            {% set url_patern = path(admin.getCreateTranslationRouteName(), {'id': object.id, 'from_site': 'from_site',  'to_site': 'to_site', 'fqcn': admin.getAdminCode() }) %}
+                            <a class="btn btn-app  flag-button flag-button-opacity" href="#"
+                               title="{{ details.label }}"
+                               onclick="sonata_extra_page_create_page_from_locale('{{ url_patern }}','{{ details.site }}')"><i
+                                        class="fi {{ flagClass }} fis  "></i></a>
+
+                        {% endif %}
+
+                    {% endfor %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    var locale_to = '';
+    $(document).ready(function () {
+        $('.chooseLocaleModalLink{{ object.id }}').on('click', function (e) {
+            $('#chooseLocaleModal{{ object.id }}').modal('show');
+            to_site = $(this).data('site');
+        });
+        tippy('a[title]', {
+            animation: 'scale',
+            arrow: true,
+            duration: [0, 0],
+            offset: [0, 10],
+            placement: 'top',
+            theme: 'material',
+            trigger: 'mouseenter focus',
+            content: (reference) => {
+                return reference.getAttribute('title');
+            }
+        });
+    });
+
+    function sonata_extra_page_create_page_from_locale(url_partern, from_site) {
+        var newUrl = url_partern.replace('from_site', from_site);
+        newUrl = newUrl.replace('to_site', to_site);
+        window.location.href = newUrl;
+    }
+
+
+</script>

@@ -1,0 +1,17 @@
+<p>C&rsquo;est vrai que lorsque l&rsquo;on parles d&rsquo;excerpt, personne ne comprend a quoi cela corresponds.<br />
+Pour changé l&rsquo;intitulé de cette zone d&rsquo;édition, il suffit d&rsquo;utiliser le bout de code suivant :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+add_filter( 'gettext', 'wpse22764_gettext', 10, 2 );
+function wpse22764_gettext( $translation, $original )
+{
+if ( 'Excerpt' == $original ) {
+return 'Sous-titre';
+}else{
+$pos = strpos($original, 'Excerpts are optional hand-crafted summaries of your');
+if ($pos !== false) {
+return  'Sous-titre affiché dans les push.';
+}
+}
+return $translation;
+}
+</pre>

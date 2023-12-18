@@ -1,0 +1,21 @@
+{
+	"$schema": "https://docs.renovatebot.com/renovate-schema.json",
+	"extends": [ "config:base" ],
+	"enabledManagers": [ "npm" ],
+	"dependencyDashboard": false,
+	"lockFileMaintenance": {
+		"enabled": false
+	},
+	"packageRules": [
+		{
+			"matchPackagePatterns": [ "*" ],
+			"enabled": false
+		},
+		{
+			"matchPackagePatterns": [ "^@wordpress" ],
+			"enabled": true,
+			"matchDepTypes": [ "dependencies" ],
+			"separateMajorMinor": false
+		}
+	]
+}

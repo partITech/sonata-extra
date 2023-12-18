@@ -1,0 +1,16 @@
+
+<p>Nous allons voir ici comment créer une deuxième interface alors que l&rsquo;entité est déjà utilisée dans une interface CRUD.<br><br>Le problème des interfaces générées automatiquement est qu&rsquo;elles utilisent le nom de l&rsquo;entité pour construire les routes.<br>Si on configure une deuxième interface avec une entité déjà utilisée on se retrouvera avec la même route que la première.</p>
+
+
+
+<p>Et pour cela nous allons utiliser ces deux paramètres dans notre classe d&rsquo;admin pour surcharger les valeurs par défaut.<br>Imaginons que nous utilisons l&rsquo;entité « modele » nous pourrons utiliser le terme « modele2 » (ou toto, ce que vous voulez en fait)</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    protected $baseRouteName = 'admin_vendor_app_modele2';
+    
+    protected $baseRoutePattern = 'modele2';
+</pre></div>
+
+
+<p>N’oubliez pas de bien vider le cache pour que les nouvelles routes soient bien prises en compte.</p>

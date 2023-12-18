@@ -1,0 +1,181 @@
+{% block gutenberg_widget %}
+<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+
+<style>
+    .iso-editor .block-editor-writing-flow{
+        overflow: auto !important;
+        height: calc(100vh - 400px) !important;
+    }
+</style>
+<script>
+    var domain = '{{ app.request.schemeAndHttpHost }}';
+    const allowedBlocksArray = JSON.parse('{{ allowed_blocks|raw }}');
+    const patterns = JSON.parse('{{ patterns|raw|escape('js') }}');
+    const categories = JSON.parse('{{ categories|raw }}');
+
+    const settings = {
+        iso: {
+            allowApi: true,
+            defaultPreferences: {
+                fixedToolbar: true,
+            },
+            toolbar: {
+                inserter: true,
+                inspector: true,
+                toc: true,
+                undo: true,
+                navigation: true,
+                documentInspector: true,
+                selectorTool: true,
+            },
+            moreMenu: {
+                editor: true,
+                fullscreen: true,
+                preview: true,
+                topToolbar: true,
+            },
+            sidebar: {
+                inserter: true,
+                inspector: true,
+            },
+            blocks: {
+                allowBlocks: allowedBlocksArray
+            }
+        },
+        editor: {
+            codeEditingEnabled: true,
+            allowedBlockTypes: true,
+            canLockBlocks: false,
+            disableCustomColors: false,
+            disableCustomGradients: true,
+            disableCustomFontSizes: false,
+            disablePostFormats: false,
+            bodyPlaceholder: this.bodyPlaceholder,
+            reusableBlocks: [],
+            richEditingEnabled: true,
+            hasUploadPermissions: true,
+            mediaUpload: sonataExtraGutenbergMediaUpload,
+
+            __experimentalBlockPatterns: patterns,
+            __experimentalBlockPatternCategories:categories,
+            __experimentalFeatures: {
+                typography: {
+                    fontFamily: true,
+                },
+                color: {
+                    background: true,
+                    text: true,
+                    gradient: true,
+                },
+                filter: {
+                    duotone: true,
+                },
+
+
+            },
+
+        },
+    };
+
+    async function sonataExtraGutenbergMediaUpload(item) {
+        const filesList = item.filesList;
+        const formData = new FormData();
+        for (let i = 0; i < filesList.length; i++) {
+            formData.append('file[]', filesList[i]);
+        }
+
+        const uploadUrl = '{{ path('sonata_extra_gutenberg_media_upload',{'context':context}) }}';
+
+        try {
+            const response = await fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response was not ok ' + response.statusText);
+            }
+
+            const uploadedMedia = await response.json();
+            const mediaObjects = uploadedMedia.map(media => ({
+                url: media.url,
+                title: media.title,
+                caption: media.caption
+            }));
+
+            item.onFileChange(mediaObjects);
+        } catch (error) {
+            console.error('There has been a problem with your fetch operation:', error);
+            item.onError(error);
+        }
+    }
+
+
+    function updateImageSrcs(iframe) {
+        var doc = iframe.contentDocument || iframe.contentWindow.document;
+        $(doc).find('img').each(function(index, img) {
+            var src = $(img).attr('src');
+            if (src && src.indexOf('http') !== 0) {  // Vérifie si l'URL n'est pas déjà absolue
+                $(img).attr('src', domain + src);
+                $(img).attr('style', "max-width: 94vw; margin: auto;max-height: 100%");
+            }
+        });
+    }
+
+</script>
+
+    {% for stylesheet in gutenberg_assets.css %}
+        <link rel="stylesheet" href="{{ asset(stylesheet) }}">
+    {% endfor %}
+
+<div id="{{ form.vars.id }}-editor-container">
+    <textarea {{ block('widget_attributes') }}>{{ value }}</textarea>
+    <div id="editor-container">
+
+    {% for script in gutenberg_assets.js %}
+        <script src="{{ asset(script) }}"></script>
+    {% endfor %}
+
+    <script>
+        document.addEventListener('DOMContentLoaded', (event) => {
+            wp=wp.attachEditor( document.getElementById( '{{ form.vars.id }}' ), settings );
+        });
+
+        $(document).ready(function() {
+            $('.btn-success').closest('form').on('submit', function(event) {
+                console.log($(event));
+                if (event.originalEvent.submitter && !$(event.originalEvent.submitter).hasClass('btn')) {
+                    setTimeout(function() {
+                        $('.btn[disabled]').removeAttr('disabled');
+                        $('.components-button, .components-item ') .removeAttr('disabled');
+                    }, 1000);
+                    event.preventDefault();
+                }
+            });
+
+            //check if iframe is created to replace absolut url with the current domain.
+            var observer = new MutationObserver(function(mutationsList, observer) {
+                for(var mutation of mutationsList) {
+                    if (mutation.type === 'childList') {
+                        $(mutation.addedNodes).each(function(index, node) {
+                            if(node.nodeName.toLowerCase() === 'div' && $(node).hasClass('block-editor-block-preview__content')) {
+                                $(node).find('iframe').each(function(index, iframe) {
+                                    setTimeout(function() {
+                                    updateImageSrcs(iframe);
+                                    }, 1000);
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+
+            observer.observe(document, { childList: true, subtree: true });
+
+
+        });
+    </script>
+    </div>
+</div>
+{% endblock %}

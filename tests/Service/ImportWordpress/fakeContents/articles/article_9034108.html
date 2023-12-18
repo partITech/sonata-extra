@@ -1,0 +1,7 @@
+<p>Faire la migration d&rsquo;un site internet volumineux (plusieurs giga) peut être fastidieux à faire depuis son poste de travail (avec filezilla par exemple). Si l&rsquo;on dispose d&rsquo;une machine chez un hébergeur avec un accès au shell, la solution lftp peux vite s&rsquo;avérer être l&rsquo;ultime alternative.</p>
+<p>Récupérer les fichiers :</p>
+<pre class="brush: bash; title: ; notranslate" title="">lftp -e 'mirror /repertoir/distant /repertoir/local' -u login,password -p 21 www.host.com</pre>
+<p>Envoyer les fichiers :</p>
+<pre class="brush: bash; title: ; notranslate" title="">lftp -e 'mirror -R /repertoir/local /repertoir/distant' -u login,password -p 21 www.host.com</pre>
+<p>Envoyer les fichiers avec 10 connexions simultanée:</p>
+<pre class="brush: bash; title: ; notranslate" title="">lftp -e 'mirror --parallel=10 -R /repertoir/local /repertoir/distant' -u login,password -p 21 www.host.com</pre>

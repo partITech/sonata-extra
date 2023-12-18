@@ -1,0 +1,200 @@
+
+<p></p>
+
+
+
+<p>Ok, vous êtes comme moi. Votre machine n&rsquo;a rien d&rsquo;installé en local. Pas même composer et même pas PHP en CLI !</p>
+
+
+
+<p>Alors que vous utilisez PHP et peut être bien Symfony (ou pas) vous avez besoin dans tous les cas d&rsquo;utiliser composer quotidiennement. Vous utilisez tous les jours <em>PhpStorm</em> et vous vous dites que c&rsquo;est dommage de ne pas bénéficier de toutes les options de votre IDE notamment tout ce qui concerne <em>composer</em> et la console <em>Symfony</em>. Alors comment configurer <em>PhpStorm</em> pour spécifier que le composer de votre projet se trouve dans l&rsquo;image docker  ? </p>
+
+
+
+<p>Voici un exemple de docker-compose.yml  Dans les faits vous utiliserez le votre avec votre php/composer dedans.</p>
+
+
+
+<pre title="docker-composee.yml" class="wp-block-code"><code lang="yaml" class="language-yaml">version: "3.8"
+services:
+  apache_server:
+    image: 'devpartitech/php:7.4-apache'
+    ports:
+      - "80:80"
+    volumes:
+      - "./:/var/www/"
+    extra_hosts:
+      - host.docker.internal:host-gateway
+</code></pre>
+
+
+
+<p>Sachez que pour l&rsquo;installation de composer dans votre image c&rsquo;est extrêmement simple il vous suffit, dans votre <em>dockerfile</em>, de copier le composer depuis une image déjà prête 😉</p>
+
+
+
+<pre title="Dockerfile" class="wp-block-code"><code lang="docker" class="language-docker">COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer</code></pre>
+
+
+
+<p>Alors maintenant comment disons nous à PhpStorm que nous souhaitons utiliser /usr/local/bin/composer de notre container ?</p>
+
+
+
+<p>Allez dans File &gt; Settings &gt; PHP &gt; Composer </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-53.png"><img decoding="async" loading="lazy" width="1024" height="626" src="https://www.partitech.com/wp-content/uploads/2023/01/image-53-1024x626.png" alt="" class="wp-image-2384" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-53-1024x626.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-53-300x183.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-53-768x470.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-53-800x489.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-53-550x336.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-53-981x600.png 981w, https://www.partitech.com/wp-content/uploads/2023/01/image-53.png 1212w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>A ce stade rien n&rsquo;est fait. Vous allez donc cocher <em>Synchronize ide Settings with composer.json</em> et <em>Remote Interpreter</em>.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-54.png"><img decoding="async" loading="lazy" width="1024" height="627" src="https://www.partitech.com/wp-content/uploads/2023/01/image-54-1024x627.png" alt="" class="wp-image-2385" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-54-1024x627.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-54-300x184.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-54-768x470.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-54-800x490.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-54-550x337.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-54-980x600.png 980w, https://www.partitech.com/wp-content/uploads/2023/01/image-54.png 1213w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Sur les « &#8230; » depuis <em>CLI Interpreter </em>vous allez  créer une nouvelle configuration.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-55.png"><img decoding="async" loading="lazy" width="1024" height="630" src="https://www.partitech.com/wp-content/uploads/2023/01/image-55-1024x630.png" alt="" class="wp-image-2386" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-55-1024x630.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-55-300x185.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-55-768x473.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-55-800x492.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-55-550x339.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-55-975x600.png 975w, https://www.partitech.com/wp-content/uploads/2023/01/image-55.png 1207w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Choisissez bien entendu <em>From Docker</em>.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-56.png"><img decoding="async" loading="lazy" width="1024" height="630" src="https://www.partitech.com/wp-content/uploads/2023/01/image-56-1024x630.png" alt="" class="wp-image-2387" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-56-1024x630.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-56-300x185.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-56-768x473.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-56-800x492.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-56-550x339.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-56-975x600.png 975w, https://www.partitech.com/wp-content/uploads/2023/01/image-56.png 1207w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Vous aurez plusieurs choix qui s&rsquo;offrent à vous. Vous pourriez directement lier à une image docker spécifique. Perso je choisis mon docker-compose qui me permet de choisir le service que je souhaite utiliser. Mon docker-compose est extrêmement simple. Je n&rsquo;ai qu&rsquo;un service et tout ce dont j&rsquo;ai besoin s&rsquo;y trouve. </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-57.png"><img decoding="async" loading="lazy" width="1024" height="619" src="https://www.partitech.com/wp-content/uploads/2023/01/image-57-1024x619.png" alt="" class="wp-image-2388" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-57-1024x619.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-57-300x181.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-57-768x464.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-57-800x484.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-57-550x333.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-57-992x600.png 992w, https://www.partitech.com/wp-content/uploads/2023/01/image-57.png 1222w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Concernant la configuration, je choisis personnellement d&rsquo;utiliser la connexion au service existant vu que j&rsquo;utilise le docker-compose. Si j&rsquo;avais utilisé directement un container docker j&rsquo;aurais utilisé l&rsquo;option de « allways start a new container ». N&rsquo;oubliez pas de cliquer sur le bouton de <em>refresh</em> au bout de <em>General</em> &gt; <em>PHP executable</em> pour valider que tout est bien présent.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-58.png"><img decoding="async" loading="lazy" width="1024" height="704" src="https://www.partitech.com/wp-content/uploads/2023/01/image-58-1024x704.png" alt="" class="wp-image-2389" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-58-1024x704.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-58-300x206.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-58-768x528.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-58-800x550.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-58-550x378.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-58-873x600.png 873w, https://www.partitech.com/wp-content/uploads/2023/01/image-58.png 1209w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Vous aurez au final un petit bandeau en haut lorsque vous ouvrez votre fichier composer.json</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-59.png"><img decoding="async" loading="lazy" width="1024" height="516" src="https://www.partitech.com/wp-content/uploads/2023/01/image-59-1024x516.png" alt="" class="wp-image-2390" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-59-1024x516.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-300x151.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-768x387.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-1536x773.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-1440x725.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-800x403.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-550x277.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-59-1192x600.png 1192w, https://www.partitech.com/wp-content/uploads/2023/01/image-59.png 1883w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Vous aurez accès aux options directement à <em>install</em> / <em>update</em>, <em>show log</em> vous permet de voir ce qu&rsquo;il se passe réellement dans votre container. Au bout de vos commandes vous avez accès aux options qui vous permet de lancer plus de commandes. </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-60.png"><img decoding="async" loading="lazy" width="1024" height="520" src="https://www.partitech.com/wp-content/uploads/2023/01/image-60-1024x520.png" alt="" class="wp-image-2391" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-60-1024x520.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-300x152.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-768x390.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-1536x780.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-1440x731.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-800x406.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-550x279.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-60-1182x600.png 1182w, https://www.partitech.com/wp-content/uploads/2023/01/image-60.png 1846w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Vous avez également la possibilité d’exécuter directement vos scripts depuis la flèche verte à gauche de votre code.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-61.png"><img decoding="async" loading="lazy" width="1024" height="248" src="https://www.partitech.com/wp-content/uploads/2023/01/image-61-1024x248.png" alt="" class="wp-image-2392" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-61-1024x248.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-61-300x73.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-61-768x186.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-61-800x193.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-61-550x133.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-61.png 1208w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p></p>
+
+
+
+<p>Maintenant que notre première étape est configurée, nous allons ajouter composer et la console de Symfony directement au système « Run Anything » de PhpStorm ; la fameuse fenêtre qui s&rsquo;ouvre lorsque l&rsquo;on clique 2 fois sur CTRL.</p>
+
+
+
+<p>Ouvez la fenêtre de configuration <em>File &gt; Settings</em>, rendez vous à la configuration de <em>Tools &gt; Command line Tool Support</em> et cliquez sur le petit « + » afin d&rsquo;ajouter une nouvelle configuration.</p>
+
+
+
+<p>Une fenêtre de configuration devrait apparaître. Cliquez sur le petit « + » afin de créer une nouvelle configuration.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-66.png"><img decoding="async" loading="lazy" width="944" height="742" src="https://www.partitech.com/wp-content/uploads/2023/01/image-66.png" alt="" class="wp-image-2420" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-66.png 944w, https://www.partitech.com/wp-content/uploads/2023/01/image-66-300x236.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-66-768x604.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-66-800x629.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-66-550x432.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-66-763x600.png 763w" sizes="(max-width: 944px) 100vw, 944px" /></a></figure>
+
+
+
+<p>Vous aurez une petite fenêtre de configuration comme ceci avec plusieurs choix, entre autre <em>composer</em> et <em>Symfony</em> que nous allons tous deux configurer.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-67.png"><img decoding="async" loading="lazy" width="944" height="742" src="https://www.partitech.com/wp-content/uploads/2023/01/image-67.png" alt="" class="wp-image-2421" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-67.png 944w, https://www.partitech.com/wp-content/uploads/2023/01/image-67-300x236.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-67-768x604.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-67-800x629.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-67-550x432.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-67-763x600.png 763w" sizes="(max-width: 944px) 100vw, 944px" /></a></figure>
+
+
+
+<p>On commence par configurer <em>composer</em> :</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-68.png"><img decoding="async" loading="lazy" width="940" height="742" src="https://www.partitech.com/wp-content/uploads/2023/01/image-68.png" alt="" class="wp-image-2422" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-68.png 940w, https://www.partitech.com/wp-content/uploads/2023/01/image-68-300x237.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-68-768x606.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-68-800x631.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-68-550x434.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-68-760x600.png 760w" sizes="(max-width: 940px) 100vw, 940px" /></a></figure>
+
+
+
+<p>Une fois enregistré vous devriez avoir un petit message vous indiquant que plusieurs commandes ont étés trouvées. C&rsquo;est plutôt bon signe 🙂</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-69.png"><img decoding="async" loading="lazy" width="945" height="749" src="https://www.partitech.com/wp-content/uploads/2023/01/image-69.png" alt="" class="wp-image-2423" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-69.png 945w, https://www.partitech.com/wp-content/uploads/2023/01/image-69-300x238.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-69-768x609.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-69-800x634.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-69-550x436.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-69-757x600.png 757w" sizes="(max-width: 945px) 100vw, 945px" /></a></figure>
+
+
+
+<p>Perso, j ai changé l&rsquo;alias pour mettre composer, par défaut PhpStorm mettra « c ». On refait la manip mais cette fois avec <em>Symfony</em>.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-70.png"><img decoding="async" loading="lazy" width="943" height="743" src="https://www.partitech.com/wp-content/uploads/2023/01/image-70.png" alt="" class="wp-image-2424" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-70.png 943w, https://www.partitech.com/wp-content/uploads/2023/01/image-70-300x236.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-70-768x605.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-70-800x630.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-70-550x433.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-70-762x600.png 762w" sizes="(max-width: 943px) 100vw, 943px" /></a></figure>
+
+
+
+<p>Toujours pareil, choisissez votre interpréteur. Je choisis mon conteneur issue de mon docker-compose, et je choisis la version de Symfony souhaitée. Honnêtement si vous ne choisissez pas 3.* 4.* vous avez un sérieux problème 🙂 A noter que si vous avez du mal a monter en dernière version votre application Symfony, nous on sait faire et on se fera une joie de vous aider ^^</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-71.png"><img decoding="async" loading="lazy" width="943" height="741" src="https://www.partitech.com/wp-content/uploads/2023/01/image-71.png" alt="" class="wp-image-2425" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-71.png 943w, https://www.partitech.com/wp-content/uploads/2023/01/image-71-300x236.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-71-768x603.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-71-800x629.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-71-550x432.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-71-764x600.png 764w" sizes="(max-width: 943px) 100vw, 943px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-72.png"><img decoding="async" loading="lazy" width="943" height="743" src="https://www.partitech.com/wp-content/uploads/2023/01/image-72.png" alt="" class="wp-image-2426" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-72.png 943w, https://www.partitech.com/wp-content/uploads/2023/01/image-72-300x236.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-72-768x605.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-72-800x630.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-72-550x433.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-72-762x600.png 762w" sizes="(max-width: 943px) 100vw, 943px" /></a></figure>
+
+
+
+<p>Là encore je change l&rsquo;alias. Je préfère y mettre « console ». Question d&rsquo;habitude 🙂</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-73.png"><img decoding="async" loading="lazy" width="946" height="737" src="https://www.partitech.com/wp-content/uploads/2023/01/image-73.png" alt="" class="wp-image-2427" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-73.png 946w, https://www.partitech.com/wp-content/uploads/2023/01/image-73-300x234.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-73-768x598.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-73-800x623.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-73-550x428.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-73-770x600.png 770w" sizes="(max-width: 946px) 100vw, 946px" /></a></figure>
+
+
+
+<p>Ca y&rsquo;est ! On est prêt pour tester l&rsquo;ensemble. Pressez deux fois sur CTRL. La fenêtre de « <em>Run anything</em> » va s&rsquo;ouvrir.</p>
+
+
+
+<p>Tapez <em>console</em> et vous verrez apparaître toutes vos commandes Symfony. Et comme c&rsquo;est magique elles vont s&rsquo;exécuter directement dans votre conteneur. </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-74.png"><img decoding="async" loading="lazy" width="810" height="774" src="https://www.partitech.com/wp-content/uploads/2023/01/image-74.png" alt="" class="wp-image-2428" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-74.png 810w, https://www.partitech.com/wp-content/uploads/2023/01/image-74-300x287.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-74-768x734.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-74-800x764.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-74-550x526.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-74-628x600.png 628w" sizes="(max-width: 810px) 100vw, 810px" /></a></figure>
+
+
+
+<figure class="wp-block-video"><video controls src="https://www.partitech.com/wp-content/uploads/2023/01/demo_php_custom_commandes_docker.mp4"></video></figure>

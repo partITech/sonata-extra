@@ -1,0 +1,320 @@
+
+<p>Si vous avez un besoin spécifique de transformation de données entre le formulaire et l&rsquo;enregistrement de votre entité et que vous pensez que ce code de transformation devrait se trouver dans un service, car cela vous semble plus logique, vous pouvez utiliser le dataMapper en utilisant l&rsquo;injection de dépendance fournit par Symfony. </p>
+
+
+
+<p>Mais alors comment le mettre en oeuvre ?  </p>
+
+
+
+<p>Un petit rappel sur le DataMapper. Si on s&rsquo;accorde à la documentation officielle de Symfony concernant les <a href="https://symfony.com/doc/current/form/data_mappers.html" target="_blank" rel="noreferrer noopener">DataMapper et DataTransformer</a>, un dataMapper a la responsabilité de lire et écrire un objet (une entité) pour le passer à un formulaire.  En simplifié, il fait la liaison entre un formulaire et son entité.  </p>
+
+
+
+<p><strong>Pour résumer :</strong>  Le data transformer change un élément de l&rsquo;entité, le dataMapper a la responsabilité de l&rsquo;ensemble de l&rsquo;objet. </p>
+
+
+
+<p>DataMapperInterface nous impose en toute logique deux methodes: </p>
+
+
+
+<p>L&rsquo;une prend les données du formulaire pour nous donner la possibilité de les transformer dans l&rsquo;entité cible (<em>mapFormsToData()</em>). L&rsquo;autre, à l&rsquo;inverse, prend les données de l&rsquo;entité pour les transformer à destination du formulaire (<em>mapDataToForms()</em>). </p>
+
+
+
+<p>Attention, cette transformation se place avant l&rsquo;enregistrement de l&rsquo;entité, donc des validations. <br>Si vous avez un besoin plus complexe vous pouvez utiliser les événements Symfony définis dans la classe Symfony\Component\Form\FormEvents. C&rsquo;est d&rsquo;ailleurs ce qui est recommandé. <br>FormEvents::PRE_SUBMIT, FormEvents::SUBMIT, FormEvents::POST_SUBMIT, FormEvents::PRE_SET_DATA, FormEvents::POST_SET_DATA. Nous aurons certainement l&rsquo;occasion d&rsquo;en reparler dans un prochain article. </p>
+
+
+
+<p>Pour l&rsquo;instant revenons à notre formulaire. Nous allons vous montrer comment vous pouvez facilement utiliser les déclarations de service et l&rsquo;autowiring de Symfony pour utiliser un service directement dans un dataMapper avec Sonata.  Notre exemple n&rsquo;est pas très pertinent, car un mécanisme bien plus poussé existe déjà dans Symfony.  Nous allons utiliser un champ texte « Title » pour écrire sa version « slug » dans un champ « slug » automatiquement. Pour formatter le Slug nous allons utiliser le service que Symfony nous propose : <em>Symfony\Component\String\Slugger\SluggerInterface.</em>  <br></p>
+
+
+
+<p><img decoding="async" loading="lazy" width="480" height="561" class="wp-image-2091" style="width: 500px;" src="https://www.partitech.com/wp-content/uploads/2022/12/Sonata_exemple_slug-2.png" alt="" srcset="https://www.partitech.com/wp-content/uploads/2022/12/Sonata_exemple_slug-2.png 480w, https://www.partitech.com/wp-content/uploads/2022/12/Sonata_exemple_slug-2-257x300.png 257w" sizes="(max-width: 480px) 100vw, 480px" /> </p>
+
+
+
+<p>Nous allons donc mettre en œuvre un formulaire avec comme unique champ &lsquo;<strong>titre</strong>&lsquo;. Au submit de ce formulaire nous allons passer par le DataMapper qui lui fera appel à un service SlugService qui lui même aura une methode slugify() qui elle ira chercher le service Symfony SluggerInterface.  Voici le schéma de la table :  </p>
+
+
+
+<pre class="wp-block-code"><code lang="sql" class="language-sql">CREATE TABLE `titles` (
+  `id` int NOT NULL,
+  `title` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL,
+  `slug` varchar(350) CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;</code></pre>
+
+
+
+<p>La définition de nos services : </p>
+
+
+
+<pre title="config/services.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml">    admin.titles:
+        class: App\Admin\SlugTitlesAdmin
+        tags:
+            - { name: sonata.admin, model_class: App\Entity\SlugTitles, controller: App\Controller\SlugTitlesAdminController, manager_type: orm, group: admin , label: "Administrations de vos titres de pages" }
+        arguments: [ ~, ~, ~, "@slug.datamapper" ]
+
+    app.slug_service:
+        class: App\Service\SlugService
+
+    slug.datamapper:
+        class: App\Form\DataMapper\SlugDataMapper
+        arguments : ["@app.slug_service"]
+        public: true</code></pre>
+
+
+
+<p>Nous avons dans l&rsquo;ordre, le form, le service Slug et notre DataMapper nous permettant de faire la liaison entre les deux. L&rsquo;astuce est de considérer le dataMapper comme un service. L&rsquo;injection de dépendance sera réalisée naturellement par Symfony.  Le dataMapper sera appliqué au Form qui lui même aura naturellement son service de mis en place car déclaré dans son constructeur. </p>
+
+
+
+<p></p>
+
+
+
+<p>Il nous faut à présent ajouter dans sonata_addmin.yaml la déclaration de notre formulaire.</p>
+
+
+
+<pre title="config/packages/sonata_admin.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml">    dashboard:
+        groups:
+            runroom:
+            slug_titles:
+                label: "Titles"
+                icon: &lt;i class="fa fa-users"&gt;&lt;/i&gt;
+                on_top: true
+                items:
+                    - admin.titles</code></pre>
+
+
+
+<p>Voici le formulaire en question :</p>
+
+
+
+<pre title="src/Admin/SlugTitlesAdmin.php" class="wp-block-code"><code lang="php" class="language-php line-numbers">&lt;?php
+declare(strict_types=1);
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Form\Type\TemplateType;
+use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Component\Form\DataMapperInterface;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+final class SlugTitlesAdmin extends AbstractAdmin
+{
+
+    private DataMapperInterface $slugDataMapper;
+
+    /**
+     * @param string|null $code
+     * @param string|null $class
+     * @param string|null $baseControllerName
+     * @param DataMapperInterface $slugDataMapper
+     */
+    public function __construct(?string $code, ?string $class,?string  $baseControllerName, DataMapperInterface $slugDataMapper)
+    {
+        parent::__construct($code, $class, $baseControllerName);
+        $this-&gt;slugDataMapper = $slugDataMapper;
+    }
+
+    /**
+     * @param DatagridMapper $filter
+     * @return void
+     */
+    protected function configureDatagridFilters(DatagridMapper $filter): void
+    {
+        $filter
+            -&gt;add('id')
+            -&gt;add('title')
+            -&gt;add('slug')
+        ;
+    }
+
+    /**
+     * @param ListMapper $list
+     * @return void
+     */
+    protected function configureListFields(ListMapper $list): void
+    {
+        $list
+            -&gt;add('title')
+            -&gt;add('slug')
+            -&gt;add(ListMapper::NAME_ACTIONS, null, [
+                'actions' =&gt; [
+                    'show' =&gt; [],
+                    'edit' =&gt; [],
+                    'delete' =&gt; [],
+                ],
+            ]);
+        ;
+    }
+
+    /**
+     * @param FormMapper $form
+     * @return void
+     */
+    protected function configureFormFields(FormMapper $form): void
+    {
+        $form
+            -&gt;add('title', TextType::class, ['help' =&gt; 'Renseignez le titre de votre article'])
+            -&gt;add('slug', HiddenType::class)
+            -&gt;add('informations',TemplateType::class,  [
+                    "template"=&gt;'slug_informations.html.twig',
+                    'label' =&gt; false,
+                    'parameters'=&gt; ['subject'=&gt; $this-&gt;getSubject()]
+                ]
+            )
+        ;
+        $builder = $form-&gt;getFormBuilder();
+        $builder-&gt;setDataMapper($this-&gt;slugDataMapper);
+    }
+
+    /**
+     * @param ShowMapper $show
+     * @return void
+     */
+    protected function configureShowFields(ShowMapper $show): void
+    {
+        $show
+            -&gt;add('id')
+            -&gt;add('title')
+            -&gt;add('slug')
+        ;
+    }
+}
+</code></pre>
+
+
+
+<p>Comme vous le voyez, <em>titre</em> est un champ texte classique. Nous ajoutons le champ <em>slug</em> afin d&rsquo;y avoir accès dans notre DataMapper (mais nous ne l&rsquo;affichons pas) et nous avons rajouté un champ <em>template</em> juste pour que nous ayons l&rsquo;affichage de notre champ slug renseigné.
+</p>
+
+
+
+<p>Remarquez le service DataMapper passé dans le constructeur que nous réutilisons directement dans le <em>formBuilder</em> via <em>setDataMapper()</em>.</p>
+
+
+
+<p></p>
+
+
+
+<pre title="\App\Form\DataMapper\SlugDataMapper" class="wp-block-code"><code lang="php" class="language-php line-numbers">&lt;?php
+
+namespace App\Form\DataMapper;
+
+use App\Entity\SlugTitles;
+use App\Service\SlugService;
+use Symfony\Component\Form\DataMapperInterface;
+use Traversable;
+
+final class SlugDataMapper implements DataMapperInterface
+{
+    protected SlugService $slugService;
+
+    /**
+     * @param SlugService $slugService
+     */
+    public function __construct(SlugService $slugService){
+
+        $this-&gt;slugService = $slugService;
+    }
+
+    /**
+     * @param mixed $viewData
+     * @param Traversable $forms
+     * @return void
+     */
+    public function mapDataToForms(mixed $viewData, Traversable $forms): void
+    {
+        if(is_null($viewData)){
+            return;
+        }
+
+        $forms = iterator_to_array($forms);
+        $forms['title']-&gt;setData($viewData-&gt;getTitle());
+        $forms['slug']-&gt;setData($viewData-&gt;getSlug());
+    }
+
+    /**
+     * @param Traversable $forms
+     * @param mixed $viewData
+     * @return void
+     */
+    public function mapFormsToData(Traversable $forms, mixed &amp;$viewData) :void
+    {
+        $submitedForm = iterator_to_array($forms);
+        $formEntity =  new SlugTitles();
+        $formEntity-&gt;setTitle($submitedForm['title']-&gt;getData());
+        $formEntity-&gt;setSlug($this-&gt;slugService-&gt;slugify($submitedForm['title']-&gt;getData()));
+        $viewData = $formEntity;
+    }
+}</code></pre>
+
+
+
+<p>Nous remplissons le tableau $form dans la première méthode \App\Form\DataMapper\SlugDataMapper::mapDataToForms. Dans la seconde méthode \App\Form\DataMapper\SlugDataMapper::mapFormsToData nous créons une entité avec nos nouvelles informations afin de leur faire passer validation et enregistrement. Le constructeur nous fournit automatiquement notre service SlugService qui lui même aura dans son constructeur le service Slug de Symfony. </p>
+
+
+
+<pre title="src/Service/SlugService.php" class="wp-block-code"><code lang="php" class="language-php line-numbers">&lt;?php
+
+namespace App\Service;
+
+use Symfony\Component\String\Slugger\SluggerInterface;
+
+class SlugService
+{
+    private SluggerInterface $slugger;
+
+    /**
+     * @param SluggerInterface $slugger
+     */
+    public function __construct(SluggerInterface $slugger){
+        $this-&gt;slugger = $slugger;
+    }
+
+    /**
+     * @param string $string
+     * @return String|null
+     */
+    public function slugify(string $string): ?String
+    {
+        return $this-&gt;slugger-&gt;slug($string) ;;
+    }
+
+}</code></pre>
+
+
+
+<p>Pour finir l&rsquo;exemple, le code de notre champ « template » qui nous permet de visualiser le résultat : </p>
+
+
+
+<p></p>
+
+
+
+<pre title="templates/slug_informations.html.twig" class="wp-block-code"><code lang="markup" class="language-markup">&lt;h3&gt;Valeurs de notre entité&lt;/h3&gt;
+
+Id: {{ subject.id }} &lt;br /&gt;
+Title : {{ subject.title }} &lt;br /&gt;
+Slug : {{ subject.slug }} &lt;br /&gt;</code></pre>
+
+
+
+<p></p>
+
+
+
+<p>Voilà !</p>

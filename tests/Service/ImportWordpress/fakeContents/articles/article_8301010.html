@@ -1,0 +1,125 @@
+
+<p>Nous allons voir comment configurer une interface d&rsquo;administration en multilingue avec un bouton de sélection de langue (language switcher).<br></p>
+
+
+
+<h2>Installation de translationBundle</h2>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require sonata-project/translation-bundle
+
+bin/console assets:install
+</pre></div>
+
+
+<p>Le language switcher nécessite un filtre twig spécifique.<br>Sinon vous aurez une erreur de type :<br></p>
+
+
+
+<pre class="wp-block-preformatted">Unknown "language_name" filter.</pre>
+
+
+
+<p>Il faut alors installer ces deux bundles</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+composer require twig/intl-extra
+composer require twig/extra-bundle
+bin/console cache:clear
+</pre></div>
+
+
+<p>On ajoute la configuration par défaut</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+# config/packages/sonata_translation.yaml
+
+sonata_translation:
+    locales: &#91;en, fr, it, nl, es]
+    default_locale: en
+    # change default behavior for translated field filtering.
+    default_filter_mode: gedmo # must be either 'gedmo' or 'knplabs', default: gedmo
+    # here enable the types you need
+    gedmo:
+        enabled: true
+    knplabs:
+        enabled: true
+    #phpcr:
+    #    enabled: true
+</pre></div>
+
+
+<p>Et on ajoute les styles dans l&rsquo;admin</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+# config/packages/sonata_admin.yaml
+
+sonata_admin:
+    assets:
+        extra_stylesheets:
+            - bundles/sonatatranslation/css/sonata-translation.css
+</pre></div>
+
+
+<p>On surcharge l&rsquo;affichage du template sonata</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+# config/packages/sonata_admin.yaml
+
+sonata_admin:
+    templates:
+        layout: '@SonataTranslation/standard_layout.html.twig'
+</pre></div>
+
+
+<p>On rajoute les routes</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+# config/routes.yaml
+
+sonata_translation:
+    resource: '@SonataTranslationBundle/Resources/config/routes.yaml'
+</pre></div>
+
+
+<p>Et on active le language switcher </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+# config/packages/sonata_translation.yaml
+
+sonata_translation:
+    locale_switcher: true
+</pre></div>
+
+
+<p>Et dernier point pour éviter l&rsquo;erreur  </p>
+
+
+
+<pre class="wp-block-preformatted">Argument 5 passed to Twig\Extra\Intl\IntlExtension::formatDateTime() must be of the type string, null given,</pre>
+
+
+
+<p><br><br>Il faudra charger l&rsquo;extension twig/extra-bundle avant SonataIntlBundle de sorte que la fonction formatDateTime de sonataIntl surcharge celle de TwigExtraBundle.<br><br>Ce qui nous donne ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    Sensio\Bundle\FrameworkExtraBundle\SensioFrameworkExtraBundle::class =&gt; &#91;'all' =&gt; true],
+    Twig\Extra\TwigExtraBundle\TwigExtraBundle::class =&gt; &#91;'all' =&gt; true],
+    Sonata\IntlBundle\SonataIntlBundle::class =&gt; &#91;'all' =&gt; true],
+    Sonata\TranslationBundle\SonataTranslationBundle::class =&gt; &#91;'all' =&gt; true],
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="377" src="https://www.partitech.com/wp-content/uploads/2020/10/Sélection_413-1024x377.png" alt="" class="wp-image-762" srcset="https://www.partitech.com/wp-content/uploads/2020/10/Sélection_413-1024x377.png 1024w, https://www.partitech.com/wp-content/uploads/2020/10/Sélection_413-300x110.png 300w, https://www.partitech.com/wp-content/uploads/2020/10/Sélection_413-768x282.png 768w, https://www.partitech.com/wp-content/uploads/2020/10/Sélection_413-1536x565.png 1536w, https://www.partitech.com/wp-content/uploads/2020/10/Sélection_413.png 1865w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p></p>

@@ -1,0 +1,56 @@
+<p>Je ne sais pas si c&rsquo;est lié, mais a l&rsquo;installation de skype 32bit sur mon système 16.04LTS 64bit, skype qui n&rsquo;est disponible qu&rsquo;en 32bit, ne m&rsquo;as pas récupéré les conversations en cours. Pire ! les groupes de discussions étaient invisibles, et je ne voyais pas les messages que l&rsquo;on m&rsquo;envoyais (j&rsquo;entendais les notifications sur skype phone, mais pas sur desktop).</p>
+<p>Pour remédier a cela, j&rsquo;ai trouvé une page intéressante qui m&rsquo;a débloqué en deux commandes :<br />
+https://community.skype.com/t5/Linux/Skype-group-chat-not-working-anymore/td-p/3987288</p>
+<p>La commande suivante, me disais que j&rsquo;étais offline, alors que j&rsquo;étais bien en ligne.</p>
+<pre class="brush: bash; title: ; notranslate" title="">/dumpmsnp </pre>
+<p>Du coup la commande ci-après, qui devrait me donner mon lieu de connexion ne me retournais rien.</p>
+<pre class="brush: bash; title: ; notranslate" title="">/showplaces </pre>
+<p>C&rsquo;est cette commande magique qui m&rsquo;a débloqué :</p>
+<pre class="brush: bash; title: ; notranslate" title="">/msnp24 </pre>
+<p>Après avoir redémarré skype, j&rsquo;ai récupéré l&rsquo;ensemble des groupes, ainsi que les historiques de conversations.</p>
+<p>Pour joindre un appel groupé qui ne serait pas lancé par une instance linux, il semblerais que la commande suivante fonctionne (a la place du bouton « rejoindre »)</p>
+<pre class="brush: bash; title: ; notranslate" title="">/golive </pre>
+<p>Pour délogger les autres devices automatiquement sauf votre connexion :</p>
+<pre class="brush: bash; title: ; notranslate" title="">/remotelogout</pre>
+<p>La liste des commandes sont ici :<br />
+https://support.skype.com/en/faq/FA10042/what-are-chat-commands-and-roles</p>
+<p>Vous pouvez aussi regler les problemes de modules au chargement de skype en installant les packets suivants :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+tbourdin@tbourdin-ubuntu:~$ skype
+Gtk-Message: Failed to load module &quot;overlay-scrollbar&quot;
+Gtk-Message: Failed to load module &quot;gail&quot;
+Gtk-Message: Failed to load module &quot;atk-bridge&quot;
+Gtk-Message: Failed to load module &quot;unity-gtk-module&quot;
+Gtk-Message: Failed to load module &quot;canberra-gtk-module&quot;
+</pre>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo dpkg --add-architecture i386 ; sudo apt-get update; sudo apt-get -f install
+sudo apt-get install libatk-adaptor:i386 libgail-common:i386 libatk-bridge2.0-0:i386 libatspi2.0-0:i386 libgail18:i386 libgtkmm-2.4-1v5:i386 gtk2-engines:i386 libcanberra-gtk-module:i386
+sudo apt-get download overlay-scrollbar-gtk2:i386 ; sudo dpkg --force-depends -i overlay-scrollbar-gtk2_*_i386.deb
+ou bien :
+sudo apt-get download overlay-scrollbar-gtk2:i386 ; sudo dpkg --ignore-depends overlay-scrollbar -i overlay-scrollbar-gtk2*.deb
+
+</pre>
+<p>EDIT :<br />
+Pour regler les problemes de son avec skype alpha, il suffit de modifier les parametres de pulse-audio</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo gedit /usr/share/pulseaudio/alsa-mixer/paths/analog-input.conf.common
+
+[Option Auto Gain Control:on]
+name = input-agc-on
+
+to
+
+[Option Auto Gain Control:on]
+name = input-agc-off
+
+and
+
+[Option Capture Boost:on]
+name = input-boost-on
+
+to
+
+[Option Capture Boost:on]
+name = input-boost-off
+</pre>

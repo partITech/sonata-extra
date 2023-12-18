@@ -1,0 +1,233 @@
+
+<p>Voici une question que je me suis posée récemment. Habituellement j’installe directement les outils de QA sur mon host ou directement dans l&rsquo;image Docker. Si les outils sont installés sur mon host, pas de problèmes pour configurer PhpStorm.</p>
+
+
+
+<p>Si les outils sont directement configurés dans l&rsquo;image Docker, pas de problèmes non plus pour l&rsquo;utiliser à l’intérieur de l&rsquo;image. En revanche comment peut on allier la puissance de <strong>PhpStorm </strong>et de <strong>Docker </strong>pour lier les deux ? </p>
+
+
+
+<p>Voici donc comment procéder pour l’installation de <strong>php_codesniffer</strong>, <strong>Mess Detector, CS Fixer, PSalm, PhpStan</strong>.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image.png"><img decoding="async" loading="lazy" width="1011" height="739" src="https://www.partitech.com/wp-content/uploads/2022/12/image.png" alt="" class="wp-image-2105" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image.png 1011w, https://www.partitech.com/wp-content/uploads/2022/12/image-300x219.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-768x561.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-800x585.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-550x402.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-821x600.png 821w" sizes="(max-width: 1011px) 100vw, 1011px" /></a></figure>
+
+
+
+<p>Pour le besoin de notre article je vous donne quelques armes pour l&rsquo;ajouter à votre Dockerfile ou bien directement en créer un spécialement pour votre workflow de développement. Personnellement j&rsquo;ai un Dockerfile pour gérer l&rsquo;ensemble des versions de PHP et dans lequel j&rsquo;y ajoute l&rsquo;ensemble des outils dont j&rsquo;ai besoin pour monter une stack de dév.  </p>
+
+
+
+<pre title="Dockerfile" class="wp-block-code"><code lang="docker" class="language-docker line-numbers">FROM php:7.4.31-apache-buster
+
+ARG COMPOSER_HOME=/composer
+
+RUN composer global require squizlabs/php_codesniffer
+RUN composer global require phpmd/phpmd
+RUN composer global require friendsofphp/php-cs-fixer  --with-all-dependencies
+RUN composer global require vimeo/psalm
+RUN composer global require phpstan/phpstan
+</code></pre>
+
+
+
+<p>Vous pouvez directement utiliser une image spéciale pour le CLI. Perso j&rsquo;utilise une image avec apache. Du coup je monte mon image &lsquo;qa&rsquo; quand j&rsquo;en ai besoin en surchargeant l&rsquo;entrypoint par défaut et en passant une commande infinie. </p>
+
+
+
+<pre title="docker-compose.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml">version: "3.8"
+services:
+    qa:
+        image: 'devpartitech/php:7.4-apache'
+        tty: true
+        environment:
+            COMPOSER_HOME: '/composer'
+        volumes:
+          - "./:/var/www/"
+        entrypoint: ["/bin/bash", "-c"]
+        command: "tail -f /dev/null"</code></pre>
+
+
+
+<p>Vous allez donc devoir configurer des interpréteurs. Pour cela rendez vous dans<strong> Settings &gt; Quality Tools </strong>et nous allons choisir le premier de la liste <strong>PHP_Code_Sniffer</strong>.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-2.png"><img decoding="async" loading="lazy" width="1024" height="811" src="https://www.partitech.com/wp-content/uploads/2022/12/image-2-1024x811.png" alt="" class="wp-image-2108" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-2-1024x811.png 1024w, https://www.partitech.com/wp-content/uploads/2022/12/image-2-300x238.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-2-768x608.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-2-800x634.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-2-550x436.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-2-758x600.png 758w, https://www.partitech.com/wp-content/uploads/2022/12/image-2.png 1125w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Une fois dans l&rsquo;interface de configuration des <strong>Interpréteurs</strong> cliquez sur le « <strong>+</strong> » et choisissez « <strong>From Docker</strong>« </p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-3.png"><img decoding="async" loading="lazy" width="1024" height="811" src="https://www.partitech.com/wp-content/uploads/2022/12/image-3-1024x811.png" alt="" class="wp-image-2109" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-3-1024x811.png 1024w, https://www.partitech.com/wp-content/uploads/2022/12/image-3-300x238.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-3-768x608.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-3-800x634.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-3-550x436.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-3-758x600.png 758w, https://www.partitech.com/wp-content/uploads/2022/12/image-3.png 1125w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Ce n&rsquo;est qu&rsquo;un exemple que vous pourrez adapter à votre guise. Je vais utiliser mon Docker Compose directement. </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-4.png"><img decoding="async" loading="lazy" width="932" height="726" src="https://www.partitech.com/wp-content/uploads/2022/12/image-4.png" alt="" class="wp-image-2110" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-4.png 932w, https://www.partitech.com/wp-content/uploads/2022/12/image-4-300x234.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-4-768x598.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-4-800x623.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-4-550x428.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-4-770x600.png 770w" sizes="(max-width: 932px) 100vw, 932px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-5.png"><img decoding="async" loading="lazy" width="932" height="726" src="https://www.partitech.com/wp-content/uploads/2022/12/image-5.png" alt="" class="wp-image-2111" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-5.png 932w, https://www.partitech.com/wp-content/uploads/2022/12/image-5-300x234.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-5-768x598.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-5-800x623.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-5-550x428.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-5-770x600.png 770w" sizes="(max-width: 932px) 100vw, 932px" /></a></figure>
+
+
+
+<p>Une fois créé vous aurez accès à la page de configuration. Avant de valider pensez à exécuter le reload de votre config qu&rsquo;il prenne en compte votre exécutable PHP.<br></p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-6.png"><img decoding="async" loading="lazy" width="974" height="748" src="https://www.partitech.com/wp-content/uploads/2022/12/image-6.png" alt="" class="wp-image-2112" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-6.png 974w, https://www.partitech.com/wp-content/uploads/2022/12/image-6-300x230.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-6-768x590.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-6-800x614.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-6-550x422.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-6-781x600.png 781w" sizes="(max-width: 974px) 100vw, 974px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-7.png"><img decoding="async" loading="lazy" width="974" height="727" src="https://www.partitech.com/wp-content/uploads/2022/12/image-7.png" alt="" class="wp-image-2113" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-7.png 974w, https://www.partitech.com/wp-content/uploads/2022/12/image-7-300x224.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-7-768x573.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-7-800x597.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-7-550x411.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-7-804x600.png 804w" sizes="(max-width: 974px) 100vw, 974px" /></a></figure>
+
+
+
+<p>Si comme moi vous avez choisi « /composer » comme COMPOSER_HOME alors vous trouverez l&rsquo;ensemble des outils installés dans <strong>/composer/vendor/bin</strong>. Vous pouvez donc renseigner (adaptez si besoin) les valeurs suivantes :<br><strong>PHP_Code_Sniffer path </strong>: /composer/vendor/bin/phpcs</p>
+
+
+
+<p><strong>Path to phpcbf </strong>: /composer/vendor/bin/phpcbf</p>
+
+
+
+<p>Validez pour bien vérifier que tout est en ordre.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-8.png"><img decoding="async" loading="lazy" width="834" height="701" src="https://www.partitech.com/wp-content/uploads/2022/12/image-8.png" alt="" class="wp-image-2116" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-8.png 834w, https://www.partitech.com/wp-content/uploads/2022/12/image-8-300x252.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-8-768x646.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-8-800x672.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-8-550x462.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-8-714x600.png 714w" sizes="(max-width: 834px) 100vw, 834px" /></a></figure>
+
+
+
+<p>Poursuivons avec le prochain de la liste : Mess Detector. Il vous suffira de sélectionner l’interpréteur déjà configuré. </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-9.png"><img decoding="async" loading="lazy" width="1015" height="747" src="https://www.partitech.com/wp-content/uploads/2022/12/image-9.png" alt="" class="wp-image-2117" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-9.png 1015w, https://www.partitech.com/wp-content/uploads/2022/12/image-9-300x221.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-9-768x565.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-9-800x589.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-9-550x405.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-9-815x600.png 815w" sizes="(max-width: 1015px) 100vw, 1015px" /></a></figure>
+
+
+
+<p>Renseignez l’interpréteur et cliquez sur les « &#8230; »</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-11.png"><img decoding="async" loading="lazy" width="1016" height="742" src="https://www.partitech.com/wp-content/uploads/2022/12/image-11.png" alt="" class="wp-image-2119" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-11.png 1016w, https://www.partitech.com/wp-content/uploads/2022/12/image-11-300x219.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-11-768x561.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-11-800x584.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-11-550x402.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-11-822x600.png 822w" sizes="(max-width: 1016px) 100vw, 1016px" /></a></figure>
+
+
+
+<p>Renseignez le path mapping :/composer/vendor/bin/phpmd et on est bon !</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-10.png"><img decoding="async" loading="lazy" width="1024" height="731" src="https://www.partitech.com/wp-content/uploads/2022/12/image-10.png" alt="" class="wp-image-2118" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-10.png 1024w, https://www.partitech.com/wp-content/uploads/2022/12/image-10-300x214.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-10-768x548.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-10-800x571.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-10-550x393.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-10-840x600.png 840w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>On poursuit avec Mess detector. On choisit toujours notre configuration sur qa-php-7.4 et on clique « &#8230; ». Puis on clique sur le « + »</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-13.png"><img decoding="async" loading="lazy" width="819" height="694" src="https://www.partitech.com/wp-content/uploads/2022/12/image-13.png" alt="" class="wp-image-2121" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-13.png 819w, https://www.partitech.com/wp-content/uploads/2022/12/image-13-300x254.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-13-768x651.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-13-800x678.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-13-550x466.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-13-708x600.png 708w" sizes="(max-width: 819px) 100vw, 819px" /></a></figure>
+
+
+
+<p>Renseignez le <strong>PHP CS Fixer path</strong> /composer/vendor/bin/php-cs-fixer et validez.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-14.png"><img decoding="async" loading="lazy" width="829" height="698" src="https://www.partitech.com/wp-content/uploads/2022/12/image-14.png" alt="" class="wp-image-2122" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-14.png 829w, https://www.partitech.com/wp-content/uploads/2022/12/image-14-300x253.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-14-768x647.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-14-800x674.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-14-550x463.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-14-713x600.png 713w" sizes="(max-width: 829px) 100vw, 829px" /></a></figure>
+
+
+
+<p>Poursuivons avec Psalm. On choisit toujours notre interpreteur.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-16.png"><img decoding="async" loading="lazy" width="1024" height="720" src="https://www.partitech.com/wp-content/uploads/2022/12/image-16-1024x720.png" alt="" class="wp-image-2125" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-16-1024x720.png 1024w, https://www.partitech.com/wp-content/uploads/2022/12/image-16-300x211.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-16-768x540.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-16-800x563.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-16-550x387.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-16-853x600.png 853w, https://www.partitech.com/wp-content/uploads/2022/12/image-16.png 1049w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-17.png"><img decoding="async" loading="lazy" width="909" height="748" src="https://www.partitech.com/wp-content/uploads/2022/12/image-17.png" alt="" class="wp-image-2126" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-17.png 909w, https://www.partitech.com/wp-content/uploads/2022/12/image-17-300x247.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-17-768x632.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-17-800x658.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-17-550x453.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-17-729x600.png 729w" sizes="(max-width: 909px) 100vw, 909px" /></a></figure>
+
+
+
+<p>On renseigne le <strong>psalm path</strong> : <strong>/composer/vendor/bin/psalm</strong> et on valide. </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-18.png"><img decoding="async" loading="lazy" width="847" height="698" src="https://www.partitech.com/wp-content/uploads/2022/12/image-18.png" alt="" class="wp-image-2127" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-18.png 847w, https://www.partitech.com/wp-content/uploads/2022/12/image-18-300x247.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-18-768x633.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-18-800x659.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-18-550x453.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-18-728x600.png 728w" sizes="(max-width: 847px) 100vw, 847px" /></a></figure>
+
+
+
+<p>On finit par le petit dernier de la liste PHPStan. On l&rsquo;active et on clique sur « &#8230; »</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-19.png"><img decoding="async" loading="lazy" width="1024" height="735" src="https://www.partitech.com/wp-content/uploads/2022/12/image-19-1024x735.png" alt="" class="wp-image-2128" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-19-1024x735.png 1024w, https://www.partitech.com/wp-content/uploads/2022/12/image-19-300x215.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-19-768x551.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-19-800x574.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-19-550x395.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-19-836x600.png 836w, https://www.partitech.com/wp-content/uploads/2022/12/image-19.png 1040w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-20.png"><img decoding="async" loading="lazy" width="1024" height="735" src="https://www.partitech.com/wp-content/uploads/2022/12/image-20-1024x735.png" alt="" class="wp-image-2129" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-20-1024x735.png 1024w, https://www.partitech.com/wp-content/uploads/2022/12/image-20-300x215.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-20-768x551.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-20-800x574.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-20-550x395.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-20-836x600.png 836w, https://www.partitech.com/wp-content/uploads/2022/12/image-20.png 1040w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Renseignez le <strong>PHPSTAN path /composer/vendor/bin/phpstan , validez </strong>et vous êtes bon : </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-21.png"><img decoding="async" loading="lazy" width="827" height="698" src="https://www.partitech.com/wp-content/uploads/2022/12/image-21.png" alt="" class="wp-image-2130" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-21.png 827w, https://www.partitech.com/wp-content/uploads/2022/12/image-21-300x253.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-21-768x648.png 768w, https://www.partitech.com/wp-content/uploads/2022/12/image-21-800x675.png 800w, https://www.partitech.com/wp-content/uploads/2022/12/image-21-550x464.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-21-711x600.png 711w" sizes="(max-width: 827px) 100vw, 827px" /></a></figure>
+
+
+
+<p>Et voilà ! Nous avons l&rsquo;ensemble de nos outils de qualité convenablement liés à notre conteneur Docker.</p>
+
+
+
+<p>Vous pouvez à présent tester que tout se passe bien avant d&rsquo;affiner vos paramètres. </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-22.png"><img decoding="async" loading="lazy" width="352" height="821" src="https://www.partitech.com/wp-content/uploads/2022/12/image-22.png" alt="" class="wp-image-2131" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-22.png 352w, https://www.partitech.com/wp-content/uploads/2022/12/image-22-129x300.png 129w, https://www.partitech.com/wp-content/uploads/2022/12/image-22-257x600.png 257w" sizes="(max-width: 352px) 100vw, 352px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-23.png"><img decoding="async" loading="lazy" width="515" height="339" src="https://www.partitech.com/wp-content/uploads/2022/12/image-23.png" alt="" class="wp-image-2132" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-23.png 515w, https://www.partitech.com/wp-content/uploads/2022/12/image-23-300x197.png 300w" sizes="(max-width: 515px) 100vw, 515px" /></a></figure>
+
+
+
+<p>Dans la liste dépliez PHP &gt; <strong>Quality tools</strong> et pensez à cocher l&rsquo;ensemble :</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-24.png"><img decoding="async" loading="lazy" width="722" height="634" src="https://www.partitech.com/wp-content/uploads/2022/12/image-24.png" alt="" class="wp-image-2133" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-24.png 722w, https://www.partitech.com/wp-content/uploads/2022/12/image-24-300x263.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-24-550x483.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-24-683x600.png 683w" sizes="(max-width: 722px) 100vw, 722px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-25.png"><img decoding="async" loading="lazy" width="760" height="627" src="https://www.partitech.com/wp-content/uploads/2022/12/image-25.png" alt="" class="wp-image-2134" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-25.png 760w, https://www.partitech.com/wp-content/uploads/2022/12/image-25-300x248.png 300w, https://www.partitech.com/wp-content/uploads/2022/12/image-25-550x454.png 550w, https://www.partitech.com/wp-content/uploads/2022/12/image-25-727x600.png 727w" sizes="(max-width: 760px) 100vw, 760px" /></a></figure>
+
+
+
+<p>Cliquez sur <strong>Analyze</strong> : </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/12/image-26.png"><img decoding="async" loading="lazy" width="511" height="345" src="https://www.partitech.com/wp-content/uploads/2022/12/image-26.png" alt="" class="wp-image-2135" srcset="https://www.partitech.com/wp-content/uploads/2022/12/image-26.png 511w, https://www.partitech.com/wp-content/uploads/2022/12/image-26-300x203.png 300w" sizes="(max-width: 511px) 100vw, 511px" /></a></figure>
+
+
+
+<p>L&rsquo;ensemble des remarques apparaîtrons directement dans l&rsquo;onglet « Problems » de PhpStorm. Attention si vous avez inclus l&rsquo;ensemble de votre projet. Préférez peut-être n&rsquo;inclure que src ou d&rsquo;exclure le rep vendor sous peine de crouler sous les notifications !</p>
+
+
+
+<p>Et voilà ! Happy coding 🙂</p>
+
+
+
+<p></p>

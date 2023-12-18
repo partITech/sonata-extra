@@ -1,0 +1,26 @@
+<p>Vous l&rsquo;avez sans doute remarqué, PHP7 est installé en standard sous Ubuntu 16.04 LTS.<br />
+Ce qui peu poser problème si vous avez un vieux projet WordPress qui utilise l’extension php mysql, qui n&rsquo;est plus disponible sous php7.<br />
+La solution consiste à installer une configuration apache 2 pour php 5.6 et php 7, et d&rsquo;activer l&rsquo;une ou l&rsquo;autre selon les besoins.</p>
+<p>On commence par installer PHP 5.6</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo add-apt-repository ppa:ondrej/php
+sudo apt-get update
+sudo apt-get install php7.0 php5.6 php5.6-mysql php-gettext php5.6-mbstring php-xdebug libapache2-mod-php5.6 libapache2-mod-php7.0 php5.6-xml
+</pre>
+<p>Pour passer de php 5.6 à php 7</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo a2dismod php5.6 ; sudo a2enmod php7.0 ; sudo service apache2 restart
+sudo ln -sfn /usr/bin/php7.0 /etc/alternatives/php
+</pre>
+<p>Pour passer de php7 à php 5.6 :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo a2dismod php7.0 ; sudo a2enmod php5.6 ; sudo service apache2 restart
+sudo ln -sfn /usr/bin/php5.6 /etc/alternatives/php
+</pre>
+<p>On peux ensuite automatiser le passage de l&rsquo;un a l&rsquo;autre avec un alias dans notre bashrc :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+vi  ~/.bashrc
+
+alias setphp7='sudo a2dismod php5.6 ; sudo a2enmod php7.0 ; sudo service apache2 restart; sudo ln -sfn /usr/bin/php7.0 /etc/alternatives/php'
+alias setphp5='sudo a2dismod php7.0 ; sudo a2enmod php5.6 ; sudo service apache2 restart; sudo ln -sfn /usr/bin/php5.6 /etc/alternatives/php'
+</pre>

@@ -1,0 +1,7 @@
+<p>Les permissions de wordpress doivent être de 755 pour les dossiers et de 644 pour les fichiers.<br>L&rsquo;ensemble doit avoir le même user/groupe que le serveur.</p>
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+chown www-data:www-data -R *
+find . -type d | xargs chmod -v 755
+find . -type f | xargs chmod -v 644
+</pre></div>

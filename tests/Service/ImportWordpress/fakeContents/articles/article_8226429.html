@@ -1,0 +1,25 @@
+<p>Pour activer le pavé numérique au démarrage, installer&nbsp;numlockx et&nbsp; créez ou éditez le fichier</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo apt-get install numlockx
+</pre>
+<pre>puis créez ou éditez le fichier de conf suivant :
+
+
+<pre class="brush: bash; title: ; notranslate" title="">
+#Pour 14.04 LTS
+sudo vi /usr/share/lightdm/lightdm.conf.d/60-lightdm-gtk-greeter.conf
+
+#Pour 16.04 LTS
+/usr/share/lightdm/lightdm.conf.d/50-unity-greeter.conf
+</pre>
+<p>et ajouter les informations suivantes :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+#Pour 14.04 LTS
+[SeatDefaults]
+greeter-setup-script=/usr/bin/numlockx on
+
+#Pour 16.04 LTS
+[Seat:*]
+greeter-session=unity-greeter
+greeter-setup-script=/usr/bin/numlockx on
+</pre>

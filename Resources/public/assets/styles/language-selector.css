@@ -1,0 +1,33 @@
+/* Exemple de style */
+.language-selector {
+    position: relative;
+}
+
+.language-selector .current-language {
+    cursor: pointer;
+}
+
+.language-selector .language-list {
+    position: absolute;
+    top: 100%;
+    display: none;
+    background-color: #fff;
+    border: 1px solid #ccc;
+}
+
+.language-selector .language-list ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+}
+
+.language-selector .language-list li {
+    margin: 0;
+    padding: 0;
+}
+
+.language-selector .language-list a {
+    display: block;
+    padding: 5px 10px;
+    text-decoration: none;
+}

@@ -1,0 +1,138 @@
+
+    {% set sites = admin.siteList %}
+    {% set currentSite = admin.currentSite %}
+    {% set currentSelectedLocalId = admin.currentSelectedLocal %}
+    {% if object is defined %}
+        {% set currentSite =  object.site %}
+    {% endif %}
+
+    <div class="nav navbar-nav navbar-right sonata-page-extra-action-flags">
+
+        {% for site in sites %}
+            {% set flagClass = 'fi-' ~ site.localShort %}
+            {% if action == 'list' or  action == 'tree' %}
+
+                {% set buttonAction = 'create' %}
+                {% set currentClass = currentSite.id == site.id ? 'flag-button-selected' : 'flag-button-opacity' %}
+
+            {% elseif action == 'create' %}
+                {% set buttonAction = 'create' %}
+                {% set currentClass = currentSite.id== site.id ? 'flag-button-selected' : 'flag-button-opacity' %}
+            {% endif %}
+
+            {% if action == 'create' or  action == 'list' or action=='tree' %}
+                <a class="btn btn-app  flag-button {{ currentClass }} flag-button-create"
+                   href="{{ admin.generateUrl(buttonAction, { 'site':site.id }) }}"
+                   title="{{ 'sonata-extra.translation.create_entity'|trans({}, 'PartitechSonataExtraBundle') }} {{ site.name }}">
+                    <i class="fi {{ flagClass }} fis"></i>
+                </a>
+            {% endif %}
+
+        {% endfor %}
+
+{#        {% if action == 'edit' %}#}
+{#            {% for details in object.translations %}#}
+{#                {% set flagClass = 'fi-' ~ details.lang %}#}
+{#                {% set disabledClass = details.entity_id is defined and details.entity_id ? '' : 'btn-disabled' %}#}
+{#                {% set currentClass = currentSite.id== details.site? 'flag-button-selected' : 'flag-button-opacity' %}#}
+
+{#                {% if details.entity_id is defined and details.entity_id %}#}
+{#                    <a class="btn btn-app  flag-button {{ currentClass }}"#}
+{#                       href="{{ admin.generateUrl('edit',  {'id': details.entity_id  }) }}"#}
+{#                       title="{{ 'sonata-extra.translation.edit'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"#}
+{#                    ><i class="fi {{ flagClass }} fis"></i></a>#}
+{#                {% else %}#}
+{#                    <a class="btn btn-app  flag-button {{ currentClass }} btn-disabled chooseLocaleModalLink{{ object.id }}"#}
+{#                       href="#"#}
+{#                       data-site="{{ details.site }}"#}
+{#                       title="{{ 'sonata-extra.translation.create'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"#}
+{#                    ><i class="fi {{ flagClass }} fis"></i></a>#}
+{#                {% endif %}#}
+{#            {% endfor %}#}
+{#        {% endif %}#}
+
+
+        {% if action == 'edit'%}
+            {% for details in object.translations %}
+                {% set flagClass = 'fi-' ~ details.lang %}
+                {% set disabledClass = details.entity_id is defined and details.entity_id ? '' : 'btn-disabled' %}
+                {% set currentClass = currentSite.id== details.site? 'flag-button-selected' : 'flag-button-opacity' %}
+
+                {% if details.entity_id is defined and details.entity_id %}
+                    <a  class="btn btn-app  flag-button {{ currentClass }} flag-button-edit"
+                        href="{{ admin.generateUrl('edit',  {'id': details.entity_id  }) }}"
+                        title="{{ 'sonata-extra.translation.edit'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"
+                    ><i class="fi {{ flagClass }} fis"></i></a>
+                {% else %}
+                    <a  class="btn btn-app  flag-button {{ currentClass }} btn-disabled chooseLocaleModalLink{{ object.id  }} flag-button-create"
+                        href="#"
+                        data-site="{{ details.site }}"
+                        title="{{ 'sonata-extra.translation.create'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"
+                    ><i class="fi {{ flagClass }} fis"></i></a>
+                {% endif %}
+            {% endfor %}
+        {% endif %}
+
+    </div>
+
+    {% if object is defined and action=='edit' %}
+        {# using modal flag shooser #}
+        {% include '@PartitechSonataExtra/Admin/translation/crud_inline_flags_modal.html.twig' %}
+    {% endif %}
+
+    <style>
+        .flag-button {
+            height: 35px;
+            padding: 0;
+            margin: 0;
+            line-height: 1.5;
+            font-size: 14px;
+        }
+
+        .flag-button-selected {
+            border-bottom: #00a65a 3px solid;
+        }
+        .sonata-page-extra-action-flags{
+            padding:10px;
+        }
+        .flag-button > i {
+            height: 25px;
+            width: 1.5em !important;
+        }
+
+        .flag-button-create::after {
+            font-family: "Font Awesome 5 Free"; /* Important pour les icônes FontAwesome */
+            content: "\f067"; /* Code Unicode pour l'icône fa-cog */
+            position: absolute;
+            top: 0px;
+            right: 0;
+            font-size: 10px;
+            color: #777;
+            background: none;
+            border-radius: 50%;
+            padding: 2px;
+            font-weight: 900;
+
+        }
+
+        .flag-button-edit::after {
+            font-family: "Font Awesome 5 Free"; /* Important pour les icônes FontAwesome */
+            content: "\f013"; /* Code Unicode pour l'icône fa-cog */
+            position: absolute;
+            top: 0px;
+            right: 0;
+            font-size: 10px;
+            color: #777;
+            background: none;
+            border-radius: 50%;
+            padding: 2px;
+            font-weight: 900;
+
+        }
+
+
+
+    </style>
+
+    <script src="https://unpkg.com/@popperjs/core@2"></script>
+    <script src="https://unpkg.com/tippy.js@6"></script>

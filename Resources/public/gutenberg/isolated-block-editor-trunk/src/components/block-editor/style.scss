@@ -1,0 +1,95 @@
+@import "@wordpress/base-styles/_mixins";
+@import "@wordpress/base-styles/_variables";
+@import "@wordpress/base-styles/_colors";
+
+.iso-editor {
+	// Restrict the interface skeleton to our container, and not assume it's own a WP admin page
+	.edit-post-layout.interface-interface-skeleton {
+		position: static;
+		top:auto;
+		left: auto;
+	}
+
+	.interface-interface-skeleton__editor,
+	.interface-interface-skeleton__content {
+		width: 100%;
+	}
+
+	.interface-interface-skeleton__sidebar,
+	.interface-interface-skeleton__secondary-sidebar {
+		margin-bottom: 1px;
+	}
+
+	.edit-post-layout:not(.is-sidebar-opened):not(.is-inserter-opened) {
+		.interface-interface-skeleton__editor,
+		.interface-interface-skeleton__content,
+		.interface-interface-skeleton__body {
+			overflow: visible;
+		}
+	}
+
+	.is-mode__text .edit-post-text-editor__body {
+		margin-left: 0;
+		margin-right: 0;
+		margin-bottom: 0;
+		padding: 16px 24px 96px;
+	}
+
+	// Set the font for the editor
+	.block-editor-writing-flow {
+		font-family: $default-font;
+		font-size: $editor-font-size;
+		line-height: $editor-line-height;
+	}
+
+	.block-editor-writing-flow .block-editor-block-list__layout .wp-block:first-child[data-type='core/paragraph'] {
+		padding-top: 0;
+	}
+
+	.block-editor-writing-flow .block-list-appender .wp-block {
+		padding-top: 0 !important;
+	}
+
+	// This adds left/right padding for the editor
+	.block-editor-block-list__layout.is-root-container {
+		padding-left: 14px;
+		padding-right: 14px;
+
+		@media ( min-width: 600px ) {
+			padding-left: 36px;
+			padding-right: 36px;
+		}
+	}
+
+	// Override default browser borders
+	.block-editor-link-control__settings {
+		border-left: none;
+		border-right: none;
+		border-bottom: none;
+	}
+
+	// Hide the 'manage reusable blocks' option
+	a[href="edit.php?post_type=wp_block"] {
+		display: none;
+	}
+
+	.is-fullscreen-mode {
+		.block-editor-block-list__layout > div:first-child > .block-list-appender:first-child .wp-block,
+		.block-editor-block-list__layout > .block-list-appender:first-child .wp-block {
+			margin: 0 auto !important;
+		}
+	}
+
+	// Ensure that we always override the black background from core
+	.edit-post-visual-editor {
+		background-color: #fff;
+	}
+
+	.edit-post-visual-editor:not(.has-inline-canvas) {
+		overflow: visible;
+	}
+
+	.components-panel__header.edit-post-sidebar__panel-tabs .components-button.has-icon {
+		margin-left: 0;
+	}
+}

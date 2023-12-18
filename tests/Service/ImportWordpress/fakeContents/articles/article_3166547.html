@@ -1,0 +1,28 @@
+<p>Pour éditer un raccourci de la barre de lancement rapide de unity, il faut éditer le .desktop correspondant à menu créer.<br />
+Pour voir l&rsquo;ensemble des raccourcis disponibles :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+gsettings get com.canonical.Unity.Launcher favorites
+</pre>
+<p>Ce qui retourne un array avec l&rsquo;ensemble des éléments</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+tbourdin@tbourdin-ubuntu:~$ gsettings get com.canonical.Unity.Launcher favorites
+['application://gnome-terminal.desktop', 'application://firefox.desktop', 'application://thunderbird.desktop', 'application://org.gnome.Nautilus.desktop', 'application://org.gnome.Software.desktop', 'application://unity-control-center.desktop', 'application://shutter.desktop', 'application://filezilla.desktop', 'unity://expo-icon', 'unity://devices', 'application://org.gnome.gedit.desktop', 'unity://running-apps', 'application://org_eclipse_equinox_launcher_1_3_100_v20150511-1540_jar.desktop', 'application://gnome-system-monitor.desktop']
+</pre>
+<p>On repère ensuite le fichier qui corresponds à notre item et on l&rsquo;édite dans le répertoire :</p>
+<pre class="brush: bash; title: ; notranslate" title="">~/.local/share/applications/</pre>
+<p>Dans notre cas : application://org_eclipse_equinox_launcher_1_3_100_v20150511-1540_jar.desktop</p>
+<pre class="brush: bash; title: ; notranslate" title="">[Desktop Entry]
+vi /home/tbourdin/.local/share/applications/org_eclipse_equinox_launcher_1_3_100_v20150511-1540_jar.desktop
+
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Name=Zend Studio Editor
+Icon=org_eclipse_equinox_launcher_1_3_100_v20150511-1540_jar.png
+Path=/etc/ZendStudio
+Exec=/etc/ZendStudio/ZendStudio
+StartupNotify=false
+StartupWMClass=Zend Studio
+OnlyShowIn=Unity;
+X-UnityGenerated=true
+</pre>

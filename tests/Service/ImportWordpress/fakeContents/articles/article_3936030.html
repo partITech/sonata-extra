@@ -1,0 +1,300 @@
+
+<p>Dans cet article nous allons voir comment créer une API rest avec FOS/rest-bundle, avec une authentification, et un générateur de documentation de type swagger.</p>
+
+
+
+<p>Liste des bundle nécessaire :<br><strong>friendsofsymfony/rest-bundle :</strong> Fournis une série d&rsquo;outils d&rsquo;aide au développement d&rsquo;une API restfull<br><a rel="noreferrer noopener" href="https://github.com/FriendsOfSymfony/FOSRestBundle" target="_blank">https://github.com/FriendsOfSymfony/FOSRestBundle</a><br><br><strong>jms/serializer-bundle :</strong> Permet la sérialisation d&rsquo;objets.<br><a rel="noreferrer noopener" href="https://packagist.org/packages/jms/serializer-bundle" target="_blank">https://packagist.org/packages/jms/serializer-bundle</a><br><br><strong>lexik/jwt-authentication-bundle :</strong> Permet la gestion de token web en json.<br><a rel="noreferrer noopener" href="https://github.com/lexik/LexikJWTAuthenticationBundle" target="_blank">https://github.com/lexik/LexikJWTAuthenticationBundle</a><br><br><strong>nelmio/NelmioApiDocBundle : </strong> Permet de générer une documentation HTML à la swagger<br><a rel="noreferrer noopener" href="https://github.com/nelmio/NelmioApiDocBundle" target="_blank">https://github.com/nelmio/NelmioApiDocBundle</a></p>
+
+
+
+<p></p>
+
+
+
+<h2>Installation dans composer</h2>
+
+
+
+<p>On part du principe que l&rsquo;on utilise notre skeleton comme base de départ.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require &quot;nelmio/cors-bundle&quot;
+composer require &quot;lexik/jwt-authentication-bundle&quot;
+composer require &quot;jms/serializer-bundle&quot;
+composer require &quot;friendsofsymfony/rest-bundle&quot;
+composer require &quot;nelmio/api-doc-bundle&quot;
+composer require &quot;annotations&quot;
+</pre></div>
+
+
+<p>Il faudra ensuite enregistrer nos bundles dans bundles.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+Nelmio\CorsBundle\NelmioCorsBundle::class =&gt; &#91;'all' =&gt; true],
+    Lexik\Bundle\JWTAuthenticationBundle\LexikJWTAuthenticationBundle::class =&gt; &#91;'all' =&gt; true],
+    FOS\RestBundle\FOSRestBundle::class =&gt; &#91;'all' =&gt; true],
+    Nelmio\ApiDocBundle\NelmioApiDocBundle::class =&gt; &#91;'all' =&gt; true],
+</pre></div>
+
+
+<p>Pour la documentation, il faudra ajouter la route :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+# config/routes.yaml
+app.swagger_ui:
+    path: /api/doc
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger_ui }
+    
+app.swagger:
+    path: /api/doc.json
+    methods: GET
+    defaults: { _controller: nelmio_api_doc.controller.swagger }
+
+</pre></div>
+
+
+<p>Créer la configuration pour la documentation :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+# config/packages/nelmio_api_doc.yaml
+nelmio_api_doc:
+    areas:
+        path_patterns: # an array of regexps
+            - ^/api(?!/doc$)
+        host_patterns:
+            - ^api\.
+</pre></div>
+
+
+<p>Il faudra ensuite activer les converters de framework extra :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+#/config/packages/sensio_framework_extra.yaml
+sensio_framework_extra:
+    router:
+        annotations: false
+    request: { converters: true }
+</pre></div>
+
+
+<h2>Création de notre première méthode de l&rsquo;API</h2>
+
+
+
+<p>On va d&rsquo;abords créer notre controller</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+ bin/console make:controller api
+</pre></div>
+
+
+<p>Dans notre controller, nous devrons inclure notre librairie d&rsquo;annotation de fosRestBundle pour y utiliser les bonnes annotations ainsi que les librairies NelmioApiDoc</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Controller;
+
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use FOS\RestBundle\Controller\Annotations\Get;
+use JMS\Serializer\SerializationContext;
+use Symfony\Component\HttpFoundation\Response;
+use Swagger\Annotations as SWG;
+use Nelmio\ApiDocBundle\Annotation\Model;
+use Nelmio\ApiDocBundle\Annotation\Security;
+
+class ApiController extends AbstractController
+{
+
+    /**
+     * @Get(
+     *     path = &quot;/api/test/{id}&quot;,
+     *     name = &quot;api_test_id&quot;,
+     *     requirements = {&quot;id&quot;=&quot;\d+&quot;}
+     * )
+     */
+    public function index()
+    {
+        $detail=&#91;'test'=&gt;'value'];
+
+        $serializer = $this-&gt;get('serializer');
+        $response = new Response(
+            $serializer-&gt;serialize(&#91;'detail' =&gt; $detail], 'json'),
+            Response::HTTP_OK
+            );
+        $response-&gt;headers-&gt;set('Content-Type', 'application/json');
+        
+        return $response;
+    }
+}
+</pre></div>
+
+
+<p>Pour gérer les code de réponses, nous devrons utiliser les annotations suivantes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+     * @SWG\Response(
+     *     response=200,
+     *     @SWG\Schema(type=&quot;object&quot;,
+     *         example={&quot;foo&quot;: &quot;bar&quot;, &quot;hello&quot;: &quot;world&quot;}
+     *     ),
+     *     description=&quot;Response ok&quot;
+     * )
+     * @SWG\Response(
+     *     response=401,
+     *     description=&quot;Access Denied&quot;
+     * ) 
+     * @SWG\Response(
+     *     response=403,
+     *     description=&quot;Forbidden&quot;
+     * ) 
+     * @SWG\Response(
+     *     response=404,
+     *     description=&quot;Not Found&quot;
+     * )
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="313" src="https://www.partitech.com/wp-content/uploads/2020/08/Sélection_207-1024x313.png" alt="" class="wp-image-650" srcset="https://www.partitech.com/wp-content/uploads/2020/08/Sélection_207-1024x313.png 1024w, https://www.partitech.com/wp-content/uploads/2020/08/Sélection_207-300x92.png 300w, https://www.partitech.com/wp-content/uploads/2020/08/Sélection_207-768x235.png 768w, https://www.partitech.com/wp-content/uploads/2020/08/Sélection_207.png 1348w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<h2>Authentification de notre API</h2>
+
+
+
+<p>Pour l&rsquo;authentification, on a choisi de faire simple. Pas une authentification par l’entête de type Bearer, mais juste une clef dans l&rsquo;url.<br>C&rsquo;est beaucoup plus simple à tester, surtout lorsque vous allez travailler avec des tiers, et que vous ne souhaitez pas faire du support dans tous les sens et former leurs stagiaire. Même si ajouter une clef dans l’entête, c&rsquo;est franchement pas bien compliqué. bref.</p>
+
+
+
+<p>Donc on va déclarer notre clef dans les annotations de notre méthode.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+     * @SWG\Parameter(
+     *     name=&quot;key&quot;,
+     *     in=&quot;query&quot;,
+     *     type=&quot;string&quot;,
+     *     description=&quot;The authorization key&quot;
+     * )
+</pre></div>
+
+
+<p>Couplé a la définition de notre api cela donne ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+/**
+ * @Get(
+ *     path = &quot;/api/test/{id}&quot;,
+ *     name = &quot;api_test_id&quot;,
+ *     requirements = {&quot;id&quot;=&quot;\d+&quot;}
+ * )
+ * 
+ * 
+ * @SWG\Parameter(
+ *     name=&quot;key&quot;,
+ *     in=&quot;query&quot;,
+ *     type=&quot;string&quot;,
+ *     description=&quot;The authorization key provided by HMF&quot;
+ * )
+</pre></div>
+
+
+<p>Et dans le swagger cela se matérialise comme cela :</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2020/08/image-wpp1617783597896.png"><img decoding="async" loading="lazy" width="597" height="627" src="https://www.partitech.com/wp-content/uploads/2020/08/image-wpp1617783597896.png" alt="" class="wp-image-653" srcset="https://www.partitech.com/wp-content/uploads/2020/08/image-wpp1617783597896.png 597w, https://www.partitech.com/wp-content/uploads/2020/08/image-wpp1617783597896-286x300.png 286w, https://www.partitech.com/wp-content/uploads/2020/08/image-wpp1617783597896-550x578.png 550w, https://www.partitech.com/wp-content/uploads/2020/08/image-wpp1617783597896-571x600.png 571w" sizes="(max-width: 597px) 100vw, 597px" /></a></figure>
+
+
+
+<h2>Personnalisation de la documentation</h2>
+
+
+
+<p>La documentation présente quelques problèmes d&rsquo;affichage du style, et notamment affiche un logo du bundle, alors que l&rsquo;on souhaites afficher le logo du client.<br>Du coup, il suffit de surcharger le template en créant un fichier twig ici :<br>/templates/bundles/NelmioApiDocBundle/SwaggerUi/index.html.twig</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+{# templates/bundles/NelmioApiDocBundle/SwaggerUi/index.html.twig #}
+
+{#
+    To avoid a &quot;reached nested level&quot; error an exclamation mark `!` has to be added
+    See https://symfony.com/blog/new-in-symfony-3-4-improved-the-overriding-of-templates
+#}
+{% extends '@!NelmioApiDoc/SwaggerUi/index.html.twig' %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    &lt;link rel=&quot;stylesheet&quot; href=&quot;{{ asset('css/custom-swagger-styles.css') }}&quot;&gt;
+    &lt;style&gt;
+    header #logo img{
+    	height: unset;
+    }
+    header::before{
+	background-color: #FFFFFF;
+    }
+    .swagger-ui table tbody tr td, .response-col_description__inner{
+    	padding: 0;
+    	vertical-align: top;
+    }
+    .swagger-ui .markdown p{
+		margin: 10px auto;
+    }
+&lt;/style&gt;
+{% endblock stylesheets %}
+
+{% block javascripts %}
+    {{ parent() }}
+    &lt;script type=&quot;text/javascript&quot; src=&quot;{{ asset('js/custom-request-signer.js') }}&quot;&gt;&lt;/script&gt;
+{% endblock javascripts %}
+
+
+{% block header %}
+    &lt;a id=&quot;logo&quot; href=&quot;#&quot;&gt;&lt;img src=&quot;{{ asset('images/logo.png') }}&quot; alt=&quot;Hyundai&quot;&gt;&lt;/a&gt;
+{% endblock header %}
+</pre></div>
+
+
+<p>On voudras aussi ne permettre que le json et le teste en https, car notre domaine est en https, et si l&rsquo;utilisateur (le stagiaire), teste en http alors que la doc est en https, le navigateur bloquera la requête. C&rsquo;est con, mais c&rsquo;est du vécus 😉<br>On va lui mettre un titre, supprimer l&rsquo;authentification Bearer, et supprimer la vérification par host.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+# config/packages/nelmio_api_doc.yaml
+nelmio_api_doc:
+    areas:
+        path_patterns: # an array of regexps
+            - ^/api(?!/doc$)
+#        host_patterns:
+#            - ^api\.
+#            
+    documentation:
+        host: api.hyundai.test
+        #schemes: &#91;http, https]
+        schemes: &#91;https]
+        info:
+            title: Hyundai API
+            description: hyundai backend webservice
+            version: 1.0.0
+        #securityDefinitions:
+        #    Bearer:
+        #        type: apiKey
+        #        description: 'Value: Bearer {jwt}'
+        #        name: Authorization
+        #        in: header
+        #security:
+        #    - Bearer: &#91;]
+</pre></div>
+
+
+<p>Et voila ! on est prêt à développer notre API.<br>Il nous resteras à créer un CRUD pour les clefs, et appliquer notre logiques de données à fournir pour chaque méthodes.<br></p>

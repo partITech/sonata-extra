@@ -1,0 +1,10 @@
+{% extends get_global_template('list') %}
+
+{%- block tab_menu -%}
+    {% if action is defined %}
+        {{ knp_menu_render(admin.sidemenu(action), {
+            'currentClass': 'active',
+            'template': '@PartitechSonataExtra/Admin/article/tab_menu_template.html.twig'
+        }, 'twig') }}
+    {% endif %}
+{%- endblock -%}

@@ -1,0 +1,49 @@
+{% extends sonata_block.templates.block_base %}
+{% form_theme form 'bootstrap_5_layout.html.twig' %}
+{% block block %}
+    {% block content %}
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="card-header">
+                            {{ title }}
+                        </div>
+                        <div class="card-body">
+                            {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
+
+                            <div class="row">
+                                <div class="col-md-6">{{ form_row(form.firstName) }}</div>
+                                <div class="col-md-6"> {{ form_row(form.lastName) }} </div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-6">{{ form_row(form.phone) }}</div>
+                                <div class="col-md-6">{{ form_row(form.email) }}</div>
+                            </div>
+
+
+                            <div class="row">
+                                <div class="col-md-6">{{ form_row(form.companyName) }}</div>
+                                <div class="col-md-6">{{ form_row(form.address) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">{{ form_row(form.additionalInformation) }}</div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col">
+                                    {{ form_row(form.sendMeACopy) }}
+                                    {{ form_row(form.submit, {'attr': {'class': 'btn btn-primary mt-3'}}) }}
+                                </div>
+                            </div>
+                            {{ form_end(form) }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}

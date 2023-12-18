@@ -1,0 +1,47 @@
+<p>https://vpsineu.com/blog/how-to-build-and-install-php-5-6-9-from-source-on-ubuntu-14-04-vps/</p>
+<p>Installation des librairies necessaire</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo apt-get install libfcgi-dev libfcgi0ldbl libjpeg62-dbg libmcrypt-dev libssl-dev libbz2-dev libjpeg-dev libfreetype6-dev libpng12-dev libxpm-dev libxml2-dev libpcre3-dev libbz2-dev libcurl4-openssl-dev libjpeg-dev libpng12-dev libxpm-dev libfreetype6-dev libmysqlclient-dev libgmp-dev libsasl2-dev libmhash-dev unixodbc-dev freetds-dev libpspell-dev libsnmp-dev libtidy-dev libxslt1-dev libmcrypt-dev libdb5.3-dev libgd-dev libxfont1 libxfont-dev
+</pre>
+<p>Téléchargement des sources :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo wget -O /var/tmp/php-5.6.9.tar.bz2     http://bg2.php.net/get/php-5.6.9.tar.bz2/from/this/mirror
+</pre>
+<p>Décompression des sources :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo tar -xvjpf /var/tmp/php-5.6.9.tar.bz2 -C /opt/build
+</pre>
+<p>Configuration des source :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+cd /opt/build/php-5.6.9
+
+./configure \
+--enable-fpm \
+--with-mcrypt \
+--enable-mbstring \
+--with-openssl \
+--with-mysql \
+--with-mysql-sock \
+--with-gd \
+--with-jpeg-dir=/usr/lib \
+--enable-gd-native-ttf  \
+--with-pdo-mysql \
+--with-libxml-dir=/usr/lib \
+--with-mysqli=/usr/bin/mysql_config \
+--with-curl \
+--enable-zip  \
+--enable-sockets \
+--with-zlib \
+--enable-exif \
+--enable-ftp \
+--with-iconv \
+--with-gettext \
+--enable-gd-native-ttf \
+--with-t1lib=/usr \
+--with-freetype-dir=/usr \
+--prefix=/opt/PHP-5.6 \
+--with-config-file-path=/opt/PHP-5.6/etc \
+--with-fpm-user=www-data \
+--with-fpm-group=www-data
+
+</pre>

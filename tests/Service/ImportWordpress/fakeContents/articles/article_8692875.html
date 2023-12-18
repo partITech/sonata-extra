@@ -1,0 +1,420 @@
+
+<p>Nous allons voir comment exploiter les types de champs Jsonb de postgreSql dans une interface générée de sonata.</p>
+
+
+
+<p>Nous partons du postulat que vous maîtrisez déjà les concepts basiques de Symfony, Sonata, et PostgreSql.<br><br>Tout d&rsquo;abord créons une table toute simple dans postgreSql qui contiendra un champs de type Jsonb.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="739" height="87" src="https://www.partitech.com/wp-content/uploads/2020/09/Sélection_161.png" alt="" class="wp-image-739" srcset="https://www.partitech.com/wp-content/uploads/2020/09/Sélection_161.png 739w, https://www.partitech.com/wp-content/uploads/2020/09/Sélection_161-300x35.png 300w" sizes="(max-width: 739px) 100vw, 739px" /></figure>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: sql; title: ; notranslate" title="">
+CREATE SEQUENCE public.table1_id_seq;
+CREATE TABLE public.table1 (
+    id integer DEFAULT nextval('public.table1_id_seq'::regclass) NOT NULL,
+    var1 character varying(250),
+    var2 jsonb
+);
+ALTER TABLE ONLY public.table1
+    ADD CONSTRAINT table1_pkey PRIMARY KEY (id);
+
+
+</pre></div>
+
+
+<p>Il faut ensuite générer l&rsquo;entity et son interface d&rsquo;admin</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console doctrine:mapping:import &quot;App\Entity&quot; annotation --path=src/Entity
+php bin/console make:entity --regenerate App
+php bin/console make:sonata:admin App/Entity/Table1
+</pre></div>
+
+
+<p>On remarque le type de champ dans notre entity</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; highlight: [35]; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Table1
+ *
+ * @ORM\Table(name=&quot;table1&quot;)
+ * @ORM\Entity
+ */
+class Table1
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name=&quot;id&quot;, type=&quot;integer&quot;, nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy=&quot;SEQUENCE&quot;)
+     * @ORM\SequenceGenerator(sequenceName=&quot;table1_id_seq&quot;, allocationSize=1, initialValue=1)
+     */
+    private $id;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name=&quot;var1&quot;, type=&quot;string&quot;, length=250, nullable=true)
+     */
+    private $var1;
+
+    /**
+     * @var json|null
+     *
+     * @ORM\Column(name=&quot;var2&quot;, type=&quot;json&quot;, nullable=true)
+     */
+    private $var2;
+
+    public function getId(): ?int
+    {
+        return $this-&gt;id;
+    }
+
+    public function getVar1(): ?string
+    {
+        return $this-&gt;var1;
+    }
+
+    public function setVar1(?string $var1): self
+    {
+        $this-&gt;var1 = $var1;
+
+        return $this;
+    }
+
+    public function getVar2(): ?array
+    {
+        return $this-&gt;var2;
+    }
+
+    public function setVar2(?array $var2): self
+    {
+        $this-&gt;var2 = $var2;
+
+        return $this;
+    }
+
+
+}
+
+</pre></div>
+
+
+<p>Et notre interface d&rsquo;admin générée dans son format le plus simple</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Show\ShowMapper;
+
+final class Table1Admin extends AbstractAdmin
+{
+
+    protected function configureDatagridFilters(DatagridMapper $datagridMapper): void
+    {
+        $datagridMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            ;
+    }
+
+    protected function configureListFields(ListMapper $listMapper): void
+    {
+        $listMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            -&gt;add('_action', null, &#91;
+                'actions' =&gt; &#91;
+                    'show' =&gt; &#91;],
+                    'edit' =&gt; &#91;],
+                    'delete' =&gt; &#91;],
+                ],
+            ]);
+    }
+
+    protected function configureFormFields(FormMapper $formMapper): void
+    {
+        $formMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            ;
+    }
+
+    protected function configureShowFields(ShowMapper $showMapper): void
+    {
+        $showMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            ;
+    }
+}
+
+</pre></div>
+
+
+<p>Notre objectif maintenant est de créer une imbrication de formulaire pour gérer notre data en json.<br>Pour cela nous allons utiliser les collections de symfony.<br>Les étapes sont les suivantes, nous allons créer un formulaire qui sera intégré au champ. Il auras un bouton ajouter/supprimer pour ajouter des items à notre collection. <br>Nous allons ensuite lier notre formulaire à notre champs « var2 ».</p>
+
+
+
+<p>Nous créons notre formulaire dans le répertoire Form de src.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;?php #src/Form/fieldvar2.php
+
+namespace App\Form;
+
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type as FormType;
+
+class fieldvar2 extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
+            -&gt;add('var2_titre', FormType\TextType::class, &#91;
+                'label' =&gt; 'Var2 titre',
+            ])
+            -&gt;add('var2_valeur', FormType\TextType::class, &#91;
+                'label' =&gt; 'var2 valeur',
+            ]);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+    }
+}
+
+?&gt;
+</pre></div>
+
+
+<p>Il faut ensuite lier ce formulaire à notre champ.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+use Symfony\Component\Form\Extension\Core\Type as FormType;
+use App\Form\fieldvar2;
+
+final class Table1Admin extends AbstractAdmin
+{
+
+    protected function configureFormFields(FormMapper $formMapper): void
+    {
+        $formMapper
+            //-&gt;add('id') #on supprime le champs id puisqu'il est auto incrémenté
+            -&gt;add('var1')
+            -&gt;add('var2', FormType\CollectionType::class, &#91;
+                'allow_add' =&gt; true,
+                'allow_delete' =&gt; true,
+                'entry_type' =&gt; 'App\\Form\\fieldvar2',
+                'label' =&gt; 'Var jsonb',
+            ])
+            ;
+        
+           
+            
+    }
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="640" height="562" src="https://www.partitech.com/wp-content/uploads/2020/09/jsonb-insert.gif" alt="" class="wp-image-732"/></figure>
+
+
+
+<p>Maintenant nous allons voir comment nous pourrions avoir une imbrication de formulaires dans notre formulaire. En gros des « nested collection ».<br>Et pour cela il va falloir utiliser un composant Collection de Sonata car c&rsquo;est le seul qui va fonctionner en imbrications multiples (en théorie, infinie).<br><br>On va rajouter la référence à  Sonata\AdminBundle\Form\Type\CollectionType, créer un deuxième formulaire et l&rsquo;implémenter dans notre premier formulaire.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;?php #src/Form/fieldvar2valeur.php
+
+namespace App\Form;
+
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type as FormType;
+
+class fieldvar2valeur extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        $builder
+            -&gt;add('valeurs_multiples', FormType\TextType::class, &#91;
+                'label' =&gt; 'Netsted 2 val',
+            ]);
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver-&gt;setDefaults(&#91;
+            'allow_extra_fields' =&gt; true,
+            'allow_add' =&gt; true,
+        ]);
+    }
+    
+    
+}
+
+?&gt;
+</pre></div>
+
+
+<p>Notre implémentation de la collection de niveau 2 </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; highlight: [24]; title: ; notranslate" title="">
+&lt;?php #src/Form/fieldvar2.php
+
+namespace App\Form;
+
+use Symfony\Component\Form\AbstractType;
+use Symfony\Component\Form\FormBuilderInterface;
+use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type as FormType;
+use App\Form\fieldvar2valeur;
+use Sonata\AdminBundle\Form\Type\CollectionType;
+
+class fieldvar2 extends AbstractType
+{
+    public function buildForm(FormBuilderInterface $builder, array $options)
+    {
+        
+        
+       $builder-&gt;add('var2_titre', FormType\TextType::class, &#91;
+            'label' =&gt; 'Var2 titre',
+        ])
+        -&gt;add('var2_valeur', CollectionType::class, &#91;
+                'allow_add' =&gt; true,
+                'allow_delete' =&gt; true,
+                'entry_type' =&gt; 'App\\Form\\fieldvar2valeur',
+                'label' =&gt; 'Data Nested 2',
+            ])
+       ;
+          
+
+
+    }
+
+    public function configureOptions(OptionsResolver $resolver)
+    {
+        $resolver-&gt;setDefaults(&#91;
+            'allow_extra_fields' =&gt; true,
+            'allow_add' =&gt; true,
+        ]);
+    }
+}
+
+?&gt;
+</pre></div>
+
+
+<p>Et il ne nous reste plus qu&rsquo;à modifier la configuration de notre collection pour utiliser le composant de SonataAdmin</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; highlight: [16]; title: ; notranslate" title="">
+&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Show\ShowMapper;
+
+use App\Form\fieldvar2;
+
+
+use Sonata\AdminBundle\Form\Type\CollectionType;
+
+final class Table1Admin extends AbstractAdmin
+{
+
+    protected function configureDatagridFilters(DatagridMapper $datagridMapper): void
+    {
+        $datagridMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            ;
+    }
+
+    protected function configureListFields(ListMapper $listMapper): void
+    {
+        $listMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            -&gt;add('_action', null, &#91;
+                'actions' =&gt; &#91;
+                    'show' =&gt; &#91;],
+                    'edit' =&gt; &#91;],
+                    'delete' =&gt; &#91;],
+                ],
+            ]);
+    }
+
+    protected function configureFormFields(FormMapper $formMapper): void
+    {
+        $formMapper
+            //-&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2', CollectionType::class, &#91;
+                'allow_add' =&gt; true,
+                'allow_delete' =&gt; true,
+                'entry_type' =&gt; 'App\\Form\\fieldvar2',
+                'label' =&gt; 'Var jsonb',
+            ])
+            ;
+        
+            
+            
+    }
+
+    protected function configureShowFields(ShowMapper $showMapper): void
+    {
+        $showMapper
+            -&gt;add('id')
+            -&gt;add('var1')
+            -&gt;add('var2')
+            ;
+    }
+}
+
+</pre></div>
+
+
+<p>Ce qui donne ceci </p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="640" height="518" src="https://www.partitech.com/wp-content/uploads/2020/09/jsonb-insert-nested2.gif" alt="" class="wp-image-736"/></figure>

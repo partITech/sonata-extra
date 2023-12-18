@@ -1,0 +1,399 @@
+
+<p>Tous les 5 ans c&rsquo;est la même musique. La version de Debian LTS arrive à expiration et il faut mettre à jour le serveur. Et du coup, on en profite pour prendre une machine récente pour bénéficier des meilleurs performances.<br>Si on a un disque dur SATA, il vaut mieux repartir sur de nouveaux disques quoi qu&rsquo;il arrive. Leurs durée de vie étant limitées.</p>
+
+
+
+<p>Nous allons donc procéder à une série de backups sur l&rsquo;ancien serveur, les rapatrier sur le nouveau et tout réinstaller à l&rsquo;identique.</p>
+
+
+
+<p>Dans notre cas, nous étions sur une Debian 8, laquelle supporte GitLab 13.3.9.<br>Nous changeons de machine pour une Debian 10, laquelle supporte GitLab 14.x.x<br><br>Installer GitLab-ce est simple, tant que nous n&rsquo;avons pas de repository à migrer. Là ou ça se complique, c&rsquo;est qu&rsquo;il ne faut rien perdre de l&rsquo;ancienne instance. Chez partITech nous avons plus de 100 repository qui représentent à peu près 20 Go d&rsquo;archives.<br><br>Les archives ne sont pas compatibles entre les versions. Donc si nous avons une archive faite avec la version 13.3.9, il faudra installer cette même version et faire l&rsquo;import. La dernière étape consistera à faire la migration de la 13.3.9 vers la dernière version 14.x<br>Mais pour procéder à cette montée de version majeur, il nous faudra impérativement installer la dernière version en date de la branche 13.x soit la  version 13.12.0</p>
+
+
+
+<h3>Installation des packages de base</h3>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+apt-get install vim curl backup-manager mlocate libcurl4-openssl-dev libexpat1-dev gettext libz-dev libssl-dev libpcre2-dev build-essential git-core graphicsmagick libimage-exiftool-perl htop
+</pre></div>
+
+
+<p>On installe vim et on désactive la souris.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+vi ~/.vimrc
+#on ajoute set mouse-=a
+</pre></div>
+
+
+<p>On dé-commente les alias.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+vi ~/.bashrc
+.   ~/.bashrc
+</pre></div>
+
+
+<h3>Sur l&rsquo;ancien serveur</h3>
+
+
+
+<p>On stoppe les services.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo gitlab-ctl stop unicorn
+sudo gitlab-ctl stop sidekiq
+</pre></div>
+
+
+<p>On crée un backup.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo gitlab-rake gitlab:backup:create
+</pre></div>
+
+
+<p>On prépare un répertoire dans lequel on met l&rsquo;ensemble de nos fichiers à rapatrier.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+mkdir ~/gitlab-old
+</pre></div>
+
+
+<p>On copie nos fichiers de configuration de notre répertoire. /etc/gitlab (gitlab.rb and gitlab-secrets.json) ainsi que le répertoire /etc/gitlab/ssl</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo cp /etc/gitlab/gitlab.rb ~/gitlab-old
+sudo cp /etc/gitlab/gitlab-secrets.json ~/gitlab-old
+sudo cp -R /etc/gitlab/ssl ~/gitlab-old
+sudo cp /etc/backup-manager.conf ~/gitlab-old/
+sudo cp /etc/backup-manager.sh ~/gitlab-old/
+</pre></div>
+
+
+<h3>Sur le nouveau serveur</h3>
+
+
+
+<p>On installe la source apt de GitLab.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+curl -s https://packages.gitlab.com/install/repositories/gitlab/gitlab-ce/script.deb.sh |  bash
+</pre></div>
+
+
+<p>On installe la version de GitLab à l&rsquo;identique de l&rsquo;ancienne pour ne pas avoir de problèmes d&rsquo;installations. Puis on mettra à jour avec la dernière version.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo apt-get install gitlab-ce=13.3.9-ce.0
+</pre></div>
+
+
+<p>On installe nos fichiers de configuration de notre ancienne instance.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo mv /etc/gitlab/gitlab.rb /etc/gitlab/_gitlab.rb
+sudo cp gitlab-old/gitlab* /etc/gitLab
+</pre></div>
+
+
+<p>On copie le répertoire SSL de notre ancienne instance.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+cp -R gitlab-old/ssl /etc/gitlab/
+</pre></div>
+
+
+<p>On lance la reconfiguration de GitLab.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo gitlab-ctl reconfigure
+</pre></div>
+
+
+<p>On éteint les services.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo gitlab-ctl stop unicorn
+sudo gitlab-ctl stop sidekiq
+</pre></div>
+
+
+<p>On place notre premier backup dans le répertoire de backup par défaut de GitLab (nous avons modifié notre répertoire par défaut.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo cp gitlab-old/1624870826_2021_06_28_13.3.9_gitlab_backup.tar ~/gitlab-backups
+</pre></div>
+
+
+<p>Et on l&rsquo;importe.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo gitlab-rake gitlab:backup:restore BACKUP=1624870826_2021_06_28_13.3.9
+</pre></div>
+
+
+<p>On fixe les permissions.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+  sudo find /data/gitlab-storage -type f -exec chmod 0644 {} \;
+  sudo find /data/gitlab-storage/uploads -type d -not -path /data/gitlab-storage/uploads -exec chmod 0700 {} \;
+</pre></div>
+
+
+<p>On convertit nos repository en hash si besoin.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+gitlab-rake gitlab:storage:migrate_to_hashed
+</pre></div>
+
+
+<p>On ouvre les ports 80 et 443 dans le firewall si besoin.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+iptables -A INPUT -p tcp --dport 80 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+iptables -A INPUT -p tcp --dport 443 -m conntrack --ctstate NEW,ESTABLISHED -j ACCEPT
+
+</pre></div>
+
+
+<p>L&rsquo;interface devrait répondre normalement maintenant sur notre nouveau serveur.</p>
+
+
+
+<h3>Upgrade des versions</h3>
+
+
+
+<p>Il nous faut maintenant mettre à jour GitLab.<br>Première étape, on passe sous la version 13.5.0</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+apt-get install gitlab-ce=13.5.0-ce.0
+</pre></div>
+
+
+<p>Et là on a l&rsquo;erreur suivante : PG::DuplicateTable: ERROR: relation « postgres_indexes » already exists</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/06/Selection_865.png"><img decoding="async" loading="lazy" width="1024" height="533" src="https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-1024x533.png" alt="" class="wp-image-1612" srcset="https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-1024x533.png 1024w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-300x156.png 300w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-768x400.png 768w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-1536x800.png 1536w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-1440x750.png 1440w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-800x417.png 800w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-550x286.png 550w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865-1152x600.png 1152w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_865.png 1874w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Pour faire passer le script, nous devrons modifier la procédure d&rsquo;upgrade pour ajouter un drop des indexes dans le fichier : <code>/opt/gitlab/embedded/service/gitlab-rails/db/migrate/20200922093004_add_postgres_index_view.rb</code></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; highlight: [8]; title: ; notranslate" title="">
+# frozen_string_literal: true
+
+class AddPostgresIndexView &lt; ActiveRecord::Migration&#91;6.0]
+  DOWNTIME = false
+
+  def up
+    execute(&lt;&lt;~SQL)
+       DROP VIEW IF EXISTS postgres_indexes;
+        CREATE VIEW postgres_indexes AS
+      SELECT
+        pg_namespace.nspname || '.' || pg_class.relname as identifier,
+        pg_index.indexrelid,
+        pg_namespace.nspname as schema,
+        pg_class.relname as name,
+        pg_index.indisunique as unique,
+        pg_index.indisvalid as valid_index,
+        pg_class.relispartition as partitioned,
+        pg_index.indisexclusion as exclusion,
+        pg_indexes.indexdef as definition,
+        pg_relation_size(pg_class.oid) as ondisk_size_bytes
+      FROM pg_index
+      INNER JOIN pg_class ON pg_class.oid = pg_index.indexrelid
+      INNER JOIN pg_namespace ON pg_class.relnamespace = pg_namespace.oid
+      INNER JOIN pg_indexes ON pg_class.relname = pg_indexes.indexname
+      WHERE pg_namespace.nspname &lt;&gt; 'pg_catalog'
+    SQL
+  end
+
+  def down
+    execute(&lt;&lt;~SQL)
+      DROP VIEW postgres_indexes
+    SQL
+  end
+end
+
+</pre></div>
+
+
+<p>Une fois le script de migration modifié, on relance le reconfigure.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/06/Selection_866.png"><img decoding="async" loading="lazy" width="790" height="365" src="https://www.partitech.com/wp-content/uploads/2021/06/Selection_866.png" alt="" class="wp-image-1613" srcset="https://www.partitech.com/wp-content/uploads/2021/06/Selection_866.png 790w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_866-300x139.png 300w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_866-768x355.png 768w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_866-550x254.png 550w" sizes="(max-width: 790px) 100vw, 790px" /></a></figure>
+
+
+
+<p>On peut maintenant passer à l&rsquo;upgrade suivante. Upgrader à la version 13.6.0 et incrémenter les installations jusqu&rsquo;à la version 13.12.0</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+apt-get install gitlab-ce=13.6.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+apt-get install gitlab-ce=13.7.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+apt-get install gitlab-ce=13.8.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+apt-get install gitlab-ce=13.9.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+apt-get install gitlab-ce=13.10.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+apt-get install gitlab-ce=13.11.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+apt-get install gitlab-ce=13.12.5-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+</pre></div>
+
+
+<p>Sur la version 13.7.0 il faudra corriger le script de migration.</p>
+
+
+
+<p>/opt/gitlab/embedded/service/gitlab-rails/db/migrate/20201127170848_add_index_bloat_estimate_view.rb</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: cpp; highlight: [8]; title: ; notranslate" title="">
+# frozen_string_literal: true
+
+class AddIndexBloatEstimateView &lt; ActiveRecord::Migration&#91;6.0]
+  DOWNTIME = false
+
+  def up
+    execute(&lt;&lt;~SQL)
+      DROP VIEW IF EXISTS postgres_index_bloat_estimates;
+      CREATE VIEW postgres_index_bloat_estimates AS
+      -- Originally from: https://github.com/ioguix/pgsql-bloat-estimation/blob/master/btree/btree_bloat.sql
+      -- WARNING: executed with a non-superuser role, the query inspect only index on tables you are granted to read.
+      -- WARNING: rows with is_na = 't' are known to have bad statistics (&quot;name&quot; type is not supported).
+      -- This query is compatible with PostgreSQL 8.2 and after
+      SELECT nspname || '.' || idxname as identifier,
+        CASE WHEN relpages &gt; est_pages_ff
+          THEN bs*(relpages-est_pages_ff)
+          ELSE 0
+        END::bigint AS bloat_size_bytes
+      FROM (
+        SELECT
+            coalesce(1 +
+              ceil(reltuples/floor((bs-pageopqdata-pagehdr)*fillfactor/(100*(4+nulldatahdrwidth)::float))), 0
+            ) AS est_pages_ff,
+            bs, nspname, tblname, idxname, relpages, is_na
+        FROM (
+            SELECT maxalign, bs, nspname, tblname, idxname, reltuples, relpages, idxoid, fillfactor,
+                  ( index_tuple_hdr_bm +
+                      maxalign - CASE -- Add padding to the index tuple header to align on MAXALIGN
+                        WHEN index_tuple_hdr_bm%maxalign = 0 THEN maxalign
+                        ELSE index_tuple_hdr_bm%maxalign
+                      END
+                    + nulldatawidth + maxalign - CASE -- Add padding to the data to align on MAXALIGN
+                        WHEN nulldatawidth = 0 THEN 0
+                        WHEN nulldatawidth::integer%maxalign = 0 THEN maxalign
+                        ELSE nulldatawidth::integer%maxalign
+                      END
+                  )::numeric AS nulldatahdrwidth, pagehdr, pageopqdata, is_na
+            FROM (
+       
+</pre></div>
+
+
+<p>On installe maintenant la version 14.0.0.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+apt-get install gitlab-ce=13.12.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+</pre></div>
+
+
+<p>Depuis la version 14, il faut impérativement utiliser le systeme de fichier par hash. L&rsquo;installation affichera une alerte et stoppera le processus.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+root@git-partitech-sd-47766:/opt/gitlab# apt-get install gitlab-ce=14.0.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+Reading package lists... Done
+Building dependency tree       
+Reading state information... Done
+The following packages will be upgraded:
+  gitlab-ce
+1 upgraded, 0 newly installed, 0 to remove and 0 not upgraded.
+Need to get 0 B/923 MB of archives.
+After this operation, 14.5 MB of additional disk space will be used.
+Reading changelogs... Done
+(Reading database ... 119998 files and directories currently installed.)
+Preparing to unpack .../gitlab-ce_14.0.0-ce.0_amd64.deb ...
+gitlab preinstall: Checking for unmigrated data on legacy storage
+gitlab preinstall: 
+gitlab preinstall: Legacy storage is no longer supported. Please migrate your data to hashed storage.
+gitlab preinstall: Check https://docs.gitlab.com/ee/administration/raketasks/storage.html#migrate-to-hashed-storage for details.
+gitlab preinstall: 
+gitlab preinstall: If you want to skip this check, run the following command and try again:
+gitlab preinstall: 
+gitlab preinstall:  sudo touch /etc/gitlab/skip-unmigrated-data-check
+gitlab preinstall: 
+dpkg: error processing archive /var/cache/apt/archives/gitlab-ce_14.0.0-ce.0_amd64.deb (--unpack):
+ new gitlab-ce package pre-installation script subprocess returned error exit status 1
+Errors were encountered while processing:
+ /var/cache/apt/archives/gitlab-ce_14.0.0-ce.0_amd64.deb
+E: Sub-process /usr/bin/dpkg returned an error code (1)
+
+</pre></div>
+
+
+<p>Il faudra donc convertir vos repository si ce n&rsquo;est pas déjà fait.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+gitlab-rake gitlab:storage:migrate_to_hashed
+</pre></div>
+
+
+<p>Et ensuite lancer l’installe en spécifiant de ne plus afficher l&rsquo;alerte.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+sudo touch /etc/gitlab/skip-unmigrated-data-check
+apt-get install gitlab-ce=14.0.0-ce.0 &amp;&amp; gitlab-ctl stop unicorn &amp;&amp; gitlab-ctl stop sidekiq &amp;&amp; gitlab-ctl reconfigure
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/06/Selection_871.png"><img decoding="async" loading="lazy" width="674" height="531" src="https://www.partitech.com/wp-content/uploads/2021/06/Selection_871.png" alt="" class="wp-image-1618" srcset="https://www.partitech.com/wp-content/uploads/2021/06/Selection_871.png 674w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_871-300x236.png 300w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_871-550x433.png 550w" sizes="(max-width: 674px) 100vw, 674px" /></a></figure>
+
+
+
+<p>L&rsquo;étape la plus critique est passée. On peut mettre à jour sur la toute dernière version. De notre coté c&rsquo;est la version 14.0.1</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+apt-get upgrade
+</pre></div>
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/06/Selection_872.png"><img decoding="async" loading="lazy" width="406" height="428" src="https://www.partitech.com/wp-content/uploads/2021/06/Selection_872.png" alt="" class="wp-image-1619" srcset="https://www.partitech.com/wp-content/uploads/2021/06/Selection_872.png 406w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_872-285x300.png 285w" sizes="(max-width: 406px) 100vw, 406px" /></a></figure></div>
+
+
+
+<p>Dernière opération. Si comme nous vous utilisiez les notifications Slack, il vous faudra migrer la configuration. Les services templates sont retirés depuis la version 14.x.x<br><br>Vous pouvez réintégrer les notifications projet par projet, ou faire comme nous, le mettre au global.<br>Pour cela, vous devrez aller dans Admin Area &gt;&gt; System Hooks</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/06/Selection_874.png"><img decoding="async" loading="lazy" width="1024" height="508" src="https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-1024x508.png" alt="" class="wp-image-1621" srcset="https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-1024x508.png 1024w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-300x149.png 300w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-768x381.png 768w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-1536x762.png 1536w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-1440x715.png 1440w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-800x397.png 800w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-550x273.png 550w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874-1209x600.png 1209w, https://www.partitech.com/wp-content/uploads/2021/06/Selection_874.png 1844w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>

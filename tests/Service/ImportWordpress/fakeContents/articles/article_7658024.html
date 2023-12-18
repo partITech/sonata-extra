@@ -1,0 +1,605 @@
+
+<p>Nous avons vu dans un article précédent comment installer Symfony 6 + Sonata Admin 5 avec une gestion d&rsquo;utilisateurs et de médias. <br>Nous allons poursuivre cette installation avec la configuration des langues et des fuseaux horaires. <br><br><br>Nous allons installer intlBundle qui permet de gérer l&rsquo;affichage localisé. </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php8.1 composer.phar require sonata-project/intl-bundle
+</pre></div>
+
+
+<p>On en profite pour ajouter un champs timezone et locale à l&rsquo;utilisateur.<br>Pour cela, nous allons étendre userBundle et ajouter un champs dans l&rsquo;admin.</p>
+
+
+
+<p>On étend user en déplaçant l&rsquo;entité user dans : src/Application/Sonata/UserBundle/Entity/User.php<br>Et on lui ajoute un champs timezone et un champs locale.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php 
+namespace App\Application\Sonata\UserBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sonata\UserBundle\Entity\BaseUser;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name=&quot;user__user&quot;)
+ */
+class User extends BaseUser
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type=&quot;integer&quot;)
+     */
+    protected $id;
+    
+    
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name=&quot;timezone&quot;, type=&quot;string&quot;, length=64, nullable=true)
+     */
+     protected $timezone;
+    
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name=&quot;locale&quot;, type=&quot;string&quot;, length=8, nullable=true)
+     */
+    protected $locale;
+    
+
+    public function getTimezone(){
+        return $this-&gt;timezone;
+    }
+    
+    public function setTimezone($timezone){
+        $this-&gt;timezone=$timezone;
+        return $this;
+    }
+    
+    public function getLocale(){
+        return $this-&gt;locale;
+    }
+    
+    public function setLocale($locale){
+        $this-&gt;locale=$locale;
+        return $this;
+    }
+}
+</pre></div>
+
+
+<p>On duplique l&rsquo;admin de Sonata et on le place dans src/Application/Sonata/UserBundle/Admin/Model/UserAdmin.php<br>On lui ajoute notre champs timezone.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the Sonata Project package.
+ *
+ * (c) Thomas Rabaix &lt;thomas.rabaix@sonata-project.org&gt;
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace App\Application\Sonata\UserBundle\Admin\Model;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\FieldDescription\FieldDescriptionInterface;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Show\ShowMapper;
+use Sonata\UserBundle\Form\Type\RolesMatrixType;
+use Sonata\UserBundle\Model\UserManagerInterface;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
+use Symfony\Component\Form\Extension\Core\Type\LocaleType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+use Symfony\Component\Form\Extension\Core\Type\TimezoneType;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
+
+/**
+ * @phpstan-extends AbstractAdmin&lt;\Sonata\UserBundle\Model\UserInterface&gt;
+ */
+class UserAdmin extends AbstractAdmin
+{
+    protected UserManagerInterface $userManager;
+
+    public function __construct(UserManagerInterface $userManager)
+    {
+        parent::__construct();
+        $this-&gt;userManager = $userManager;
+    }
+
+    protected function preUpdate(object $object): void
+    {
+        $this-&gt;userManager-&gt;updatePassword($object);
+    }
+
+    protected function configureFormOptions(array &amp;$formOptions): void
+    {
+        $formOptions&#91;'validation_groups'] = &#91;'Default'];
+
+        if (!$this-&gt;hasSubject() || null === $this-&gt;getSubject()-&gt;getId()) {
+            $formOptions&#91;'validation_groups']&#91;] = 'Registration';
+        } else {
+            $formOptions&#91;'validation_groups']&#91;] = 'Profile';
+        }
+    }
+
+    protected function configureListFields(ListMapper $list): void
+    {
+        $list
+            -&gt;addIdentifier('username')
+            -&gt;add('email')
+            -&gt;add('enabled', null, &#91;'editable' =&gt; true])
+            -&gt;add('createdAt');
+
+        if ($this-&gt;isGranted('ROLE_ALLOWED_TO_SWITCH')) {
+            $list
+                -&gt;add('impersonating', FieldDescriptionInterface::TYPE_STRING, &#91;
+                    'virtual_field' =&gt; true,
+                    'template' =&gt; '@SonataUser/Admin/Field/impersonating.html.twig',
+                ]);
+        }
+    }
+
+    protected function configureDatagridFilters(DatagridMapper $filter): void
+    {
+        $filter
+            -&gt;add('id')
+            -&gt;add('username')
+            -&gt;add('email');
+    }
+
+    protected function configureShowFields(ShowMapper $show): void
+    {
+        $show
+            -&gt;add('username')
+            -&gt;add('email');
+    }
+
+    protected function configureFormFields(FormMapper $form): void
+    {
+        $form
+            -&gt;with('general', &#91;'class' =&gt; 'col-md-4'])
+                -&gt;add('username')
+                -&gt;add('email')
+                -&gt;add('locale', LocaleType::class, &#91;'required' =&gt; false])
+                -&gt;add('timezone', TimezoneType::class, &#91;'required' =&gt; false])
+                -&gt;add('plainPassword', TextType::class, &#91;
+                    'required' =&gt; (!$this-&gt;hasSubject() || null === $this-&gt;getSubject()-&gt;getId()),
+                ])
+                -&gt;add('enabled', null)
+            -&gt;end()
+            -&gt;with('roles', &#91;'class' =&gt; 'col-md-8'])
+                -&gt;add('realRoles', RolesMatrixType::class, &#91;
+                    'label' =&gt; false,
+                    'multiple' =&gt; true,
+                    'required' =&gt; false,
+                ])
+            -&gt;end();
+    }
+
+    protected function configureExportFields(): array
+    {
+        // Avoid sensitive properties to be exported.
+        return array_filter(parent::configureExportFields(), static function (string $v): bool {
+            return !\in_array($v, &#91;'password', 'salt'], true);
+        });
+    }
+}
+
+</pre></div>
+
+
+<p>On change les références de notre entité et de notre admin dans sonata_user.yml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; highlight: [2,3,4,5,6]; title: ; notranslate" title="">
+sonata_user:
+    class:
+        user: App\Application\Sonata\UserBundle\Entity\User
+    admin:
+        user:
+            class: App\Application\Sonata\UserBundle\Admin\Model\UserAdmin
+    resetting:
+        email:
+            address: &quot;test@test.com&quot;
+            sender_name: Backoffice
+            
+    security_acl: true
+    manager_type: orm # can be orm or mongodb
+</pre></div>
+
+
+<p>et on enregistre notre extension dans doctrine.yml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; highlight: [25,26,27,28,29]; title: ; notranslate" title="">
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '13'
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+
+            App\Application\Sonata\MediaBundle:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Application/Sonata/MediaBundle/Entity'
+                prefix: 'App\Application\Sonata\MediaBundle\Entity'
+                alias: App\Application\Sonata\MediaBundle
+
+            App\Application\Sonata\UserBundle:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Application/Sonata/UserBundle/Entity'
+                prefix: 'App\Application\Sonata\UserBundle\Entity'
+                alias: App
+
+</pre></div>
+
+
+<p>On met à jour notre schéma et on teste.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php8.1 bin/console doctrine:schema:update --force
+</pre></div>
+
+
+<p>Notre nouveau champs est bien pris en compte.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/03/image-5.png"><img decoding="async" loading="lazy" width="1024" height="430" src="https://www.partitech.com/wp-content/uploads/2022/03/image-5-1024x430.png" alt="" class="wp-image-1866" srcset="https://www.partitech.com/wp-content/uploads/2022/03/image-5-1024x430.png 1024w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-300x126.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-768x322.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-1536x644.png 1536w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-1440x604.png 1440w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-800x336.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-550x231.png 550w, https://www.partitech.com/wp-content/uploads/2022/03/image-5-1430x600.png 1430w, https://www.partitech.com/wp-content/uploads/2022/03/image-5.png 1859w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>On met la locale par défaut en FR</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+#config/packages/translation.yaml
+framework:
+    default_locale: fr
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks:
+            - en
+            - fr
+
+</pre></div>
+
+
+<p>On configure sonata_intl</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_intl:
+    timezone:
+        default: Europe/Paris
+        locales:
+            fr:    Europe/Paris
+            en_UK: Europe/London
+        detectors:
+            - sonata.intl.timezone_detector.user
+            - sonata.intl.timezone_detector.locale
+            
+</pre></div>
+
+
+<p>On souhaite maintenant que les paramètres timezone et le langage par défaut de notre utilisateur soient pris en compte.<br>Pour cela, nous allons récupérer ses configurations au moment du login et les mettre en session.<br>Ensuite, nous allons récupérer ces informations à chaque chargement de la page et surcharger l&rsquo;interface avec ces paramètres. </p>
+
+
+
+<p>Première étape, on récupère les infos au login. Pour cela, on va spécifier le service à utiliser lors du handler_success dans security.yaml. <br><br>On met success_handler: login_success_handler</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; highlight: [26]; title: ; notranslate" title="">
+security:
+    enable_authenticator_manager: true
+    password_hashers:
+        Sonata\UserBundle\Model\UserInterface:
+            algorithm: auto
+    providers:
+        sonata_user_bundle:
+            id: sonata.user.security.user_provider
+    access_decision_manager:
+        strategy: unanimous   
+    
+    firewalls:
+        dev:
+            pattern: ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+        admin:
+            lazy: true
+            pattern: /admin(.*)
+            provider: sonata_user_bundle
+            context: user
+            switch_user: true
+            form_login:
+                login_path: sonata_user_admin_security_login
+                check_path: sonata_user_admin_security_check
+                default_target_path: sonata_admin_dashboard
+                success_handler: login_success_handler
+            logout:
+                path: sonata_user_admin_security_logout
+                target: sonata_user_admin_security_login
+            remember_me:
+                #secret: &quot;%env(APP_SECRET)%&quot;
+                secret: &quot;123456&quot;
+                lifetime: 2629746
+                path: /admin
+
+
+    
+    access_control:
+        - { path: ^/admin/login$, role: PUBLIC_ACCESS }
+        - { path: ^/admin/logout$, role: PUBLIC_ACCESS }
+        - { path: ^/admin/login_check$, role: PUBLIC_ACCESS }
+        - { path: ^/admin/request$, role: PUBLIC_ACCESS }
+        - { path: ^/admin/check-email$, role: PUBLIC_ACCESS }
+        - { path: ^/admin/reset/.*$, role: PUBLIC_ACCESS }
+        - { path: ^/admin/, role: ROLE_ADMIN }    
+    
+    role_hierarchy:
+        ROLE_ADMIN:
+            - ROLE_USER
+            - ROLE_SONATA_ADMIN
+            - ROLE_SONATA_USER_ADMIN_USER_VIEW
+        ROLE_SUPER_ADMIN:
+            - ROLE_ADMIN
+            - ROLE_ALLOWED_TO_SWITCH        
+
+when@test:
+    security:
+        password_hashers:
+            # By default, password hashers are resource intensive and take time. This is
+            # important to generate secure password hashes. In tests however, secure hashes
+            # are not important, waste resources and increase test times. The following
+            # reduces the work factor to the lowest possible values.
+            Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+                algorithm: auto
+                cost: 4 # Lowest possible value for bcrypt
+                time_cost: 3 # Lowest possible value for argon
+                memory_cost: 10 # Lowest possible value for argon
+
+</pre></div>
+
+
+<p>Ensuite on ajoute notre service dans service.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; highlight: [15,16,17]; title: ; notranslate" title="">
+services:
+
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+
+    login_success_handler:
+        parent: security.authentication.success_handler
+        class:  App\EventListener\LoginSuccessHandler
+</pre></div>
+
+
+<p>Et on crée notre Handler dans src/EventListener/LoginSuccessHandler.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;?php 
+namespace App\EventListener;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use Symfony\Component\Security\Http\HttpUtils;
+use Symfony\Component\Security\Http\Authentication\DefaultAuthenticationSuccessHandler;
+
+class LoginSuccessHandler extends DefaultAuthenticationSuccessHandler
+{
+    
+    public function onAuthenticationSuccess(Request $request, TokenInterface $token): Response
+    {
+        $locale = $token-&gt;getUser()-&gt;getLocale();
+        $request-&gt;getSession()-&gt;set('_locale', $locale);
+        $request-&gt;setLocale($locale);
+        
+        $timezone = $token-&gt;getUser()-&gt;getTimezone();
+        $request-&gt;getSession()-&gt;set('_timezone', $timezone);
+        
+        return $this-&gt;httpUtils-&gt;createRedirectResponse($request, $this-&gt;determineTargetUrl($request));
+    }
+
+}
+</pre></div>
+
+
+<p>A ce stade nous avons les préférences en session au moment du login. On ajoute maintenant 2 Listener. LocaleListener et TimezoneListener.<br>On les ajoute dans les services.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; highlight: [24,25,26,27,28,29,30,31,32,33,34]; title: ; notranslate" title="">
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+
+    
+
+    login_success_handler:
+        parent: security.authentication.success_handler
+        class:  App\EventListener\LoginSuccessHandler
+
+    App\EventListener\LocaleListener:
+        class: App\EventListener\LocaleListener
+        arguments: &#91; &quot;%kernel.default_locale%&quot;]
+        tags:
+            - { name: kernel.event_subscriber }    
+            
+    App\EventListener\TimeZoneListener:
+        class: App\EventListener\TimeZoneListener
+        arguments: &#91;&quot;@twig&quot;]
+        tags:
+            - { name: kernel.event_subscriber }   
+</pre></div>
+
+
+<p>Et on crée nos listeners.<br><br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php 
+#src/EventListener/LocaleListener.php
+namespace App\EventListener;
+
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+
+class LocaleListener implements EventSubscriberInterface
+{
+    private $defaultLocale;
+
+    public function __construct($defaultLocale = 'fr')
+    {
+        $this-&gt;defaultLocale = $defaultLocale;
+    }
+
+    public function onKernelRequest(RequestEvent $event)
+    {
+
+        $request = $event-&gt;getRequest();
+        if (!$request-&gt;hasPreviousSession()) {
+            return;
+        }
+        $request-&gt;setLocale($request-&gt;getSession()-&gt;get('_locale', $this-&gt;defaultLocale));
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return array(
+            KernelEvents::REQUEST =&gt; array(array('onKernelRequest', 17)),
+        );
+    }
+}
+</pre></div>
+
+
+<p></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+#src/EventListener/TimeZoneListener.php
+namespace App\EventListener;
+
+use Symfony\Component\HttpKernel\Event\RequestEvent;
+use Symfony\Component\HttpKernel\KernelEvents;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
+use Twig\Environment;
+use Twig\Extension\CoreExtension;
+
+/**
+ * Class TimeZoneListener
+ *
+ * @package App\EventListener
+ */
+class TimeZoneListener implements EventSubscriberInterface
+{
+    /** @var twig */
+    private $twig;
+
+    public function __construct( $twig)
+    {
+        $this-&gt;twig     = $twig;
+        
+    }
+
+    public function onKernelRequest( RequestEvent $request)
+    {
+        $request = $request-&gt;getRequest();
+        $timezone = $request-&gt;getSession()-&gt;get('_timezone', &quot;Europe/Paris&quot;);
+
+        $core = $this-&gt;twig-&gt;getExtension('Twig\Extension\CoreExtension');
+        $core-&gt;setTimezone($timezone);
+        
+        return $core;
+        
+    }
+
+    public static function getSubscribedEvents()
+    {
+        return array(
+            KernelEvents::REQUEST =&gt; array(array('onKernelRequest', 18)),
+        );
+    }
+
+}
+</pre></div>
+
+
+<p>Il ne nous reste plus qu&rsquo;à vérifier que c&rsquo;est bien pris en compte.<br>On met d’abord nos préférences en locale anglaise et timezone à l&rsquo;autre bout du monde.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/03/image-6.png"><img decoding="async" loading="lazy" width="535" height="587" src="https://www.partitech.com/wp-content/uploads/2022/03/image-6.png" alt="" class="wp-image-1869" srcset="https://www.partitech.com/wp-content/uploads/2022/03/image-6.png 535w, https://www.partitech.com/wp-content/uploads/2022/03/image-6-273x300.png 273w" sizes="(max-width: 535px) 100vw, 535px" /></a></figure></div>
+
+
+<p>On a pas de traduction vietnamienne, donc on tombe sur le fallback EN. On a bien la liste des locales de traduites en revanche.<br></p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/03/image-7.png"><img decoding="async" loading="lazy" width="1024" height="154" src="https://www.partitech.com/wp-content/uploads/2022/03/image-7-1024x154.png" alt="" class="wp-image-1870" srcset="https://www.partitech.com/wp-content/uploads/2022/03/image-7-1024x154.png 1024w, https://www.partitech.com/wp-content/uploads/2022/03/image-7-300x45.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/image-7-768x116.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/image-7-800x121.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/image-7-550x83.png 550w, https://www.partitech.com/wp-content/uploads/2022/03/image-7.png 1115w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+<p>On a bien l&rsquo;interface en anglais et les dates traduites en vietnamien, et l’horaire correspond bien au fuseau d&rsquo;HCMC.<br><br>On revient sur du FR et Europe/Paris maintenant.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/03/image-8.png"><img decoding="async" loading="lazy" width="543" height="506" src="https://www.partitech.com/wp-content/uploads/2022/03/image-8.png" alt="" class="wp-image-1871" srcset="https://www.partitech.com/wp-content/uploads/2022/03/image-8.png 543w, https://www.partitech.com/wp-content/uploads/2022/03/image-8-300x280.png 300w" sizes="(max-width: 543px) 100vw, 543px" /></a></figure></div>
+
+
+<p>Notre interface est en Français et les listesbox aussi.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/03/image-9.png"><img decoding="async" loading="lazy" width="1024" height="95" src="https://www.partitech.com/wp-content/uploads/2022/03/image-9-1024x95.png" alt="" class="wp-image-1872" srcset="https://www.partitech.com/wp-content/uploads/2022/03/image-9-1024x95.png 1024w, https://www.partitech.com/wp-content/uploads/2022/03/image-9-300x28.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/image-9-768x71.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/image-9-800x74.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/image-9-550x51.png 550w, https://www.partitech.com/wp-content/uploads/2022/03/image-9.png 1154w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+<p>Et nos dates sont écrites au format FR et l’horaire est calé sur Paris. 11:24 à Paris vs 17h24 au Vietnam.</p>

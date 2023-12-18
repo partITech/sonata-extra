@@ -1,0 +1,264 @@
+{% if admin.request.attributes.get('seo_proposal_on_page') and action_name=='edit' %}
+    <button type="button" class="btn btn-default seo-proposal">
+        <strong class="text-info" style="margin-right:10px">
+            <a href="#">
+                <img src="{{ asset('/bundles/partitechsonataextra/assets/img/seo.svg') }}" width="25" height="25" style="margin-top: -3px;">
+                {{ 'sonata-extra.article_admin.seo_proposal'|trans({}, 'PartitechSonataExtraBundle') }}
+            </a>
+        </strong>
+    </button>
+{% endif %}
+
+{% if admin.request.attributes.get('seo_proposal_on_page') and action_name=='edit' %}
+    <div id="seoProposal" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="seoProposal" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="modal-title" id="chooseLocaleModalLabel">
+                        <img src="{{ asset('/bundles/partitechsonataextra/assets/img/seo.svg') }}" alt="SEO" class="seo-icon">
+                        {{ 'sonata-extra.article_admin.seo_modal_title'|trans({}, 'PartitechSonataExtraBundle') }}
+                    </h4>
+                </div>
+                <div class="modal-body">
+                    <div class="seo-checkboxes">
+                        <label><input type="checkbox" name="seo_title">{{ 'sonata-extra.article_admin.seo_modal_seo_title'|trans({}, 'PartitechSonataExtraBundle') }}</label><br>
+                        <div id="seo_title"></div>
+                        <label><input type="checkbox" name="seo_description">{{ 'sonata-extra.article_admin.seo_modal_seo_description'|trans({}, 'PartitechSonataExtraBundle') }}</label><br>
+                        <div id="seo_description"></div>
+                        <label><input type="checkbox" name="seo_seokeywords">{{ 'sonata-extra.article_admin.seo_modal_seo_seokeywords'|trans({}, 'PartitechSonataExtraBundle') }}</label><br>
+                        <div id="seo_keywords"></div>
+                        <label><input type="checkbox" name="slug">{{ 'sonata-extra.article_admin.seo_modal_seo_slug'|trans({}, 'PartitechSonataExtraBundle') }}</label>
+                        <div id="slug"></div>
+
+                    </div>
+                    <span class="loader" id="loader"></span>
+                    <div class="btn alert alert-danger"  id="seo_alert"><span>{{ 'sonata-extra.article_admin.seo_modal_error'|trans({}, 'PartitechSonataExtraBundle')|raw }}</span></div>
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" id="sendSeoProposal" >{{ 'sonata-extra.article_admin.seo_modal_calculate_btn'|trans({}, 'PartitechSonataExtraBundle') }}</button>
+                    <button type="button" class="btn btn-primary" id="useSeoProposal" style="display:none">{{ 'sonata-extra.article_admin.seo_modal_use_btn'|trans({}, 'PartitechSonataExtraBundle') }}</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+<script type="text/javascript">
+    $(document).ready(function() {
+        $('.seo-proposal').on('click', function (e) {
+            e.preventDefault();
+            $('#seoProposal').modal('show');
+        });
+
+        $('#useSeoProposal').click(function() {
+
+            /* if($('input[name="excerpt"]').is(':checked')){
+                 $('textarea[name$="[excerpt]"]').val($('#excerpt').html())
+             }*/
+            if($('input[name="slug"]').is(':checked')){
+                $('input[name$="[slug]"]').val($('#slug').html());
+            }
+
+            if($('input[name="seo_title"]').is(':checked')){
+                $('input[name$="[title]"]').val($('#seo_title').html());
+                $('input[name$="[ogTitle]"]').val($('#seo_title').html());
+            }
+
+            if($('input[name="seo_description"]').is(':checked')){
+                $('textarea[name$="[metaDescription]"]').val($('#seo_description').html());
+                $('textarea[name$="[ogDescription]"]').val($('#seo_description').html());
+            }
+
+            if($('input[name="seo_seokeywords"]').is(':checked')){
+                $('textarea[name$="[metaKeyword]"]').val($('#seo_keywords').html());
+            }
+            $('#seoProposal').modal('hide');
+
+        });
+        $('#sendSeoProposal').click(function() {
+
+            $('#loader').show();
+            $('#useSeoProposal').hide();
+            $('#seo_alert').hide();
+            $('#seoProposal').removeClass('modal-error');
+
+            var data = {
+                excerpt: $('input[name="excerpt"]').is(':checked'),
+                seo_title: $('input[name="seo_title"]').is(':checked'),
+                seo_description: $('input[name="seo_description"]').is(':checked'),
+                seo_keywords: $('input[name="seo_seokewords"]').is(':checked'),
+                slug: $('input[name="slug"]').is(':checked')
+            };
+            $('#seoProposal ').addClass('modal-error');
+            $.ajax({
+                url: '{{ path('sonata_extra_page_seo_proposal', {'id': page.id } ) }}',
+                type: 'POST',
+                data: data,
+                success: function (response) {
+                    var data = response;
+                    if (typeof response === 'string') {
+                        data = JSON.parse(response);
+                    }
+
+                    if (data.error && data.error !== "") {
+                        $('#loader').hide();
+                        $('#useSeoProposal').hide();
+
+                        $('#seo_alert').show();
+                    } else {
+                        $('#excerpt').text(data.excerpt);
+                        $('#seo_title').text(data.seo_title);
+                        $('#seo_description').text(data.seo_description);
+                        $('#seo_keywords').text(data.seo_keywords);
+                        $('#slug').text(data.slug);
+                        $('#loader').hide();
+                        $('#useSeoProposal').show();
+                        $('#seoProposal').removeClass('modal-error');
+                    }
+
+                },
+                error: function (xhr, status, error) {
+                    console.error("Erreur AJAX: ", error);
+                    $('#loader').hide();
+                    $('#seoProposal ').addClass('modal-error');
+                }
+            });
+        });
+
+
+
+
+
+    });
+</script>
+
+<style>
+    .seo-proposal{
+        padding-top: 5px;padding-bottom: 3px;margin-left: 3px;
+    }
+
+    .modal-header .seo-icon {
+        width: 40px;
+        height: auto;
+        display: inline-block;
+        vertical-align: middle;
+        margin-right: 10px;
+    }
+
+    .box-header .box-title {
+        font-size: 14px;
+        padding-bottom: 10px;
+    }
+
+    .modal-title {
+        display: inline-block;
+        vertical-align: middle;
+    }
+
+    .modal-body {
+        position: relative;
+    }
+
+    .seo-checkboxes label, .icheckbox_square-blue {
+
+        margin-bottom: 5px;
+        margin-right: 10px;
+    }
+
+
+    #seo_alert{
+        display:none;
+    }
+    /*spinner*/
+    #seo_alert{
+        top: 20%;
+        left: 14%;
+        position: absolute;
+    }
+    .modal-error .modal-body{
+        background-color: #b3b3bb;
+    }
+    .loader {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        display:none;
+        transform: rotateZ(45deg);
+        perspective: 1000px;
+        border-radius: 50%;
+        width: 48px;
+        height: 48px;
+        color: #ffffff;
+    }
+    .loader:before,
+    .loader:after {
+        content: '';
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: inherit;
+        height: inherit;
+        border-radius: 50%;
+        transform: rotateX(70deg);
+        animation: 1s spin linear infinite;
+    }
+    .loader:after {
+        color: #1e282c;
+        transform: rotateY(70deg);
+        animation-delay: .4s;
+    }
+
+    @keyframes rotate {
+        0% {
+            transform: translate(-50%, -50%) rotateZ(0deg);
+        }
+        100% {
+            transform: translate(-50%, -50%) rotateZ(360deg);
+        }
+    }
+
+    @keyframes rotateccw {
+        0% {
+            transform: translate(-50%, -50%) rotate(0deg);
+        }
+        100% {
+            transform: translate(-50%, -50%) rotate(-360deg);
+        }
+    }
+
+    @keyframes spin {
+        0%,
+        100% {
+            box-shadow: .2em 0px 0 0px currentcolor;
+        }
+        12% {
+            box-shadow: .2em .2em 0 0 currentcolor;
+        }
+        25% {
+            box-shadow: 0 .2em 0 0px currentcolor;
+        }
+        37% {
+            box-shadow: -.2em .2em 0 0 currentcolor;
+        }
+        50% {
+            box-shadow: -.2em 0 0 0 currentcolor;
+        }
+        62% {
+            box-shadow: -.2em -.2em 0 0 currentcolor;
+        }
+        75% {
+            box-shadow: 0px -.2em 0 0 currentcolor;
+        }
+        87% {
+            box-shadow: .2em -.2em 0 0 currentcolor;
+        }
+    }
+
+</style>
+
+{% endif %}

@@ -1,0 +1,195 @@
+{% extends '@SonataPage/PageAdmin/tree.html.twig' %}
+
+{% import _self as tree %}
+{% macro pages(pages, pageAliases, admin, rootPages) %}
+    <ul{% if rootPages %} class="page-tree"{% endif %}>
+        {% for page in pages|filter(page =>  (not page.parent or not rootPages) and (page.routeName not in pageAliases)) %}
+
+            <li>
+                <div class="page-tree__item">
+                    {% if page.parent %}<i class="fa fa-caret-right"></i>{% endif %}
+                    <i class="fa page-tree__item__is-hybrid fa-{% if page.isHybrid %}gears{% else %}code{% endif %}"></i>
+                    <a class="page-tree__item__edit" href="{{ admin.generateObjectUrl('edit', page) }}">{{ page.name }}</a>
+                    <i class="text-muted">{{ page.url }}</i>
+
+
+                    {% if page.translations|length %}
+                        {% for details in page.translations|reverse %}
+                            {% set flagClass = 'fi-' ~ details.lang %}
+                            {% set buttonClass = details.entity_id is defined and details.entity_id ? '' : 'btn-disabled' %}
+
+                            {% if details.entity_id is defined and details.entity_id %}
+                                <a class="label pull-right  mr-2 " href="{{ path('admin_app_sonatapagepage_edit', {'id': details.entity_id  }) }}" title="{{ 'sonata-extra.page_admin.tree_view.edit'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"><span class="fi {{ flagClass }} fis {{ buttonClass }} "></span></a>
+                            {% else %}
+                                <a class="label pull-right  mr-2 chooseLocaleModalLink{{ page.id  }}" href="#"  title="{{ 'sonata-extra.page_admin.tree_view.create'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}" data-site="{{ details.site }}"><span class="fi {{ flagClass }} fis {{ buttonClass }} "></span></a>
+                            {% endif %}
+                        {% endfor %}
+                    {% else %}
+                        <a class="label label-default pull-right" href="{{ admin.generateObjectUrl('compose', page) }}">{{ 'pages.compose_label'|trans({}, 'SonataPageBundle') }} <i class="fa fa-magic"></i></a>
+                    {% endif %}
+                    {% if page.edited %}<span class="label label-warning pull-right">{{ 'pages.edited_label'|trans({}, 'SonataPageBundle') }}</span>{% endif %}
+
+                </div>
+
+
+
+                <div id="chooseLocaleModal{{ page.id }}" class="modal fade" tabindex="-1" role="dialog" aria-labelledby="chooseLocaleModalLabel" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                                <h4 class="modal-title" id="chooseLocaleModalLabel">ddd{{ page.name }}</h4>
+                                <h5 class="modal-title" >
+                                    {{ 'sonata-extra.page_admin.tree_view.create_translation_popin'|trans({}, 'PartitechSonataExtraBundle') }}
+                                </h5>
+
+
+                            </div>
+                            <div class="modal-body">
+                                <!-- Flags -->
+                                <div id="flags-container">
+                                    {% for  details in page.translations %}
+                                        {% if details.entity_id is defined and details.entity_id %}
+                                            {% set flagClass = 'fi-' ~ details.lang %}
+                                            {% set url_patern = path('sonata_extra_page_create_page_from_locale', {'id': page.id, 'from_site': 'from_site',  'to_site': 'to_site'  }) %}
+                                            <a class="mr-2 flag-link"  href="#"  title="{{ details.label }}" onclick="sonata_extra_page_create_page_from_locale('{{ url_patern }}','{{ details.site }}')"><span class="fi {{ flagClass }} fis  "></span></a>
+                                        {% endif %}
+
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">Fermer</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <script type="text/javascript">
+                    var locale_to='';
+                    $(document).ready(function() {
+                        $('.chooseLocaleModalLink{{ page.id  }}').on('click', function(e) {
+                            $('#chooseLocaleModal{{ page.id  }}').modal('show');
+                            to_site=$(this).data('site');
+                        });
+                    });
+                    function sonata_extra_page_create_page_from_locale(url_partern,from_site){
+                        var newUrl = url_partern.replace('from_site', from_site);
+                        newUrl = newUrl.replace('to_site', to_site);
+                        window.location.href = newUrl;
+                    }
+                </script>
+
+                {% import _self as macro %}
+                {% if page.children|length %}
+                    {{ macro.pages(page.children, pageAliases, admin, false) }}
+                {% endif %}
+            </li>
+        {% endfor %}
+    </ul>
+    <style>
+        .btn-disabled {
+            filter: grayscale(100%);
+            opacity: 0.6;
+        }
+
+        .flag-link {
+            margin-right: 10px;
+        }
+        .flag-link .fi {
+            font-size: 24px;
+            cursor: pointer;
+        }
+        #chooseLocaleModal .modal-body {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+            height: 100%; /* or specify a fixed height */
+        }
+        #flags-container {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+            justify-content: center;
+            align-items: center;
+        }
+        .flag-link {
+            margin: 0 10px; /* Adjust spacing between flags */
+            font-size: 24px; /* Adjust flag size */
+        }
+        .flag-link .fi {
+            cursor: pointer;
+        }
+    </style>
+
+{% endmacro %}
+
+{% block tab_menu %}
+    {% include '@SonataPage/PageAdmin/list_tab_menu.html.twig' with {
+        'mode':        'tree',
+        'action':      action,
+        'admin':       admin,
+        'currentSite': currentSite,
+    } only %}
+{% endblock %}
+
+{% block list_table %}
+    <div class="col-xs-12 col-md-12">
+        <div class="box box-primary">
+            <div class="box-header">
+                <h1 class="box-title">
+                    {{ 'pages.tree_site_label'|trans({}, 'SonataPageBundle') }}
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                            <strong class="text-info">
+                                {%- if sites and sites|length > 0 -%}
+                                    {% if currentSite %}
+                                        {{ currentSite.name }}
+                                    {% else %}
+                                        {{ 'pages.label_no_site_selected'|trans({}, 'SonataPageBundle') }}
+                                    {% endif %}
+                                {%- else -%}
+                                    {{ 'pages.label_no_sites'|trans({}, 'SonataPageBundle') }}
+                                {%- endif -%}
+                            </strong> <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            {% for site in sites %}
+                                <li>
+                                    <a href="{{ admin.generateUrl('tree', { 'site': site.id }) }}">
+                                        {% if currentSite and site.id == currentSite.id %}
+                                            <span class="pull-right">
+                                                <i class="fa fa-check"></i>
+                                            </span>
+                                        {% endif %}
+                                        {{ site.name }}
+                                    </a>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                </h1>
+            </div>
+            <div class="box-content">
+
+
+                {% set pageAliases = [] %}
+                {% for p in pages %}
+                    {% if p.pageAlias is not empty %}
+                        {% set cleanAlias = p.pageAlias|replace({'_page_alias_': ''}) %}
+                        {% set pageAliases = pageAliases|merge([cleanAlias]) %}
+                    {% endif %}
+                {% endfor %}
+
+                {{ tree.pages(pages, pageAliases,  admin, true) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+
+

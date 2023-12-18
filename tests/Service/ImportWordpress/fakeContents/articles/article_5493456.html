@@ -1,0 +1,930 @@
+
+<p>Pour faire suite à l&rsquo;article écrit par Thomas Bourdin  <a href="https://www.partitech.com/blog-technique/symfony/symfony-sonata-ajouter-une-fonction-clone-dans-un-crud/">SYMFONY / SONATA : AJOUTER UNE FONCTION CLONE DANS UN CRUD</a>, nous allons montrer comment, de manière très simple, nous pouvons ajouter des actions personnalisées dans une interface. </p>
+
+
+
+<p> Sur le Dashboard :</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-23.png"><img decoding="async" loading="lazy" width="1024" height="408" src="https://www.partitech.com/wp-content/uploads/2023/01/image-23-1024x408.png" alt="" class="wp-image-2278" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-23-1024x408.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-23-300x120.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-23-768x306.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-23-800x319.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-23-550x219.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-23.png 1342w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Mais nous allons également voir comment personnaliser simplement et de manière générique les actions personnalisées du listing, de l&rsquo;entête de votre CRUD et pour finir comment ajouter des actions pour un traitement par lot. </p>
+
+
+
+<p>Pour mon exemple je suis parti d&rsquo;une table toute simple appelée <strong>Title</strong> dont voici l&rsquo;entité. Aucun intérêt pour vous de lancer le projet avec ces fichiers mais cela pose le contexte de l&rsquo;article. On a donc des champs <strong>id</strong>, <strong>title</strong>, <strong>slug</strong> qui nous permettent d&rsquo;avoir du contenu. </p>
+
+
+
+<pre title="src/Entity/SlugTitles.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace App\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use App\Repository\TitlesRepository;
+/**
+ * Projets
+ *
+ * @ORM\Table(name="titles")
+ * @ORM\Entity(repositoryClass=TitlesRepository::class)
+ */
+class SlugTitles
+{
+    /**
+     * @ORM\Column(name="id", type="integer", nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy="IDENTITY")
+     */
+    private ?int $id = null;
+
+
+    /**
+     * @ORM\Column(name="title", type="string", length=350, nullable=true)
+     */
+    private ?string $title = null;
+
+    /**
+     * @ORM\Column(name="slug", type="string", length=350, nullable=true)
+     */
+    private ?string $slug = null;
+
+    /**
+     * @return ?int
+     */
+    public function getId(): ?int
+    {
+        return $this-&gt;id;
+    }
+
+    /**
+     * @param int $id
+     * @return $this
+     */
+    public function setId(int $id): self
+    {
+        $this-&gt;id = $id;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getTitle(): ?string
+    {
+        return $this-&gt;title;
+    }
+
+    /**
+     * @param string|null $title
+     * @return $this
+     */
+    public function setTitle(?string $title): self
+    {
+        $this-&gt;title = $title;
+        return $this;
+    }
+
+    /**
+     * @return string|null
+     */
+    public function getSlug(): ?string
+    {
+        return $this-&gt;slug;
+    }
+
+    /**
+     * @param string|null $slug
+     * @return $this
+     */
+    public function setSlug(?string $slug): self
+    {
+        $this-&gt;slug = $slug;
+        return $this;
+    }
+
+    public function __toString(): string
+    {
+        return (string) $this-&gt;title;
+    }
+
+}
+</code></pre>
+
+
+
+<p>Côté config nous déclarons notre admin (config/packages/sonata_admin.yaml:29,34) :</p>
+
+
+
+<pre title="config/packages/sonata_admin.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml line-numbers">sonata_admin:
+    title: 'Sonata Admin'
+    title_logo: /bundles/sonataadmin/images/logo_title.png
+    show_mosaic_button: false
+    security:
+        handler: sonata.admin.security.handler.role
+    options:
+        default_admin_route: edit
+        html5_validate: false
+    global_search:
+        admin_route: edit
+    breadcrumbs:
+        child_admin_route: edit
+    dashboard:
+        groups:
+            runroom:
+            users:
+                label: Users
+                icon: &lt;i class="fa fa-users"&gt;&lt;/i&gt;
+                on_top: true
+                items:
+                    - sonata.user.admin.user
+            media:
+                label: Media
+                icon: &lt;i class="fa fa-photo"&gt;&lt;/i&gt;
+                on_top: true
+                items:
+                    - sonata.media.admin.media
+            slug_titles:
+                label: "Titles"
+                icon: &lt;i class="fa fa-users"&gt;&lt;/i&gt;
+                on_top: true
+                items:
+                    - admin.titles
+        blocks:
+            - { type: sonata.admin.block.admin_list, position: left })
+
+sonata_block:
+    blocks:
+        sonata.admin.block.admin_list:
+            contexts: [admin]
+</code></pre>
+
+
+
+<p>et on le déclare comme Service afin de pouvoir injecter des paramètres. Ici le point important est que nous y associons un <strong>Controller</strong> en plus des paramètres habituels (config/services.yaml:20,24) : </p>
+
+
+
+<pre title="config/services.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml line-numbers">parameters:
+
+services:
+    # default configuration for services in *this* file
+    _defaults:
+        autowire: true      # Automatically injects dependencies in your services.
+        autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+
+    # makes classes in src/ available to be used as services
+    # this creates a service per class whose id is the fully-qualified class name
+    App\:
+        resource: '../src/'
+        exclude:
+            - '../src/DependencyInjection/'
+            - '../src/Entity/'
+            - '../src/Kernel.php'
+
+    # add more service definitions when explicit configuration is needed
+    # please note that last definitions always *replace* previous ones
+    admin.titles:
+        class: App\Admin\SlugTitlesAdmin
+        tags:
+            - { name: sonata.admin, model_class: App\Entity\SlugTitles, controller: App\Controller\SlugTitlesAdminController, manager_type: orm, group: admin , label: "Administrations de vos titres de pages" }
+        arguments: [ ~, ~, ~]</code></pre>
+
+
+
+<p>Vous remarquerez que nous associons automatiquement à notre déclaration de page d&rsquo;administration un <em>Controller</em> <strong>\App\Controller\SlugTitlesAdminController</strong>. Cette phase est essentielle dans la mise en place d&rsquo;une page d&rsquo;admin. Elle va nous permettre de jouer avec la magie de <strong>Sonata</strong>. En effet <strong>Sonata</strong> va associer une action personnalisée directement avec le <em><strong>Controller</strong></em>, <br><em><strong>Controller</strong></em> qui sera chargé de dispatcher nos actions entre le model et différents services dont nous pourrions avoir besoin. </p>
+
+
+
+<pre title="src/Controller/SlugTitlesAdminController.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Controller;
+
+use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Controller\CRUDController;
+use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+
+final class SlugTitlesAdminController extends CRUDController
+{
+    public function batchActionClone( ProxyQueryInterface $selectedModelQuery, AdminInterface $admin, Request $request): RedirectResponse
+    {
+        return new RedirectResponse(
+            $admin-&gt;generateUrl('list', [
+                 'filter' =&gt; $this-&gt;admin-&gt;getFilterParameters()
+            ])
+        );
+    }
+
+    /**
+     * @param $id
+     */
+    public function cloneAction($id): Response
+    {
+        return new RedirectResponse(
+            $admin-&gt;generateUrl('list', [
+                 'filter' =&gt; $this-&gt;admin-&gt;getFilterParameters()
+            ])
+        );
+    }
+
+}
+</code></pre>
+
+
+
+<p>Pour finir voici la coquille un peu vide de notre page d&rsquo;admin.</p>
+
+
+
+<pre title="src/Admin/SlugTitlesAdmin.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Route\RouteCollectionInterface;
+use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+final class SlugTitlesAdmin extends AbstractAdmin
+{
+    /**
+     * @param string|null $code
+     * @param string|null $class
+     * @param string|null $baseControllerName
+     */
+    public function __construct(?string $code, ?string $class,?string  $baseControllerName)
+    {
+        parent::__construct($code, $class, $baseControllerName);
+    }
+
+    /**
+     * @param DatagridMapper $filter
+     * @return void
+     */
+    protected function configureDatagridFilters(DatagridMapper $filter): void
+    {
+        $filter
+            -&gt;add('id')
+            -&gt;add('title')
+            -&gt;add('slug')
+        ;
+    }
+
+    /**
+     * @param ListMapper $list
+     * @return void
+     */
+    protected function configureListFields(ListMapper $list): void
+    {
+        $list
+            -&gt;add('title')
+            -&gt;add('slug')
+            -&gt;add(ListMapper::NAME_ACTIONS, null, [
+                'actions' =&gt; [
+                    'show' =&gt; [],
+                    'edit' =&gt; [],
+                    'delete' =&gt; []
+                 ]
+            ]);
+        ;
+    }
+
+    /**
+     * @param FormMapper $form
+     * @return void
+     */
+    protected function configureFormFields(FormMapper $form): void
+    {
+        $form
+            -&gt;add('title', TextType::class, ['help' =&gt; 'Renseignez le titre de votre article'])
+            -&gt;add('slug', HiddenType::class)
+        ;
+    }
+
+    /**
+     * @param ShowMapper $show
+     * @return void
+     */
+    protected function configureShowFields(ShowMapper $show): void
+    {
+        $show
+            -&gt;add('id')
+            -&gt;add('title')
+            -&gt;add('slug')
+        ;
+    }
+
+}</code></pre>
+
+
+
+<p>Voilà qui pose le contexte. On va pouvoir ajouter à présent nos différents éléments de notre interface.</p>
+
+
+
+<h2>Action customisée sur le Dashboard</h2>
+
+
+
+<p>Mais le Dashboard c&rsquo;est quoi ? C&rsquo;est notre page d&rsquo;accueil. Pour être exacte, ici :</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-26.png"><img decoding="async" loading="lazy" width="1024" height="425" src="https://www.partitech.com/wp-content/uploads/2023/01/image-26-1024x425.png" alt="" class="wp-image-2294" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-26-1024x425.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-26-300x125.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-26-768x319.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-26-800x332.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-26-550x228.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-26.png 1190w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>On va ajouter un petit bouton d&rsquo;import. Il faut bien se mettre en situation  :).</p>
+
+
+
+<p>Je n&rsquo;aime pas trop répéter mon code, encore plus quand il s&rsquo;agit de Template. Alors pour ce tuto j&rsquo;ai préparé un petit bouton générique que l&rsquo;on peut utiliser à chaque ajout d&rsquo;action sur cette page. </p>
+
+
+
+<pre title="templates/Sonata/default_dashboard_button.html.twig" class="wp-block-code"><code lang="markup" class="language-markup">&lt;a class="btn btn-link btn-flat" href="{{ admin.generateUrl(action.route) }}"&gt;
+    &lt;i class="fas {{ action.icon | default('')}}"&gt;&lt;/i&gt;
+    {{ action.label | default('') | trans({}, 'default') }}
+&lt;/a&gt;</code></pre>
+
+
+
+<p>Rien de bien étonnant dans ce template si ce n&rsquo;est une information intéressante. Au niveau du TWIG nous avons accès à <strong>$context[&lsquo;actions&rsquo;]</strong> qui va nous permettre de passer des informations facilement depuis notre page <em><strong>src/Admin/SlugTitlesAdmin.php </strong></em>vers notre template <em><strong>templates/Sonata/default_dashboard_button.html.twig</strong></em></p>
+
+
+
+<p>Voici une capture du <strong>debugger</strong> lorsque l&rsquo;on pose un point d&rsquo;arrêt dans le fichier <strong><em>templates/Sonata/default_dashboard_button.html.twig</em></strong></p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-27.png"><img decoding="async" loading="lazy" width="722" height="788" src="https://www.partitech.com/wp-content/uploads/2023/01/image-27.png" alt="" class="wp-image-2296" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-27.png 722w, https://www.partitech.com/wp-content/uploads/2023/01/image-27-275x300.png 275w, https://www.partitech.com/wp-content/uploads/2023/01/image-27-550x600.png 550w" sizes="(max-width: 722px) 100vw, 722px" /></a></figure>
+
+
+
+<p>De retour dans notre fichier d&rsquo;admin <strong>src/Admin/SlugTitlesAdmin.php, </strong>nous allons ajouter la méthode <strong>configureRoutes</strong>()</p>
+
+
+
+<p>En effet il va falloir expliquer à <strong>Sonata</strong> et donc à <strong>Symfony</strong> quelles sont les actions et les routes associées que nous souhaitons configurer. C&rsquo;est important si vous souhaitez customiser l&rsquo;URL. </p>
+
+
+
+<pre title="\App\Admin\SlugTitlesAdmin::configureRoutes" class="wp-block-code"><code lang="php" class="language-php">    /**
+     * @param RouteCollectionInterface $collection
+     * @return void
+     */
+    protected function configureRoutes(RouteCollectionInterface $collection): void
+    {
+        $collection
+            -&gt;add('clone', $this-&gt;getRouterIdParameter().'/clone')
+            -&gt;add('import');
+    }</code></pre>
+
+
+
+<p>Comme vous le voyez nous avons deux routes. Un petit aperçu de l&rsquo;interface et vous comprenez rapidement que nous avons accès à à peu prêt tout sur notre <strong>Route</strong>.</p>
+
+
+
+<pre title=" \Sonata\AdminBundle\Route\RouteCollectionInterface::add" class="wp-block-code"><code lang="php" class="language-php">namespace Sonata\AdminBundle\Route;
+
+use Symfony\Component\Routing\Route;
+
+/**
+ * @author Jordi Sala &lt;jordism91@gmail.com&gt;
+ */
+interface RouteCollectionInterface
+{
+    /**
+     * @param array&lt;string, mixed&gt;  $defaults
+     * @param array&lt;string, string&gt; $requirements
+     * @param array&lt;string, mixed&gt;  $options
+     * @param string[]              $schemes
+     * @param string[]              $methods
+     *
+     * @return static
+     */
+    public function add(
+        string $name,
+        ?string $pattern = null,
+        array $defaults = [],
+        array $requirements = [],
+        array $options = [],
+        string $host = '',
+        array $schemes = [],
+        array $methods = [],
+        string $condition = ''
+    ): self;</code></pre>
+
+
+
+<p>Vous voyez l&rsquo;action <strong>import</strong> est laissée vide. <strong>Sonata</strong> et <strong>Symfony</strong> font le job pour nous et c&rsquo;est tres bien comme cela.</p>
+
+
+
+<p>Toujours dans notre fichier de configuration de page d&rsquo;administration, nous allons ajouter la méthode <strong>configureDashboardActions()</strong>. Rien de bien compliqué ici. On passe le Template qui va se charger de tout. Pour ma part j&rsquo;y ajoute les informations comme label, icones et la route associée. </p>
+
+
+
+<pre title="\App\Admin\SlugTitlesAdmin::configureDashboardActions" class="wp-block-code"><code lang="php" class="language-php">    /**
+     * @param array $actions
+     * @return array|\mixed[][]
+     */
+    protected function configureDashboardActions(array $actions): array
+    {
+        $actions['import'] = [
+            'template' =&gt; 'Sonata/default_dashboard_button.html.twig',
+            'label'    =&gt; 'Import',
+            'icon'     =&gt; 'fa-level-up-alt',
+            'route'    =&gt; 'import'
+        ];
+
+
+        return $actions;
+    }
+</code></pre>
+
+
+
+<p>Ce qui visuellement nous donne ceci : </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-28.png"><img decoding="async" loading="lazy" width="845" height="146" src="https://www.partitech.com/wp-content/uploads/2023/01/image-28.png" alt="" class="wp-image-2302" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-28.png 845w, https://www.partitech.com/wp-content/uploads/2023/01/image-28-300x52.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-28-768x133.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-28-800x138.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-28-550x95.png 550w" sizes="(max-width: 845px) 100vw, 845px" /></a></figure>
+
+
+
+<p>Une fois que l&rsquo;on clique que se passe-t-il ?  C&rsquo;est là que la magie opère. Pour l&rsquo;article, ce que nous envisageons c&rsquo;est d&rsquo;arriver dans un <strong>Controller</strong>, utiliser un <strong>Service</strong> pour récupérer des données, les insérer dans la base de données et aller directement sur notre page avec la liste de nos titres. </p>
+
+
+
+<p>Dans la vraie vie vous allez vouloir passer par une page intermédiaire avec certainement une confirmation, un formulaire avec des options, etc. Là nous ne sommes pas dans la vie réelle. On veut juste montrer que notre action va automatiquement aller sur un <strong>Controller</strong>, que dans ce <strong>Controller</strong> vous pouvez récupérer un <strong>Service</strong> (merci l&rsquo;autowiring !) et accéder au repository de votre entité via le <strong>modelManager</strong>.</p>
+
+
+
+<p>Côté code j&rsquo;ai juste ajouté un fichier <strong>ImportSevice</strong> sans configuration YAML. Ça se fait tout seul. Rien de folichon dans la méthode <strong><em>getDatas()</em></strong> on retourne juste un <em>array</em> avec 1 seule donnée. </p>
+
+
+
+<pre title="src/Service/ImportService.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace App\Service;
+
+use App\Repository\TitlesRepository;
+
+class ImportService
+{
+
+    /**
+     * @return array
+     */
+    public function getDatas(): array
+    {
+        $data = [
+            'title' =&gt; 'titre factice : ' . (new \DateTime())-&gt;format(\DateTimeInterface::RSS),
+            'slug' =&gt; null
+        ];
+        return [$data];
+    }
+}</code></pre>
+
+
+
+<p>Dans notre Controller il n y a pas grand chose non plus : </p>
+
+
+
+<pre title="src/Controller/SlugTitlesAdminController.php" class="wp-block-code"><code lang="php" class="language-php">    /**
+     * @param ImportService $importService
+     * @return RedirectResponse
+     * @throws \Sonata\AdminBundle\Exception\ModelManagerThrowable
+     */
+    public function importAction(ImportService $importService): RedirectResponse
+    {
+        $datas = $importService-&gt;getDatas();
+        foreach($datas as $data){
+            $newEntity = new SlugTitles();
+            $newEntity-&gt;setTitle($data['title']);
+            $newEntity-&gt;setSlug($data['slug']);
+            $this-&gt;admin-&gt;create($newEntity);
+        }
+
+        return new RedirectResponse($this-&gt;admin-&gt;generateUrl('list'));
+    }</code></pre>
+
+
+
+<p>Comme vous le voyez nous avons automatiquement accès au service <strong>ImportService</strong> sans rien faire. Comme notre <strong>Controller</strong> étend  <strong>CRUDController</strong> nous avons accès directement à <strong><em>$this-&gt;admin</em></strong>  qui n&rsquo;est autre qu&rsquo;une instance de <strong>\Sonata\AdminBundle\Admin\AdminInterface</strong> qui lui même étend <strong>\Sonata\AdminBundle\Admin\LifecycleHookProviderInterface</strong> nous donnant accès au méthodes <strong>update()</strong>, <strong>create()</strong>, <strong>delete()</strong>. </p>
+
+
+
+<pre title="vendor/sonata-project/admin-bundle/src/Admin/LifecycleHookProviderInterface.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+declare(strict_types=1);
+
+/*
+ * This file is part of the Sonata Project package.
+ *
+ * (c) Thomas Rabaix &lt;thomas.rabaix@sonata-project.org&gt;
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Sonata\AdminBundle\Admin;
+
+use Sonata\AdminBundle\Exception\LockException;
+use Sonata\AdminBundle\Exception\ModelManagerThrowable;
+
+/**
+ * This interface can be implemented to provide hooks that will be called
+ * during the lifecycle of the object.
+ *
+ * @author Thomas Rabaix &lt;thomas.rabaix@sonata-project.org&gt;
+ *
+ * @phpstan-template T of object
+ */
+interface LifecycleHookProviderInterface
+{
+    /**
+     * @throws ModelManagerThrowable
+     * @throws LockException
+     *
+     * @phpstan-param T $object
+     * @phpstan-return T $object
+     */
+    public function update(object $object): object;
+
+    /**
+     * @throws ModelManagerThrowable
+     *
+     * @phpstan-param T $object
+     * @phpstan-return T $object
+     */
+    public function create(object $object): object;
+
+    /**
+     * @throws ModelManagerThrowable
+     *
+     * @phpstan-param T $object
+     */
+    public function delete(object $object): void;
+}
+</code></pre>
+
+
+
+<p>Donc si vous chercher à déplacer une certaine logique dans un <strong>Repository</strong> ou un <strong>Service</strong> il faudra jouer avec <strong><em>$this-&gt;admin</em></strong>. </p>
+
+
+
+<p>Ce qu&rsquo;il y a de super c&rsquo;est qu&rsquo;à présent nous avons toute notre logique. Et notre <strong>Controller</strong> va nous servir pour les actions que nous allons ajouter dans l&rsquo;entête et sur chacune des lignes de notre tableau. </p>
+
+
+
+<h2>Action customisée sur l&rsquo;entête du CRUD</h2>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-29.png"><img decoding="async" loading="lazy" width="1024" height="190" src="https://www.partitech.com/wp-content/uploads/2023/01/image-29-1024x190.png" alt="" class="wp-image-2308" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-29-1024x190.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-29-300x56.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-29-768x143.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-29-1536x285.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-29-1440x267.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-29-800x149.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-29-550x102.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-29.png 1670w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>En fait rien de plus simple.</p>
+
+
+
+<pre title="\App\Admin\SlugTitlesAdmin::configureActionButtons" class="wp-block-code"><code lang="php" class="language-php">    protected function configureActionButtons(array $buttonList, string $action, ?object $object = null): array
+    {
+        $buttonList['import'] = [
+            'template' =&gt; 'Sonata/default_header_action.html.twig',
+            'label'    =&gt; 'Import',
+            'icon'     =&gt; 'fa-level-up-alt',
+            'route'    =&gt; 'import'
+        ];
+        return $buttonList;
+    }</code></pre>
+
+
+
+<pre title="templates/Sonata/default_header_action.html.twig" class="wp-block-code"><code lang="markup" class="language-markup">&lt;li&gt;
+    &lt;a class="sonata-action-element" href="{{ admin.generateUrl(item.route) }}"&gt;
+        &lt;i class="fas {{ item.icon | default('')}}"&gt;&lt;/i&gt;
+        {{ item.label | default('') | trans({}, 'default') }}
+    &lt;/a&gt;
+&lt;/li&gt;</code></pre>
+
+
+
+<p>Vous verrez que dans notre template ce n&rsquo;est plus <strong>action</strong> auquel nous avons accès mais <strong>item</strong>.<br></p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-30.png"><img decoding="async" loading="lazy" width="874" height="844" src="https://www.partitech.com/wp-content/uploads/2023/01/image-30.png" alt="" class="wp-image-2309" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-30.png 874w, https://www.partitech.com/wp-content/uploads/2023/01/image-30-300x290.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-30-768x742.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-30-800x773.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-30-550x531.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-30-621x600.png 621w" sizes="(max-width: 874px) 100vw, 874px" /></a></figure>
+
+
+
+<p>On clique. Ça va directement envoyer l&rsquo;action à notre méthode <strong>\App\Controller\SlugTitlesAdminController::importAction</strong>.</p>
+
+
+
+<h2>Action customisée sur chacune des lignes du tableau</h2>
+
+
+
+<p>Concernant ce sujet je vous recommande la lecture de l&rsquo;article écrit par Thomas Bourdin <a href="https://www.partitech.com/blog-technique/symfony/symfony-sonata-ajouter-une-fonction-clone-dans-un-crud/">SYMFONY / SONATA : AJOUTER UNE FONCTION CLONE DANS UN CRUD</a> qui vous apportera des informations complémentaires.</p>
+
+
+
+<p>Le code est tout aussi simple que les autres.</p>
+
+
+
+<pre title="src/Admin/SlugTitlesAdmin.php" class="wp-block-code"><code lang="php" class="language-php">    /**
+     * @param ListMapper $list
+     * @return void
+     */
+    protected function configureListFields(ListMapper $list): void
+    {
+        $list
+            -&gt;add('title')
+            -&gt;add('slug')
+            -&gt;add(ListMapper::NAME_ACTIONS, null, [
+                'actions' =&gt; [
+                    'show' =&gt; [],
+                    'edit' =&gt; [],
+                    'delete' =&gt; [],
+                    'clone' =&gt; [
+                        'template' =&gt; 'Sonata/default_filed_button_action.html.twig',
+                        'label' =&gt; 'Clone',
+                        'route' =&gt; 'clone',
+                        'icon_class' =&gt; 'fas fa-clone',
+                        'ask_confirmation' =&gt; true,
+                        'confirmation_message' =&gt; 'êtes vous sûr de blahblah cette action ????? '
+                    ],
+                    'import' =&gt; ['template' =&gt; 'Sonata/custom_field_button.html.twig']
+                ],
+            ]);
+        ;
+    }</code></pre>
+
+
+
+<p>Voici les deux templates utilisés. </p>
+
+
+
+<pre title="templates/Sonata/default_filed_button_action.html.twig" class="wp-block-code"><code lang="markup" class="language-markup">&lt;a href="{{ admin.generateObjectUrl(actions.route, object) }}"
+   class="btn btn-sm btn-default"
+   {% if actions.ask_confirmation is defined and actions.ask_confirmation == true %}
+        data-confirm="{{ actions.confirmation_message }}"
+    {% endif %}
+    &gt;
+    &lt;i class="{{ actions.icon_class | default('') }} " aria-hidden="true"&gt;&lt;/i&gt;
+    {{ actions.label | default('') | trans({}, 'default') }}
+&lt;/a&gt;</code></pre>
+
+
+
+<pre title="templates/Sonata/custom_field_button.html.twig" class="wp-block-code"><code lang="markup" class="language-markup">&lt;a class="btn btn-sm btn-default" href="{{ admin.generateUrl('import') }}"&gt;
+    &lt;i class="fas fa-level-up-alt"&gt;&lt;/i&gt; {{ 'Import'|trans({}, 'SonataAdminBundle') }}
+&lt;/a&gt;</code></pre>
+
+
+
+<p>Finalement rien de neuf dans ces deux actions. L&rsquo;une diffère de l&rsquo;autre dans le sens ou j&rsquo;ai ajouté deux paramètres au Template : <strong><em>ask_confirmation</em></strong>, <strong><em>confirmation_message</em></strong>. Non, ce ne sont pas des arguments natifs de <strong>Sonata</strong>. J&rsquo;ai juste ajouté un javascript pour provoquer  un <strong>confirm</strong>. Rien de bien compliqué. Voici le JavaScript qui va s&rsquo;occuper de faire les choses toutes seules.</p>
+
+
+
+<pre title="config/packages/sonata_admin.yaml" class="wp-block-code"><code lang="yaml" class="language-yaml">sonata_admin:
+    assets:
+        extra_javascripts:
+            - '/Sonata/custom_field_action_ask_confirmation.js'</code></pre>
+
+
+
+<pre title="public/Sonata/custom_field_action_ask_confirmation.js" class="wp-block-code"><code lang="javascript" class="language-javascript">$(document).ready(function() {
+    $('a[data-confirm]').click(function(ev) {
+        var href = $(this).attr('href');
+
+        if (!$('#dataConfirmModal').length) {
+            $('body').append('' +
+                '&lt;div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true"&gt;' +
+                '&lt;div class="modal-dialog modal-lg"&gt;' +
+                '&lt;div class="modal-content"&gt;' +
+                '&lt;div class="modal-header"&gt;' +
+                '&lt;button type="button" class="close" data-dismiss="modal" aria-hidden="true"&gt;&amp;times;&lt;/button&gt;' +
+                '&lt;h4 class="modal-title"&gt;&lt;/h4&gt;' +
+                '&lt;/div&gt;' +
+                '' +
+                '&lt;div class="modal-body"&gt;' +
+                '&lt;/div&gt;' +
+                '&lt;div class="modal-footer"&gt;' +
+                '&lt;button class="btn" data-dismiss="modal" aria-hidden="true"&gt;Cancel&lt;/button&gt;' +
+                '&lt;a class="btn btn-primary" id="dataConfirmOK"&gt;OK&lt;/a&gt;' +
+                '&lt;/div&gt;' +
+                '&lt;/div&gt;' +
+                '&lt;/div&gt;' +
+                '&lt;/div&gt;');
+        }
+        $('#dataConfirmModal').find('.modal-body').text($(this).attr('data-confirm'));
+        $('#dataConfirmOK').attr('href', href);
+        $('#dataConfirmModal').modal({show:true});
+        return false;
+    });
+});</code></pre>
+
+
+
+<p>Tout ça pour dire qu&rsquo;une confirmation automatique n&rsquo;existe pas pour les action customisées au niveau des entités du <strong>CRUD</strong>. Vous aurez, soit le choix de faire directement la manipulation dans votre <strong>Controller</strong>, soit bidouiller en Javascript comme montré en exemple. </p>
+
+
+
+<p>Voici la methode <strong>cloneAction() </strong></p>
+
+
+
+<pre title="\App\Controller\SlugTitlesAdminController::cloneAction" class="wp-block-code"><code lang="php" class="language-php">    /**
+     * @param $id
+     * @param CloneService $cloneService
+     * @return Response
+     */
+    public function cloneAction($id, CloneService $cloneService): Response
+    {
+        $object = $this-&gt;admin-&gt;getSubject();
+
+        if (!$object) {
+            throw new NotFoundHttpException(sprintf('unable to find the object with id: %s', $id));
+        }
+        $clonedResult = $cloneService-&gt;clone($this-&gt;admin-&gt;getModelManager(), $object);
+
+        if($clonedResult){
+            $this-&gt;addFlash('sonata_flash_success', 'Cloned successfully');
+        }else{
+            $this-&gt;addFlash('sonata_flash_error', 'Clone Error');
+        }
+
+        return new RedirectResponse($this-&gt;admin-&gt;generateUrl('list', ['filter' =&gt; $this-&gt;admin-&gt;getFilterParameters()]));
+    }</code></pre>
+
+
+
+<p>Le <strong>Controller</strong> prendra en argument <strong>$id</strong> qui est automatiquement passé par <strong>Sonata</strong>. Il correspond à l&rsquo;<strong>id</strong> de votre <strong>entité</strong>. Le second argument est le <strong>Service</strong> qu&rsquo;éventuellement vous souhaitez utiliser. Il est <strong>autowiré</strong> via Symfony. Vous pouvez donc ajouter autant de <strong>Services</strong> que vous souhaitez dans votre <strong>Controller</strong>. </p>
+
+
+
+<p id="block-8c92d599-59a5-4cd5-95c1-2135b48762a9"><strong>$this-&gt;admin-&gt;getSubject()</strong> vous permet d&rsquo;accèder directement à <strong>l&rsquo;entity</strong> en question. Pratique !</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-31.png"><img decoding="async" loading="lazy" width="902" height="214" src="https://www.partitech.com/wp-content/uploads/2023/01/image-31.png" alt="" class="wp-image-2315" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-31.png 902w, https://www.partitech.com/wp-content/uploads/2023/01/image-31-300x71.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-31-768x182.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-31-800x190.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-31-550x130.png 550w" sizes="(max-width: 902px) 100vw, 902px" /></a></figure>
+
+
+
+<p>Voici le service à titre d&rsquo;information.</p>
+
+
+
+<pre title="src/Service/CloneService.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+
+namespace App\Service;
+
+use App\Entity\SlugTitles;
+use Sonata\DoctrineORMAdminBundle\Model\ModelManager;
+
+Class CloneService {
+
+    /**
+     * @param CRUDController $crudController
+     * @param SlugTitles $slugTitle
+     * @return bool
+     */
+    public function clone(ModelManager $modelManager, SlugTitles $slugTitle): bool
+    {
+        try{
+            $clonedObject = clone $slugTitle;
+            $clonedObject-&gt;setTitle($slugTitle-&gt;getTitle().' (Clone)');
+            $modelManager-&gt;create($clonedObject);
+        }catch (\Exception $e){
+            return new \Exception('Erreur lors du clonage : ' . $e-&gt;getMessage());
+        }
+
+        return true;
+    }
+}</code></pre>
+
+
+
+<p>Comme vous pouvez le voir via <strong>$this-&gt;admin-&gt;getModelManager()</strong> nous récupèrons l&rsquo;équivalent de l&rsquo;entity <strong>repository</strong> qui va nous permettre d&rsquo;enregistrer directement dans notre service. </p>
+
+
+
+<p>Dernière étape, l&rsquo;action en mode batch.</p>
+
+
+
+<h2>Action customisée en batch</h2>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-32.png"><img decoding="async" loading="lazy" width="1024" height="291" src="https://www.partitech.com/wp-content/uploads/2023/01/image-32-1024x291.png" alt="" class="wp-image-2320" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-32-1024x291.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-32-300x85.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-32-768x218.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-32-1536x436.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-32-1440x409.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-32-800x227.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-32-550x156.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-32.png 1667w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Toujours aussi simple que les autres avec Sonata et la magie qui va avec.</p>
+
+
+
+<pre title="src/Admin/SlugTitlesAdmin.php" class="wp-block-code"><code lang="php" class="language-php">    /**
+     * @param array $actions
+     * @return array|\mixed[][]
+     */
+    protected function configureBatchActions(array $actions): array
+    {
+        if (
+            $this-&gt;hasRoute('edit') &amp;&amp; $this-&gt;hasAccess('edit') &amp;&amp;
+            $this-&gt;hasRoute('delete') &amp;&amp; $this-&gt;hasAccess('delete')
+        ) {
+            $actions['clone'] = [
+                'ask_confirmation' =&gt; true,
+            ];
+        }
+
+        return $actions;
+    }</code></pre>
+
+
+
+<p>Cette fois-ci la confirmation est native. Parfait !</p>
+
+
+
+<p>Côté <strong>Controller</strong> on va attendre une méthode de type <strong>batchActionClone()</strong> pour une action nommée <strong>Clone</strong>.</p>
+
+
+
+<p>A l&rsquo;image de l&rsquo;action simple qui prend en premier paramètre un <strong>int $id</strong>, <strong>batchActionClone&rsquo;ActionName'()</strong> attend une instance de <strong>ProxyQueryInterface</strong> contenant une instance de <strong>QueryBuilder</strong>. Finalement un simple <strong>ProxyQueryInterface-&gt;execute() </strong>suffit pour avoir accès à l&rsquo;ensemble des entités sélectionnées. </p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-33.png"><img decoding="async" loading="lazy" width="697" height="674" src="https://www.partitech.com/wp-content/uploads/2023/01/image-33.png" alt="" class="wp-image-2321" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-33.png 697w, https://www.partitech.com/wp-content/uploads/2023/01/image-33-300x290.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-33-550x532.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-33-620x600.png 620w" sizes="(max-width: 697px) 100vw, 697px" /></a></figure>
+
+
+
+<pre title="src/Controller/SlugTitlesAdminController.php" class="wp-block-code"><code lang="php" class="language-php">    public function batchActionClone(ProxyQueryInterface $selectedModelQuery, CloneService $cloneService): RedirectResponse
+    {
+        $entityList = $selectedModelQuery-&gt;execute();
+        
+        try {
+            foreach ($entityList-&gt;getIterator() as $entity) {
+                $clonedResult = $cloneService-&gt;clone($this-&gt;admin-&gt;getModelManager(), $entity);
+                if($clonedResult){
+                    $this-&gt;addFlash('sonata_flash_success', 'Cloned successfully: ' . $entity-&gt;getTitle());
+                }else{
+                    $this-&gt;addFlash('sonata_flash_error', 'Clone Error' . $entity-&gt;getTitle());
+                }
+            }
+
+        } catch (\Exception $e) {
+            $this-&gt;addFlash('sonata_flash_error', 'Quelques erreurs sont survenues lors de l\'execution des taches groupés');
+        } finally {
+            return new RedirectResponse(
+                $this-&gt;admin-&gt;generateUrl('list', [
+                    'filter' =&gt; $this-&gt;admin-&gt;getFilterParameters()
+                ])
+            );
+        }
+    }</code></pre>
+
+
+
+<p>Le code est plutôt simple et montre bien la logique derrière cela.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-34.png"><img decoding="async" loading="lazy" width="1024" height="192" src="https://www.partitech.com/wp-content/uploads/2023/01/image-34-1024x192.png" alt="" class="wp-image-2323" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-34-1024x192.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-34-300x56.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-34-768x144.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-34-1536x287.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-34-1440x269.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-34-800x150.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-34-550x103.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-34.png 1652w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-35.png"><img decoding="async" loading="lazy" width="1024" height="468" src="https://www.partitech.com/wp-content/uploads/2023/01/image-35-1024x468.png" alt="" class="wp-image-2324" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-35-1024x468.png 1024w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-300x137.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-768x351.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-1536x702.png 1536w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-1440x658.png 1440w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-800x366.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-550x251.png 550w, https://www.partitech.com/wp-content/uploads/2023/01/image-35-1313x600.png 1313w, https://www.partitech.com/wp-content/uploads/2023/01/image-35.png 1650w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p> </p>
+
+
+
+<p>Voilà. Vous avez à présent un bon aperçu des différentes actions possibles depuis votre page d&rsquo;administration de votre entité. </p>

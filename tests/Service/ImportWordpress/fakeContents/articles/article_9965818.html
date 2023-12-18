@@ -1,0 +1,20 @@
+<p>Il suffit d&rsquo;étider la configuration de varnish :<br />
+/etc/varnish/default.vcl</p>
+<p>Et d&rsquo;ajouter une directive pour exclure le domaine :<br />
+dans la routine sub vcl_recv<br />
+ajouter :<br />
+if (req.http.Host == « phpmyadmin.p1-caue.partitech.com ») {<br />
+return (pass);<br />
+}<br />
+Si phpmyadmin est installé dans un sous répertoire d&rsquo;un vhost :<br />
+if (req.url ~ « ^/pma ») {<br />
+return (pass);<br />
+}</p>
+<p>Si il y a un probleme avec la création des cookies, il faut rajouter la directive suivante dans la sous directive sub vcl_fetch :<br />
+if (req.http.Host == « phpmyadmin.p1-caue.partitech.com ») {<br />
+return (hit_for_pass);<br />
+}<br />
+ou<br />
+if (req.url ~ « ^/pma ») {<br />
+return (hit_for_pass);<br />
+}</p>

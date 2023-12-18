@@ -1,0 +1,24 @@
+<p><br style="clear:both"><br />
+Pour ajouter récursivement des fichiers en ligne de commande avec svn nous avons plusieurs possibilités.</p>
+<p>La premiere, sans doute la plus clean :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn add --force * --auto-props --parents --depth infinity -q
+</pre>
+<p>Bien que seule les options suivantes semblent vraiment necessaires :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn add --force *
+</pre>
+<p>Il y a ensuite des solutions alternatives un peu plus compliqués à comprendre :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn status | grep '?' | sed 's/^.* /svn add /' | bash
+</pre>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn add `svn status .|grep &quot;^?&quot;|awk '{print $2}'`
+</pre>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn st | grep &quot;^\?&quot; | awk &quot;{print \$2}&quot; | xargs svn add $1
+</pre>
+<p>Ainsi qu&rsquo;une solution qui permet de prendre en compte les fichiers contenant des espaces (non recommandé :p)</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+svn status| grep ^? | while read line ; do  svn add &quot;`echo $line|cut --complement -c 1,2`&quot; ;done
+</pre>

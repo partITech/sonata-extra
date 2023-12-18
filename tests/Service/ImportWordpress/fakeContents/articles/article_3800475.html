@@ -1,0 +1,11 @@
+<p><br style="clear:both"></p>
+<p>A mettre dans le fichier functions.php :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+
+function modify_footer_admin () {
+echo 'Created by &amp;lt;a href=&quot;http://www.partitech.com&quot;&amp;gt;Partitech&amp;lt;/a&amp;gt;.';
+}
+if (is_admin()) {
+add_filter('admin_footer_text', 'modify_footer_admin');
+}
+</pre>

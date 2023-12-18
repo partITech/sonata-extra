@@ -1,0 +1,156 @@
+parameters:
+
+
+services:
+  _defaults:
+    autowire: true
+    autoconfigure: true
+#  _instanceof:
+#    Sonata\AdminBundle\Admin\AbstractAdmin:
+#      tags: { name: sonata.admin }
+
+
+
+  Partitech\SonataExtra\:
+    resource: '../src/'
+    exclude:
+      - '../src/DependencyInjection/'
+      - '../src/Entity/'
+      - '../src/PartitechSonataExtraBundle.php'
+#      - '../src/Admin'
+
+#  sonata_admin:
+#    namespace: Partitech\SonataExtra\Admin\
+#    resource: '../src/Admin'
+
+
+  ## @todo: a priori plus besoin de déclarations
+  Partitech\SonataExtra\Service\GutenbergPatternsService: ~
+  sonata.extra.translation.create.template.service:
+    class: Partitech\SonataExtra\SmartService\TranslationCreateTemplateService
+    public: true
+
+  Partitech\SonataExtra\Service\PagePageService:
+    - tags:
+      - { name: sonata.page }
+
+  Partitech\SonataExtra\Service\ImportCsvHandler:
+    arguments:
+      - '@doctrine.orm.entity_manager'
+
+  doctrine.orm.resolve_target_entity_listener:
+    class: Doctrine\ORM\Tools\ResolveTargetEntityListener
+    tags:
+      - { name: doctrine.event_listener, event: loadClassMetadata }
+
+  Doctrine\ORM\Tools\ResolveTargetEntityListener:
+    tags:
+      - { name: doctrine.event_subscriber }
+
+
+  Sonata\MediaBundle\Entity\MediaManager: '@sonata.media.manager.media'
+  Sonata\MediaBundle\Provider\ImageProvider: '@sonata.media.provider.image'
+  Symfony\Component\DependencyInjection\ContainerInterface: '@service_container'
+  Sonata\PageBundle\Page\TemplateManager: '@sonata.page.template_manager'
+  Sonata\PageBundle\Page\PageServiceManagerInterface: '@sonata.page.page_service_manager'
+
+  #
+#  sonata.extra.admin.article:
+#    class: Partitech\SonataExtra\Admin\ArticleAdmin
+#    arguments: [~, Partitech\SonataExtra\Entity\Article, ~]
+#    tags:
+#      - { name: sonata.admin, manager_type: orm, group: "Content", label: "Article" }
+#    calls:
+#      - [ setTranslationDomain, [App]]
+#      - [ addChild, ['@sonata.extra.admin.article_revision', 'article']]
+
+
+#  sonata.extra.admin.article_revision:
+#    class: Partitech\SonataExtra\Admin\ArticleRevisionAdmin
+#    arguments: [~, Partitech\SonataExtra\Entity\ArticleRevision, Partitech\SonataExtra\Controller\Admin\ArticleRevisionsController]
+#    tags:
+#      - { name: sonata.admin, manager_type: orm, group: "Content", label: "Article Revision" }
+
+  Partitech\SonataExtra\EventListener\ArticleRevisionListener:
+    tags:
+      - { name: doctrine.event_listener, event: onFlush }
+
+  Partitech\SonataExtra\EventListener\EditorRevisionListener:
+    tags:
+      - { name: doctrine.event_listener, event: onFlush }
+
+
+  Partitech\SonataExtra\EventListener\TranslationEntityListener:
+    tags:
+      - { name: doctrine.event_listener, event: postLoad }
+      - { name: doctrine.event_listener, event: postPersist }
+
+  Partitech\SonataExtra\Twig\Extension:
+    tags:
+      - { name: twig.extension }
+
+
+  Partitech\SonataExtra\Admin\Extension\PageAdminExtension:
+    tags:
+      - { name: 'sonata.admin.extension', target: 'sonata.page.admin.page' }
+
+  Partitech\SonataExtra\Admin\Extension\MediaAdminExtension:
+    tags:
+      - { name: 'sonata.admin.extension', target: 'sonata.media.admin.media' }
+
+  Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface:
+    alias: sonata.page.cms_manager_selector
+
+  Sonata\PageBundle\Listener\RequestListener:
+    alias: sonata.page.request_listener
+
+  Cocur\Slugify\SlugifyInterface:
+    alias: sonata.page.slugify.cocur
+
+
+  Partitech\SonataExtra\Translation\Provider\OpenAiProvider: ~
+
+
+  Partitech\SonataExtra\Admin\CategoryAdmin:
+    arguments: [~, '%sonata.classification.admin.category.entity%', Partitech\SonataExtra\Controller\Admin\CategoryAdminController]
+    tags:
+      - { name: sonata.admin, manager_type: orm, group: "Content", label: "Category multilangue" , default: true}
+    calls:
+      - [setTranslationDomain, ['PartitechSonataExtra']]
+
+  Partitech\SonataExtra\Admin\TagAdmin:
+    arguments: [~, '%sonata.classification.admin.tag.entity%', ~]
+    tags:
+      - { name: sonata.admin, manager_type: orm, group: "Content", label: "Tag Multilangue" , default: true}
+    calls:
+      - [setTranslationDomain, ['PartitechSonataExtra']]
+
+
+  Sonata\PageBundle\Page\PageServiceManager: '@sonata.page.page_service_manager'
+
+
+  Partitech\SonataExtra\Service\BlogPageService:
+    tags:
+      - { name: 'sonata.page' }
+
+
+  Partitech\SonataExtra\Routing\DatabaseRouteLoader:
+    tags:
+      - { name: routing.loader }
+
+  Sonata\PageBundle\Route\CmsPageRouter: '@sonata.page.router'
+
+  Partitech\SonataExtra\EventListener\SitemapSubscriber:
+    tags:
+      - { name: "kernel.event_subscriber", priority: 50 }
+
+  Partitech\SonataExtra\EventListener\ConsoleContextListener:
+    tags:
+      - { name: kernel.event_subscriber }
+
+  Partitech\SonataExtra\EventListener\SecurityHeadersListener:
+    arguments:
+      $policies: '%partitech_sonata_extra.content_security_policy%'
+    tags:
+      - { name: kernel.event_listener, event: kernel.response }
+

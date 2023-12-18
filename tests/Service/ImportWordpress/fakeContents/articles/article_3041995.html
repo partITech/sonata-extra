@@ -1,0 +1,351 @@
+
+<p>Nous avons vu dans les article précédents comment initialiser un projet Symfony 6 + Sonata 5 avec les médias et les utilisateurs dans un admin sécurisé. Nous avons vu ensuite comment gérer les localisations de l&rsquo;utilisateur.<br>Nous allons voir maintenant comment installer et gérer les classifications.</p>
+
+
+
+<p>On procède à l&rsquo;installation de la dernière version en date.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php8.1 composer.phar require  sonata-project/classification-bundle:5.x-dev
+</pre></div>
+
+
+<p>Visiblement, nous avons une erreur de configuration.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+Unrecognized option &quot;media&quot; under &quot;sonata_classification.class&quot;. Available   
+!!    options are &quot;category&quot;, &quot;collection&quot;, &quot;context&quot;, &quot;tag&quot;.      
+</pre></div>
+
+
+<p>On retire la section médias de la configuration  sonata_classification.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_classification:
+    class:
+        category: App\Entity\SonataClassificationCategory
+        collection: App\Entity\SonataClassificationCollection
+        context: App\Entity\SonataClassificationContext
+        tag: App\Entity\SonataClassificationTag
+        #media: App\Entity\SonataMediaMedia
+</pre></div>
+
+
+<p>Nous avons ensuite une nouvelle erreur.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+PHP Fatal error:  Type of App\Entity\SonataClassificationCategory::$children must be Doctrine\Common\Collections\Collection (as in class Sonata\ClassificationBundle\Model\Category) in /src/Entity/SonataClassificationCategory.php on line 18
+
+</pre></div>
+
+
+<p>Ce n&rsquo;est pas grave, on va tout configurer pour que ça passe du premier coup.<br>On va déjà implémenter nos entity dans un répertoire autre que src/app histoire de ne pas polluer notre application avec les surcharges de nos bundles. Tout comme UserBundle et MediaBundle, on met ça dans src/Application/Sonata/ClassificationBundle/Entity et on va créer nos 4 fichiers.<br><br>src/Application/Sonata/ClassificationBundle/Entity/SonataClassificationCategory.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+declare(strict_types=1);
+
+namespace App\Application\Sonata\ClassificationBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sonata\ClassificationBundle\Entity\BaseCategory;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name=&quot;classification__category&quot;)
+ */
+class SonataClassificationCategory extends BaseCategory
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type=&quot;integer&quot;)
+     */
+    protected $id;
+    
+    public function getId(): ?int
+    {
+        return $this-&gt;id;
+    }
+}
+?&gt;
+
+
+</pre></div>
+
+
+<p>src/Application/Sonata/ClassificationBundle/Entity/SonataClassificationCollection.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php 
+declare(strict_types=1);
+
+namespace App\Application\Sonata\ClassificationBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sonata\ClassificationBundle\Entity\BaseCollection;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name=&quot;classification__collection&quot;)
+ */
+class SonataClassificationCollection extends BaseCollection
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type=&quot;integer&quot;)
+     */
+    protected $id;
+    
+    public function getId(): ?int
+    {
+        return $this-&gt;id;
+    }
+}
+
+
+?&gt;
+</pre></div>
+
+
+<p>src/Application/Sonata/ClassificationBundle/Entity/SonataClassificationContext.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php 
+declare(strict_types=1);
+
+namespace App\Application\Sonata\ClassificationBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sonata\ClassificationBundle\Entity\BaseContext;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name=&quot;classification__context&quot;)
+ */
+class SonataClassificationContext extends BaseContext
+{
+    /**
+     * @ORM\Id
+     * @ORM\Column(name=&quot;id&quot;, type=&quot;string&quot;, length=64, nullable=false)
+     */
+     protected ?string $id = null;
+    
+    public function getId(): ?string
+    {
+        return $this-&gt;id;
+    }
+}
+
+?&gt;
+</pre></div>
+
+
+<p>src/Application/Sonata/ClassificationBundle/Entity/SonataClassificationTag.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+declare(strict_types=1);
+
+namespace App\Application\Sonata\ClassificationBundle\Entity;
+
+use Doctrine\ORM\Mapping as ORM;
+use Sonata\ClassificationBundle\Entity\BaseTag;
+
+/**
+ * @ORM\Entity
+ * @ORM\Table(name=&quot;classification__tag&quot;)
+ */
+class SonataClassificationTag extends BaseTag
+{
+    /**
+     * @ORM\Id
+     * @ORM\GeneratedValue
+     * @ORM\Column(type=&quot;integer&quot;)
+     */
+    protected $id;
+    
+    public function getId(): ?int
+    {
+        return $this-&gt;id;
+    }
+}
+</pre></div>
+
+
+<p>Ensuite, il nous faut donner les path de nos classes dans config/packages/sonata_classification.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_classification:
+    class:
+        category: App\Application\Sonata\ClassificationBundle\Entity\SonataClassificationCategory
+        collection: App\Application\Sonata\ClassificationBundle\Entity\SonataClassificationCollection
+        context: App\Application\Sonata\ClassificationBundle\Entity\SonataClassificationContext
+        tag: App\Application\Sonata\ClassificationBundle\Entity\SonataClassificationTag
+   
+
+</pre></div>
+
+
+<p>Il faut aussi que l&rsquo;on ajoute le path de la classe catégorie dans la définition des médias du fichier config/packages/sonata_media.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_media:
+    class:
+        media: App\Application\Sonata\MediaBundle\Entity\Media
+        gallery: App\Application\Sonata\MediaBundle\Entity\Gallery
+        gallery_item: App\Application\Sonata\MediaBundle\Entity\GalleryItem
+        category: App\Application\Sonata\ClassificationBundle\Entity\SonataClassificationCategory
+</pre></div>
+
+
+<p>On ajoute notre bundle dans config/packages/doctrine.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+doctrine:
+    dbal:
+        url: '%env(resolve:DATABASE_URL)%'
+
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '13'
+    orm:
+        auto_generate_proxy_classes: true
+        naming_strategy: doctrine.orm.naming_strategy.underscore_number_aware
+        auto_mapping: true
+        mappings:
+            App:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Entity'
+                prefix: 'App\Entity'
+                alias: App
+            App\Application\Sonata\UserBundle:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Application/Sonata/UserBundle/Entity'
+                prefix: 'App\Application\Sonata\UserBundle\Entity'
+                alias: App\Application\Sonata\UserBundle
+            App\Application\Sonata\MediaBundle:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Application/Sonata/MediaBundle/Entity'
+                prefix: 'App\Application\Sonata\MediaBundle\Entity'
+                alias: App\Application\Sonata\MediaBundle
+            App\Application\Sonata\ClassificationBundle:
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Application/Sonata/ClassificationBundle/Entity'
+                prefix: 'App\Application\Sonata\ClassificationBundle\Entity'
+                alias: App\Application\Sonata\ClassificationBundle
+                
+            translatable:
+                type: annotation # or attribute
+                alias: Gedmo
+                prefix: Gedmo\Translatable\Entity
+                # make sure vendor library location is correct
+                dir: &quot;%kernel.project_dir%/vendor/gedmo/doctrine-extensions/src/Translatable/Entity&quot;
+        filters:
+            softdeleteable:
+                class: Gedmo\SoftDeleteable\Filter\SoftDeleteableFilter
+</pre></div>
+
+
+<p>On crée le schéma de la base de données.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+ php8.1 bin/console doctrine:schema:update --force
+</pre></div>
+
+<div class="wp-block-image">
+<figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/03/Selection_279.png"><img decoding="async" loading="lazy" width="1024" height="163" src="https://www.partitech.com/wp-content/uploads/2022/03/Selection_279-1024x163.png" alt="" class="wp-image-1889" srcset="https://www.partitech.com/wp-content/uploads/2022/03/Selection_279-1024x163.png 1024w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_279-300x48.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_279-768x122.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_279-800x127.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_279-550x87.png 550w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_279.png 1102w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/03/Selection_280.png"><img decoding="async" loading="lazy" width="1024" height="417" src="https://www.partitech.com/wp-content/uploads/2022/03/Selection_280-1024x417.png" alt="" class="wp-image-1890" srcset="https://www.partitech.com/wp-content/uploads/2022/03/Selection_280-1024x417.png 1024w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_280-300x122.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_280-768x312.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_280-800x326.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_280-550x224.png 550w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_280.png 1278w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>On ajoute nos interfaces dans l&rsquo;admin dans le fichier config/packages/sonata_admin.yaml</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+sonata_admin:
+    title: Backoffice
+    title_logo: /bundles/sonataadmin/images/logo_title.png
+    show_mosaic_button: false
+    security:
+        handler: sonata.admin.security.handler.role
+    options:
+        default_admin_route: edit
+        html5_validate: false
+    global_search:
+        admin_route: edit
+    breadcrumbs:
+        child_admin_route: edit
+    dashboard:
+        groups:
+            runroom:
+#                label: Base
+#                items:
+#                    - Runroom\SeoBundle\Admin\MetaInformationAdmin
+#                    - Runroom\BasicPageBundle\Admin\BasicPageAdmin
+#                    - Runroom\TranslationBundle\Admin\TranslationAdmin
+#                    - Runroom\RedirectionBundle\Admin\RedirectAdmin
+#                    - label: Cookies
+#                      route: admin_runroom_cookies_cookiespage_edit
+#                      route_params: { id: 1 }
+            users:
+                label: Users
+                icon: &lt;i class=&quot;fa fa-users&quot;&gt;&lt;/i&gt;
+                on_top: true
+                items:
+                    - sonata.user.admin.user
+            media:
+                label: Media
+                icon: &lt;i class=&quot;fa fa-photo&quot;&gt;&lt;/i&gt;
+                on_top: true
+                items:
+                    - sonata.media.admin.media
+                    
+            classification:
+                label: Classification
+                icon: &lt;i class=&quot;fa fa-tags&quot;&gt;&lt;/i&gt;
+                items:
+                    - sonata.classification.admin.category
+                    - sonata.classification.admin.tag
+                    - sonata.classification.admin.collection
+                    - sonata.classification.admin.context
+                    
+</pre></div>
+
+
+<p>Et tout devrait fonctionner normalement.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2022/03/Selection_285.png"><img decoding="async" loading="lazy" width="1024" height="309" src="https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-1024x309.png" alt="" class="wp-image-1893" srcset="https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-1024x309.png 1024w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-300x91.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-768x232.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-1536x463.png 1536w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-1440x434.png 1440w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-800x241.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285-550x166.png 550w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_285.png 1866w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>On passe une commande de migration pour mettre à jour tous les éléments avec le contexte par défaut.<br>A priori on a pas beaucoup d&rsquo;éléments à migrer à ce stade.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php8.1 bin/console sonata:classification:fix-context
+</pre></div>
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2022/03/Selection_282.png"><img decoding="async" loading="lazy" width="973" height="126" src="https://www.partitech.com/wp-content/uploads/2022/03/Selection_282.png" alt="" class="wp-image-1892" srcset="https://www.partitech.com/wp-content/uploads/2022/03/Selection_282.png 973w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_282-300x39.png 300w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_282-768x99.png 768w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_282-800x104.png 800w, https://www.partitech.com/wp-content/uploads/2022/03/Selection_282-550x71.png 550w" sizes="(max-width: 973px) 100vw, 973px" /></a></figure>
+
+
+
+<p></p>

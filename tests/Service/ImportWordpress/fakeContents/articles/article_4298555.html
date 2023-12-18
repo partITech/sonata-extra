@@ -1,0 +1,46 @@
+<p><br style="clear:both"><br />
+Exemple d&rsquo;ajout manuel d&rsquo;une taxonomie (sans passer par la configuration).</p>
+<p>A mettre dans le fichier functions.php :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+/**
+* Manual add new Field to taxonomy or you can use plugin &quot;taxonomy manager&quot;
+*
+* BEGIN
+*/
+// A callback function to add a custom field to our &quot;expertise&quot; taxonomy
+function expertise_taxonomy_custom_fields($tag) {
+// Check for existing taxonomy meta for the term you're editing
+$t_id = $tag-&amp;gt;term_id; // Get the ID of the term you're editing
+$term_meta = get_option(&quot;taxonomy_term_$t_id&quot;); // Do the check
+?&amp;gt;
+
+&amp;lt;tr class=&quot;form-field&quot;&amp;gt;
+&amp;lt;th scope=&quot;row&quot; valign=&quot;top&quot;&amp;gt;
+&amp;lt;label for=&quot;presenter_id&quot;&amp;gt;&amp;lt;?php _e('WordPress User ID'); ?&amp;gt;&amp;lt;/label&amp;gt;
+&amp;lt;/th&amp;gt;
+&amp;lt;td&amp;gt;
+&amp;lt;input type=&quot;text&quot; name=&quot;term_meta[presenter_id]&quot; id=&quot;term_meta[presenter_id]&quot; size=&quot;25&quot; style=&quot;width:60%;&quot; value=&quot;&amp;lt;?php echo $term_meta['presenter_id'] ? $term_meta['presenter_id'] : ''; ?&amp;gt;&quot;&amp;gt;&amp;lt;br /&amp;gt;
+&amp;lt;span class=&quot;description&quot;&amp;gt;&amp;lt;?php _e('The Presenter\'s WordPress User ID'); ?&amp;gt;&amp;lt;/span&amp;gt;
+&amp;lt;/td&amp;gt;
+&amp;lt;/tr&amp;gt;
+
+&amp;lt;?php
+}
+
+// A callback function to save our extra taxonomy field(s)
+function save_taxonomy_custom_fields($term_id) {
+if (isset($_POST['term_meta'])) {
+$t_id = $term_id;
+$term_meta = get_option(&quot;taxonomy_term_$t_id&quot;);
+$cat_keys = array_keys($_POST['term_meta']);
+foreach ($cat_keys as $key) {
+if (isset($_POST['term_meta'][$key])) {
+$term_meta[$key] = $_POST['term_meta'][$key];
+}
+}
+//save the option array
+update_option(&quot;taxonomy_term_$t_id&quot;, $term_meta);
+}
+}
+
+</pre>

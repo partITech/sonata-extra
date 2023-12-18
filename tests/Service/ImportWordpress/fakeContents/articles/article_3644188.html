@@ -1,0 +1,22 @@
+<p>Pour configurer les couleurs par défaut du color picker des champs custom types il suffit d&rsquo;ajouter un javascript pour surcharger la configuration par défaut.<br />
+Dans votre fichier functions.php ajoutez le code suivant, et configurez a loisir la palette de celui-ci :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+add_action( 'admin_footer', 'backgroundColor_hook' );
+function backgroundColor_hook( $hook_suffix )
+{
+?&amp;gt;
+&amp;lt;script type=&quot;text/javascript&quot;&amp;gt;
+
+jQuery( document ).ready(function() {
+jQuery('.js-types-colorpicker').each(function(){
+jQuery(this).wpColorPicker({
+palettes: ['#d21268','#146c52','#82b600','#00949b','#010080','#001c4b']
+});
+
+});
+
+});
+&amp;lt;/script&amp;gt;
+&amp;lt;?php
+}
+</pre>

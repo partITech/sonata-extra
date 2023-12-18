@@ -1,0 +1,64 @@
+{% set sites = admin.siteList %}
+
+{% for field_description in admin.list.getElements() %}
+    {% if field_description.name == constant('Sonata\\AdminBundle\\Datagrid\\ListMapper::NAME_ACTIONS') and app.request.isXmlHttpRequest %}
+        {# NEXT_MAJOR: Remove this case in version 5 and recommend using the option `ajax_hidden` instead. #}
+        {# Action buttons disabled in ajax view! #}
+    {% elseif field_description.getOption('ajax_hidden') == true and app.request.isXmlHttpRequest %}
+        {# Disable fields with 'ajax_hidden' option set to true #}
+    {% else %}
+        {% if field_description.type=='actions' and sites |length%}
+        <td style="white-space: nowrap;">
+            {% for details in object.translations %}
+                {% set flagClass = 'fi-' ~ details.lang %}
+                {% set buttonClass = details.entity_id is defined and details.entity_id ? '' : 'btn-disabled' %}
+
+                {% if details.entity_id is defined and details.entity_id %}
+                    <a class="label pull-left  btn btn-app btn-app-xs mr-2 " href="{{ admin.generateUrl('edit',  {'id': details.entity_id  }) }}" title="{{ 'sonata-extra.page_admin.tree_view.edit'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}"><i class="fi {{ flagClass }} fis {{ buttonClass }} "></i></a>
+                {% else %}
+                    <a class="label pull-left btn btn-app btn-app-xs mr-2 chooseLocaleModalLink{{ object.id  }}" href="#"  title="{{ 'sonata-extra.page_admin.tree_view.create'|trans({}, 'PartitechSonataExtraBundle') }} {{ details.label }}" data-site="{{ details.site }}"><i class="fi {{ flagClass }} fis {{ buttonClass }} "></i></a>
+                {% endif %}
+            {% endfor %}
+        </td>
+
+
+            {# using modal flag shooser #}
+            {% include '@PartitechSonataExtra/Admin/translation/crud_inline_flags_modal.html.twig' %}
+
+
+
+
+
+
+
+
+
+
+
+            {{ object|render_list_element(field_description) }}
+        {% else %}
+            {{ object|render_list_element(field_description) }}
+        {% endif %}
+
+    {% endif %}
+{% endfor %}
+
+<style>
+
+    .btn-app-xs{
+        height: 25px !important;
+        width: 25px !important;
+        min-width: 25px;
+        padding: 0;
+        margin-left: 2px;
+        margin-right: 2px;
+        line-height: 1.5;
+        font-size: 12px;
+
+    }
+    .btn-app-xs>i{
+        margin-top:4px;
+        width:1.5em !important;
+        height:1.3em !important;
+    }
+</style>

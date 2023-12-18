@@ -1,0 +1,129 @@
+
+<p>Pour ajouter une fonctionnalité de duplication d&rsquo;objet sur une liste CRUD, il faut modifier la liste en ajoutant le bouton, configurer une route, et exécuter un code de duplication d&rsquo;objet, et pour finir, référencer le controller qui accueillera notre fonction dans notre interface, via son service.<br><br>Ajouter le bouton :<br>Dans votre controller ajouter le bouton en donnant en référence le template du bouton.<br>Ici nous mettons le path &lsquo;Admin/list__action_clone.html.twig&rsquo;. Le système ira donc chercher le fichier : /templates/Admin/list__action_clone.html.twig</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+   protected function configureListFields(ListMapper $listMapper)
+    {
+
+        $listMapper-&gt;addIdentifier('id', null, &#91;'label' =&gt; 'id']);
+        $listMapper-&gt;addIdentifier('label', null, &#91;'label' =&gt; 'type']);  
+        $listMapper-&gt;addIdentifier('description', null, &#91;'label' =&gt; 'Label']);
+        $listMapper-&gt;add('actif', null, &#91;'editable' =&gt; true]);
+        $listMapper-&gt;add('_action', null, &#91;
+				'actions' =&gt; &#91;
+					'clone' =&gt; &#91;
+						'template' =&gt; 'Admin/list__action_clone.html.twig'
+					]
+				]
+			]);
+        
+    }
+</pre></div>
+
+
+<p>Le contenu de notre fichier twig est très simple. C&rsquo;est juste l&rsquo;affichage d&rsquo;une icône.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+&lt;a  class=&quot;btn btn-sm btn-default&quot; 
+    href=&quot;{{ admin.generateObjectUrl('clone', object) }}&quot; 
+    title=&quot;{{ 'Clone'|trans({}, 'default') }}&quot; 
+    alt=&quot;{{ 'Clone'|trans({}, 'default') }}&quot;&gt;
+	&lt;i class=&quot;fa fa-clone&quot;&gt;&lt;/i&gt;
+&lt;/a&gt;
+
+</pre></div>
+
+
+<p>Il faut ensuite créer la route dans notre controller :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    protected function configureRoutes(RouteCollection $collection)
+    {
+        $collection-&gt;add('clone', $this-&gt;getRouterIdParameter().'/clone');
+    }
+</pre></div>
+
+
+<p>Et dernière étape, cloner notre objet ainsi que l&rsquo;ensemble de sa configuration. Pour cela nous allons créer un controller spécialement dédié à la gestion de nos fonctions additionnelles et l&rsquo;ajouter à notre service pour qu&rsquo;il soit disponible.<br><br>Dans App/Admin nous allons créé un fichier CustomAction.php qui va contenir notre function cloneAction().<br>Celui-ci doit être étendu par CRUDController et non AbstractAdmin comme nos interfaces. C&rsquo;est ce qui explique que nous mettons notre fonction dans un nouveau fichier. Mais cela nous permet aussi de réutiliser cette fonction au besoin.</p>
+
+
+
+<p><br>Dans src/Admin/CustomAction.php :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+namespace App\Admin;
+
+use Sonata\AdminBundle\Controller\CRUDController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+
+class CustomAction extends CRUDController
+{
+    
+    
+    /**
+     * @param $id
+     */
+    public function cloneAction($id)
+    {
+        $object = $this-&gt;admin-&gt;getObject($id);
+        $objectConf=$object-&gt;getWtypeWconf()-&gt;toArray();
+    
+    
+        if (!$object) {
+            throw new NotFoundHttpException(sprintf('unable to find the object with id: %s', $id));
+        }
+    
+        $clonedObject = clone $object;
+        $clonedObject-&gt;unsetId();
+        $clonedObject-&gt;setLabel($object-&gt;getLabel().' clone('.uniqid().')');
+        $this-&gt;admin-&gt;create($clonedObject);
+        if(!empty($objectConf)){
+            foreach($objectConf as $c){
+                $clonedConf=clone $c;
+                $clonedConf-&gt;setWconfTypcont($clonedObject);
+                $this-&gt;admin-&gt;create($clonedConf);
+            }
+        }
+        $this-&gt;addFlash('sonata_flash_success', 'L\'élément a correctement été dupliqué.');
+        return new RedirectResponse($this-&gt;admin-&gt;generateUrl('list'));
+    
+        // if you have a filtered list and want to keep your filters after the redirect
+        // return new RedirectResponse($this-&gt;admin-&gt;generateUrl('list', &#91;'filter' =&gt; $this-&gt;admin-&gt;getFilterParameters()]));
+    }
+}
+</pre></div>
+
+
+<p>Comme vous pouvez le constater, notre fonction clone se charge de cloner notre objet mais aussi de cloner l&rsquo;ensemble de ses relations OneToMany.<br>La ligne $clonedConf->setWconfTypcont($clonedObject); permet de mettre l&rsquo;id de la relation parent dans le champ de la relation enfant. Sinon tous les objets garderaient leurs relations avec l&rsquo;objet initial.<br><br>Dernière étape, il faut référencer notre nouveau controller dans le service de notre interface.<br><br>Avant : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+admin.wtype:
+    class: App\Admin\WtypeAdmin
+    arguments: &#91;~, App\Entity\Wtype, ~]
+    calls:
+        - &#91;addChild, &#91;&quot;@admin.wconf&quot;]] 
+    tags:
+        - { name: sonata.admin, manager_type: orm, label: &quot;Types de contrats&quot; }
+    public: true
+</pre></div>
+
+
+<p>Après :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+    admin.wtype:
+        class: App\Admin\WtypeAdmin
+        arguments: &#91;~, App\Entity\Wtype, App\Admin\CustomAction]
+        calls:
+            - &#91;addChild, &#91;&quot;@admin.wconf&quot;]] 
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Types de contrats&quot; }
+        public: true
+</pre></div>

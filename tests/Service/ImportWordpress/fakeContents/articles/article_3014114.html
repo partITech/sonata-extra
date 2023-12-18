@@ -1,0 +1,251 @@
+
+<div class="wp-block-group is-layout-flow"><div class="wp-block-group__inner-container">
+<p>Nous allons créer une une interface d&rsquo;administration 1N, avec deux entités. La première One, et la seconde Many, et faire un panel d&rsquo;admin pour la table One, qui pourras affected plusieurs éléments de la table Many. Pour corser le truc, on s&rsquo;ajoute quelques paramètres additionnels, tel que des champs timestamps pour une date de synchro avec un SI, et des champs primary qui ne s&rsquo;appellent pas ID et qui ne sont pas auto incrémentés.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="503" src="https://www.partitech.com/wp-content/uploads/2020/01/Sélection_086-1024x503.png" alt="" class="wp-image-347" srcset="https://www.partitech.com/wp-content/uploads/2020/01/Sélection_086-1024x503.png 1024w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_086-300x147.png 300w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_086-768x377.png 768w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_086-1536x754.png 1536w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_086.png 1873w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p></p>
+
+
+
+<p>Dans notre cas, nous avons une synchro avec un SI qui nécessite un champs timestamps.<br>Il suffit juste de créer un champs de type datetime<br>Ajouter l&rsquo;annonation options={« default »: « CURRENT_TIMESTAMP »}<br>L&rsquo;annotation suivante créera un champs Timepstamps avec en default CURRENT_TIMESTAMP.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+* @ORM\Column(type=&quot;datetime&quot;, nullable=false, options={&quot;default&quot;: &quot;CURRENT_TIMESTAMP&quot;})
+* @ORM\Version
+
+</pre></div>
+
+
+<p><br>Pour nommer correctement la table et créer les index, il suffit de rajouter l&rsquo;annotation suivante en entête de classe</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Mapping\Entity;
+use Doctrine\ORM\Mapping\Table;
+use Doctrine\ORM\Mapping\Id;
+use Doctrine\ORM\Mapping\Column;
+use Doctrine\ORM\Mapping\GeneratedValue;
+use Doctrine\ORM\Mapping\Index;
+
+/**
+* @ORM\Entity(repositoryClass=&quot;App\Repository\WcoconRepository&quot;)
+* @Table(name=&quot;table_name&quot;,indexes={@Index(name=&quot;PRIMARY&quot;, columns={&quot;champs1&quot;, &quot;champs2&quot;})})
+*/
+</pre></div>
+
+
+<p><br>Pour utiliser un autre champs que « id » mis par défaut, il faut juste ajouter l&rsquo;annotation suivante :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+/**
+* @ORM\Column(type=&quot;integer&quot;)
+* @ORM\Id()
+*/
+private $numero_dossier;
+</pre></div>
+
+
+<p><br>Une fois la relation faite, il faut préciser l&rsquo;id qui sera utilisé dans le mapping. sinon on aura une erreur du type :<br>Column name <code>id</code> referenced for relation from App\Entity\Many towards App\Entity\One does not exist.</p>
+
+
+
+<p>Donc dans l&rsquo;entité &lsquo;Many&rsquo;, il faut ajouter la relation avec l&rsquo;id de l&rsquo;entité &lsquo;One&rsquo;</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+/**
+* @ORM\ManyToOne(targetEntity=&quot;App\Entity\One&quot;, inversedBy=&quot;Ones&quot;)
+* @ORM\JoinColumn(nullable=false, name=&quot;many_id&quot;, referencedColumnName=&quot;one_id&quot;)
+*/
+private $many_id;
+</pre></div>
+
+
+<p><br>Dernier point qui a son importance;  Pour éviter que l&rsquo;objet ait le un nom du type « App\Entity\One:sdfsdfgsdgmlkpoufsdlkjfsdg » lors de l&rsquo;édition, il est préférable de surcharger la méthode __toString(), pour afficher le nom de l&rsquo;objet.<br>Dans l&rsquo;entity il suffit d&rsquo;inclure une méthode :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+public function __toString()
+{
+       return &quot;Nom object &quot;.$this-&gt;getName();
+}
+
+</pre></div>
+
+
+<p><br>Une fois fait, il suffit de faire la migration :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console make:migration
+php bin/console doctrine:migrations:migrate
+
+</pre></div>
+
+
+<p><br>Au besoin pour régénérer le repository à partir des entités disponibles il suffit de lancer cette commande :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console make:entity --regenerate
+</pre></div>
+
+
+<p>Les entités ne seront pas modifiés.</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="272" src="https://www.partitech.com/wp-content/uploads/2020/01/Sélection_092-1024x272.png" alt="" class="wp-image-363" srcset="https://www.partitech.com/wp-content/uploads/2020/01/Sélection_092-1024x272.png 1024w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_092-300x80.png 300w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_092-768x204.png 768w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_092.png 1058w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p><br>Pour tester la relations entre les entités, on peux passer la commande suivante :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console doctrine:schema:validate
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="259" src="https://www.partitech.com/wp-content/uploads/2020/01/Sélection_091-1024x259.png" alt="" class="wp-image-362" srcset="https://www.partitech.com/wp-content/uploads/2020/01/Sélection_091-1024x259.png 1024w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_091-300x76.png 300w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_091-768x195.png 768w, https://www.partitech.com/wp-content/uploads/2020/01/Sélection_091.png 1125w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p><br>A ce stade, il ne nous reste plus qu&rsquo;a mettre en place les interfaces de gestion dans l&rsquo;admin et on pourras commencer à développer l&rsquo;authentification en front.</p>
+
+
+
+<p>Première étape de l&rsquo;interface d&rsquo;admin est de créer la classe dans src/Admin/TableAdmin.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Symfony\Component\Form\Extension\Core\Type\TextType;
+
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+use Sonata\AdminBundle\Form\Type\ModelAutocompleteType;
+use Sonata\AdminBundle\Form\Type\ModelType;
+use Sonata\AdminBundle\Form\Type\ModelListType;
+use Sonata\Form\Type\CollectionType;
+
+class OneAdmin extends AbstractAdmin
+{
+	protected function configureFormFields(FormMapper $formMapper)
+	{
+
+		$formMapper-&gt;tab('General');
+
+		$formMapper-&gt;with('Parametres', &#91;'class' =&gt; 'col-md-4']);
+
+		$formMapper-&gt;add('name', TextType::class, &#91;'required' =&gt; false, 'label'=&gt;'Site internet','attr' =&gt; &#91;'placeholder' =&gt; '']]);
+
+		$formMapper-&gt;end()
+
+		$formMapper-&gt;with('Parametres', &#91;'class' =&gt; 'col-md-8']);
+
+		$formMapper-&gt;add('nomduchampsArrayCollection', EntityType::class, &#91;
+		'class' =&gt; 'App\Entity\Many',
+		'choice_label' =&gt; 'nom_du_champs_autre_table',
+		'label' =&gt; 'champs liste',
+		'multiple' =&gt; true,
+		//'expanded' =&gt; true,
+		]);
+
+		$formMapper-&gt;end()
+		$formMapper-&gt;end('General');
+
+	}
+
+	protected function configureDatagridFilters(DatagridMapper $datagridMapper)
+	{
+		$datagridMapper-&gt;add('name');
+
+	}
+
+	protected function configureListFields(ListMapper $listMapper)
+	{
+		$listMapper-&gt;addIdentifier('name', null, &#91;'label' =&gt; 'Nom']);
+
+	}
+	public function prePersist($object)
+	{
+		$this-&gt;preUpdate($object);
+	}
+
+	public function preUpdate($object)
+	{
+
+		$mapping=$object-&gt;getManys()-&gt;getMapping();
+		$currentManys=$this-&gt;createQuery()-&gt;getQueryBuilder()-&gt;getQuery()-&gt;getEntityManager()-&gt;getRepository($mapping&#91;&quot;targetEntity&quot;])
+		-&gt;findBy(&#91;$mapping&#91;&quot;mappedBy&quot;]=&gt;$this-&gt;id($object)]);
+		$object-&gt;setMany($object-&gt;getManys(),$currentManys);
+
+	}
+	public function setMany($collections,$currentManys)
+	{
+		foreach ($currentCollections as $w) 
+		{
+			if(!$collections-&gt;contains($w)){
+			$w-&gt;setCollectionID(null);
+			}
+
+		}
+		$this-&gt;collections= new ArrayCollection();
+
+		foreach ($collections as $collection) {
+			$this-&gt;addCollections($collections);
+		}
+
+	}
+
+}
+</pre></div>
+
+
+<p>Dans l&rsquo;entity One.php il faut rajouter notre nouvelle méthode pour gérer les modifications</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    public function setMany($manys,$current)
+    {
+        foreach ($current as $w) {
+            if(!$manys-&gt;contains($w)){
+                $w-&gt;setManyField(null);
+            }
+           
+        }
+        $this-&gt;manys = new ArrayCollection();
+        
+        foreach ($manys as $m) {
+            $this-&gt;addMany($m);
+        }
+
+    }
+</pre></div>
+
+
+<p>Il faut ensuite enregistrer le service dans config/sercices.yaml</p>
+</div></div>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    admin.MaTable:
+        class: App\Admin\MaTableAdmin
+        arguments: &#91;~, App\Entity\MaTable, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Table MaTable&quot; }
+        public: true
+</pre></div>

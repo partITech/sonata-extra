@@ -1,0 +1,33 @@
+{# templates/blocks/contact/confirmation_email.html.twig #}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ 'sonata-extra.block_contact.confirmation.title'|trans({}, 'PartitechSonataExtraBundle') }}</title>
+</head>
+<body>
+<h1>{{ 'sonata-extra.block_contact.confirmation.heading'|trans({}, 'PartitechSonataExtraBundle') }}</h1>
+<p>{{ 'sonata-extra.block_contact.confirmation.greeting'|trans({}, 'PartitechSonataExtraBundle') }} {% if formData.firstName is defined and formData.firstName %}{{ formData.firstName }}{% endif %}{% if formData.lastName is defined and formData.lastName %} {{ formData.lastName }}{% endif %},</p>
+<p>{{ 'sonata-extra.block_contact.confirmation.received'|trans({}, 'PartitechSonataExtraBundle') }}</p>
+<ul>
+    {% if formData.firstName is defined and formData.firstName %}
+        <li>{{ 'sonata-extra.block_contact.confirmation.firstName'|trans({}, 'PartitechSonataExtraBundle') }} : {{ formData.firstName }}</li>
+    {% endif %}
+    {% if formData.lastName is defined and formData.lastName %}
+        <li>{{ 'sonata-extra.block_contact.confirmation.lastName'|trans({}, 'PartitechSonataExtraBundle') }} : {{ formData.lastName }}</li>
+    {% endif %}
+    {% if formData.email is defined and formData.email %}
+        <li>{{ 'sonata-extra.block_contact.confirmation.email'|trans({}, 'PartitechSonataExtraBundle') }} : {{ formData.email }}</li>
+    {% endif %}
+    {% if formData.phone is defined and formData.phone %}
+        <li>{{ 'sonata-extra.block_contact.confirmation.phone'|trans({}, 'PartitechSonataExtraBundle') }} : {{ formData.phone }}</li>
+    {% endif %}
+    {% if formData.additionalInformation is defined and formData.additionalInformation %}
+        <li>{{ 'sonata-extra.block_contact.confirmation.message'|trans({}, 'PartitechSonataExtraBundle') }} : {{ formData.additionalInformation }}</li>
+    {% endif %}
+</ul>
+<p>{{ 'sonata-extra.block_contact.confirmation.confirmation'|trans({}, 'PartitechSonataExtraBundle') }}</p>
+<p>{{ 'sonata-extra.block_contact.confirmation.thankYou'|trans({}, 'PartitechSonataExtraBundle') }}</p>
+<p>{{ 'sonata-extra.block_contact.confirmation.regards'|trans({}, 'PartitechSonataExtraBundle') }}<br>{% if settings.mailSignature is defined %}{{ settings.mailSignature }}{% endif %}</p>
+</body>
+</html>

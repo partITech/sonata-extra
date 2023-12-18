@@ -1,0 +1,30 @@
+
+<p>Aujourd&rsquo;hui, utiliser Teams sous Linux est indispensable tant il est utilisé dans le monde de l&rsquo;entreprise.<br><br>Vous aurez toujours un contact, un client, un groupe de travail, qui utilisera cet outil.<br>Et cela fonctionne très bien sous Linux. SAUF depuis la dernière mise à jour, où les liens d’accès directs aux meetings ne fonctionnent plus.<br><br>Vous cliquez sur le lien, une page web s&rsquo;ouvre, puis vous cliquez sur « Ouvrir votre application Teams ».</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/Selection_381.png"><img decoding="async" loading="lazy" width="451" height="422" src="https://www.partitech.com/wp-content/uploads/2021/03/Selection_381.png" alt="" class="wp-image-1182" srcset="https://www.partitech.com/wp-content/uploads/2021/03/Selection_381.png 451w, https://www.partitech.com/wp-content/uploads/2021/03/Selection_381-300x281.png 300w" sizes="(max-width: 451px) 100vw, 451px" /></a></figure></div>
+
+
+
+<p>Et là, l&rsquo;application s&rsquo;ouvre, mais pas la conf. Et comme on est pas sous Zoom, impossible d&rsquo;ouvrir la conférence avec un code. Pas de bouton « rejoindre une conférence ». <br><br>De mon coté, cela ne fonctionnait plus depuis la mise à jour d&rsquo;Avril 2021.<br><br>Pour corriger le problème, il suffit d&rsquo;éditer le fichier « /usr/bin/teams » et de déplacer l&rsquo;argument « $@ »<br><br>Vous devrez passer de ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+nohup &quot;$TEAMS_PATH&quot; --disable-namespace-sandbox --disable-setuid-sandbox &quot;$@&quot; &gt; &quot;$TEAMS_LOGS/teams-startup.log&quot; 2&gt;&amp;1 &amp;
+</pre></div>
+
+
+<p>A cela : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+nohup &quot;$TEAMS_PATH&quot; &quot;$@&quot; --disable-namespace-sandbox --disable-setuid-sandbox &gt; &quot;$TEAMS_LOGS/teams-startup.log&quot; 2&gt;&amp;1 &amp;
+</pre></div>
+
+
+<p>Vous devriez pouvoir rejoindre votre conférence en un click, et enfin vous passer de la web app de Teams (qui fait bien l&rsquo;affaire aussi).</p>
+
+
+
+<p></p>

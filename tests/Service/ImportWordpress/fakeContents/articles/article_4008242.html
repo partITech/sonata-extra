@@ -1,0 +1,9 @@
+<p>Aucuns réel intérêt d&rsquo;ajouter un favicon a la partie admin de WordPress, mais il se peux qu&rsquo;un client le demande, ce qui a déjà été le cas :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+
+function favicon(){
+echo '&amp;lt;link rel=&quot;shortcut icon&quot; href=&quot;',get_template_directory_uri(),'/images/favicon.ico&quot; /&amp;gt;',&quot;\n&quot;;
+}
+
+add_action('admin_head','favicon');
+</pre>

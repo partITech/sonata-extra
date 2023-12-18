@@ -1,0 +1,13 @@
+<p>Pour éviter que tout et n&rsquo;importe quoi soit uploadé depuis l&rsquo;admin, vous pouvez configurer les mimes authorisé comme suit :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+add_filter('upload_mimes','custom_upload_mimes');
+function custom_upload_mimes($mime_types=array()){
+$mime_types = array(
+'jpg|jpeg|jpe'  =&amp;gt; 'image/jpeg',
+'png'           =&amp;gt; 'image/png',
+'mp4'           =&amp;gt; 'video/mp4',
+'flv'           =&amp;gt; 'video/x-flv'
+);
+return $mime_types;
+}
+</pre>

@@ -1,0 +1,60 @@
+
+<p>Si vous êtes familier avec les thèmes WordPress, vous savez que de nombreux thèmes ont une barre latérale widgetisée. Cela signifie que vous pouvez ajouter, supprimer et réorganiser des widgets sur votre site Web WordPress en utilisant la section «widget» de votre tableau de bord WordPress.<br> <br>Avoir une barre latérale widgetisée est très utile mais vous voudrez peut-être également widgetiser d&rsquo;autres parties de votre thème WordPress. C&rsquo;est très facile à faire, et une fois que votre thème est modifié, il sera simple pour vous, ou l&rsquo;administrateur WordPress, de réorganiser cette zone de contenu dynamique.</p>
+
+
+
+<p>Nous allons ajouter une zone de widget dans notre template principale, et faire en sorte que cette zone s&rsquo;affiche que en page d&rsquo;accueil.<br><br>En premier lieu, on ajoute dans l&rsquo;index.php de notre thème l&rsquo;appel de notre template de sidebar<strong>.</strong><br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+if(is_front_page()){
+		   get_sidebar('widget-homepage');
+}
+</pre></div>
+
+
+<p>On vérifie si on est dans notre page d&rsquo;accueil, et on appelle notre sidebar que l&rsquo;on nomme « widget-homepage ».</p>
+
+
+
+<p>On créé ensuite un fichier template pour notre widget. Il doit être à la racine de votre thème et se nommer « sidebar-{widget-id} » (ici l&rsquo;ID de notre widget c&rsquo;est « widget-homepage »).<br>Dans ce fichier on fait appel à la  fonction WordPress « dynamic_sidebar » qui créée notre zone.<br><br>Voici le contenu de notre fichier sidebar-widget-homepage.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+ &lt;?php dynamic_sidebar( 'widget-homepage' ); ?&gt;
+</pre></div>
+
+
+<p>Ni plus, ni moins.</p>
+
+
+
+<p>Il nous faut ensuite dire à WordPress comment cette zone va être gérée. Et accessoirement, lui dire qu&rsquo;elle existe.<br>Dans notre fichier functions.php nous allons ajouter ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+function add_widget_area($id, $name, $description) {
+        register_sidebar(&#91;
+            'name'          =&gt; __( $name ),
+            'id'            =&gt; $id,
+            'description'   =&gt; $description,
+            'class'        =&gt; '',
+    		'description'   =&gt; esc_html__( 'Add widgets here.', 'partitech' ),
+    		'before_widget' =&gt; '&lt;section id=&quot;%1$s&quot; class=&quot;widget %2$s&quot;&gt;',
+    		'after_widget'  =&gt; '&lt;/section&gt;',
+    		'before_title'  =&gt; '&lt;h2 class=&quot;np-block-title&quot;&gt;',
+    		'after_title'   =&gt; '&lt;/h2&gt;',
+        ]
+        );
+  
+}
+
+add_widget_area('widget-homepage', 'Homepage widget zone', 'zone widget homepage');
+</pre></div>
+
+
+<p>Il vous suffit ensuite d&rsquo;aller dans le gestionnaire de widget de votre thème ou de WordPress et d&rsquo;ajouter les widgets que vous souhaitez.<br></p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/Selection_361.png"><img decoding="async" loading="lazy" width="330" height="478" src="https://www.partitech.com/wp-content/uploads/2021/03/Selection_361.png" alt="Gestion d'une zone widget dans le theme" class="wp-image-976" srcset="https://www.partitech.com/wp-content/uploads/2021/03/Selection_361.png 330w, https://www.partitech.com/wp-content/uploads/2021/03/Selection_361-207x300.png 207w" sizes="(max-width: 330px) 100vw, 330px" /></a><figcaption>Gestion d&rsquo;une zone widget dans le theme</figcaption></figure></div>

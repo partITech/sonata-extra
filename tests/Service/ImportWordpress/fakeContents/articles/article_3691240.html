@@ -1,0 +1,5 @@
+<p>Pour faire un export, à la manière de tortoiseSVN qui permet d&rsquo;exporter les fichiers de une ou plusieurs révisions, dans leurs arborescence (ce qui est pratique pour faire une mise en production), il suffit de lancer la commande suivante, en indiquant la révision précédente, ainsi que la derniere révision :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+git diff-tree -r --no-commit-id --name-only 6c16aaab  35168851| xargs tar -rf /var/www/delivery.tar
+
+</pre>

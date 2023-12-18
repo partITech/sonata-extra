@@ -1,0 +1,667 @@
+
+<p>Pour clôturer ce mini dossier technique sur les <em>foreign functions interface</em> de PHP,&nbsp;je me suis mis en tête de me connecter simplement à une lib.&nbsp;Une sorte de Challenge qui pourrait en même temps me faire progresser sur le sujet.&nbsp;Il m&rsquo;a fallu donc trouver une idée de projet. Un truc pas trop petit ni trop simple mais pas non plus un truc trop gros. Raté, j&rsquo;ai trouvé une idée mais celle ci s&rsquo;avère bien plus complexe que je ne l&rsquo;imaginais. Qu&rsquo;à cela ne tienne, j&rsquo;ai tout de même tenté. Donc pour notre article je me suis dit que j&rsquo;allais tenter une intégration plus ou moins réussie et plus ou moins aboutie de QuickJS. </p>
+
+
+
+<p>Le premier jet est assez simpliste. Et vous allez voir que pour le bien de cette série d&rsquo;articles j&rsquo;ai eu quelques complications. Dans un second temps je vais tenter de simplifier l&rsquo;intégration et essayer d&rsquo;aller beaucoup plus loin en tentant de faire une intégration avec PHP dans les retours d&rsquo;appels (via un callback). Donc ma première étape : réussir à lancer du JavaScript et obtenir un retour. </p>
+
+
+
+<h2>Installation</h2>
+
+
+
+<p>Mon répertoire de travail va être simple. Un répertoire avec la source de QuickJs, un répertoire avec les sources C du binding (qui nous servira pour simplifier notre première version) et un répertoire pour notre lib PHP. </p>
+
+
+
+<p>Installer QuickJS :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo apt-get install gcc-multilib texlive texinfo
+git clone https://github.com/bellard/quickjs
+cd quickjs
+./unicode_download.sh
+./release.sh binary  quickjs
+make build_doc
+gcc -shared -o ../php/src/lib/libquickjs.so .obj/qjsc.o .obj/quickjs.o .obj/libregexp.o .obj/libunicode.o .obj/cutils.o .obj/quickjs-libc.o .obj/libbf.o
+cd ..</code></pre>
+
+
+
+<p>Concernant mon répertoire de travail, je me suis créé un dossier &lsquo;php&rsquo; dans lequel je vais initialiser une architecture composer. Ça aura l&rsquo;avantage de me fournir un espace de travail avec tout ce dont j&rsquo;ai besoin pour créer mes fichiers de code ainsi que des tests unitaires qui valideront que tout fonctionne convenablement. Vous pouvez si vous le désirez vous référer à l&rsquo;article <a href="https://www.partitech.com/blog-technique/divers/creer-une-librairie-avec-composer/">Creer une librairie avec composer</a>.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-79.png"><img decoding="async" loading="lazy" width="274" height="403" src="https://www.partitech.com/wp-content/uploads/2023/01/image-79.png" alt="" class="wp-image-2487" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-79.png 274w, https://www.partitech.com/wp-content/uploads/2023/01/image-79-204x300.png 204w" sizes="(max-width: 274px) 100vw, 274px" /></a></figure>
+
+
+
+<h2>Appeler QuickJS et exécuter un code JavaScript simple.</h2>
+
+
+
+<p>Lors de notre compilation de la librairie nous avons donc créé notre librairie mais aussi une documentation qui va nous permettre de mieux comprendre comment fonctionne ce moteur JavaScript. &nbsp;Un bref aperçu de l&rsquo;index et nous nous retrouvons directement dans le descriptif de l&rsquo;API&nbsp;qui nous apprend que la fonction<em> JS_EVAL() </em>nous permet de lancer une évaluation d&rsquo;un code JavaScript.&nbsp;Chouette c&rsquo;est exactement ce que l&rsquo;on cherche.</p>
+
+
+
+<p>Et comme premier objectif on va tenter de faire 2*3=6&nbsp;?&nbsp;ce sera un bon début&#8230;</p>
+
+
+
+<p>Allez hop on file dans le header file pour dérouler la pelote d&rsquo;informations dont nous avons besoin&nbsp;:</p>
+
+
+
+<p><a href="https://github.com/bellard/quickjs/blob/master/quickjs.h" target="_blank" rel="noreferrer noopener">https://github.com/bellard/quickjs/blob/master/quickjs.h</a></p>
+
+
+
+<p>Heu&#8230;&nbsp;ouai OK le machin il est long comme une autoroute&#8230;</p>
+
+
+
+<p>donc à la ligne 781 on trouve donc ce que l&rsquo;on cherche :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">JSValue JS_Eval(JSContext *ctx, const char *input, size_t input_len,
+                const char *filename, int eval_flags);</code></pre>
+
+
+
+<p>Ce que ça nous apprend&nbsp;c&rsquo;est que nous avons besoin d&rsquo;un type qui serait <em>JSContext</em>.&nbsp;Une petite recherche sur&nbsp;« struct JSContext »&nbsp;nous renvoit vers la ligne 50.&nbsp;Ok on va prendre tout le block ça doit servir&#8230;</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">typedef struct JSRuntime JSRuntime;
+typedef struct JSContext JSContext;
+typedef struct JSObject JSObject;
+typedef struct JSClass JSClass;
+typedef uint32_t JSClassID;
+typedef uint32_t JSAtom;</code></pre>
+
+
+
+<p>Donc là, on va chercher comment générer ce fameux <em>JSContext</em>.&nbsp;et là on remarque&nbsp;:361</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">JSContext *JS_NewContext(JSRuntime *rt);</code></pre>
+
+
+
+<p>Ok&#8230;&nbsp;Donc maintenant nous allons chercher qui génère <em>JSRuntime</em>&#8230;c&rsquo;est sans fin cette histoire&nbsp;!</p>
+
+
+
+<p>Ligne 331</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">JSRuntime *JS_NewRuntime(void);</code></pre>
+
+
+
+<p>Pour finir on remarque que le retour de la fonction<em> eval()</em> sera une structure de type <em>JSValue</em> composée d&rsquo;une <em>union</em> et d&rsquo;un <em>int</em>.</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">typedef struct JSValue {
+    JSValueUnion u;
+    int64_t tag;
+} JSValue;
+
+typedef union JSValueUnion {
+    int32_t int32;
+    double float64;
+    void *ptr;
+} JSValueUnion;</code></pre>
+
+
+
+<p>Ok le contrat a l&rsquo;air d&rsquo;être le suivant&nbsp;:</p>
+
+
+
+<p>On crée un <em>Runtime</em>,&nbsp;on crée un <em>context</em> avec notre runtime et ensuite on peut tenter de passer notre addition à <em>js_eval</em>.</p>
+
+
+
+<p>Nous pouvons donc commencer à créer nos premiers fichiers, le code ainsi que son test associé.</p>
+
+
+
+<p>Première remarque, je n&rsquo;ai pas trouvé comment spécifier le header file et la librairie séparément. </p>
+
+
+
+<p>Vous avez le choix entre </p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">FFI::cdef('VOS DEFINITIONS.h', 'VOTRE_POINT_SO.so');</code></pre>
+
+
+
+<p>Ce qui vous oblige à tout embarquer d&rsquo;un coup, quitte à avoir des définitions de plusieurs centaines de lignes. Perso j&rsquo;aime pas. </p>
+
+
+
+<p>Ou bien utiliser :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php"><strong>FFI::load</strong>('VOS DEFINITIONS.h');</code></pre>
+
+
+
+<p>Avec en entête de votre header :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">#define FFI_LIB "/path/to/your_lib.so";</code></pre>
+
+
+
+<p>Ce qui ne me parait pas spécialement flexible. Bon mon code est peut-être dégueulasse, à ce stade ça n&rsquo;est pas grave. En revanche ça me gonfle un poil de ne pas avoir la flexibilité de spécifier ce que je veux utiliser. Du coup je vais récupérer via un <em>file_get_contents</em> mes définitions. On fera l&rsquo;impasse sur la beauté du code pour le moment. </p>
+
+
+
+<p>Seconde remarque, php::ffi n&rsquo;est pas capable de travailler en relatif. Aussi, si vous souhaitez passer votre .h ou votre .so avec un ./lib/lib.so, ça ne fonctionnera pas. C&rsquo;est une limitation de la lib ffi, pas de php. Dans l’intérim et afin d&rsquo;avancer j&rsquo;ai directement mis le path dans mon fichier. J&rsquo;ajoute cela à ma grandissante liste des todo lorsque je voudrai rendre mon code plus propre et plus flexible. </p>
+
+
+
+<p>Donc je commence à faire ma première classe, un peu fourre tout j&rsquo;avoue. Mais il n’empêche que je souhaite tout de même tester ce que je fais. Et là, je me pose des questions : </p>
+
+
+
+<p><strong>Comment tester  \FFI::cdef ? </strong> Vous pouvez avoir une erreur dans votre définition, soit elle est non trouvée, soit elle est invalide. Mais vous pouvez aussi avoir une erreur lors du load de la librairie en elle même. Je n&rsquo;ai trouvé absolument aucune ressource sur ce sujet. Je vous livre tout de même ce que j&rsquo;ai réussi à trouver pour contenter mon besoin de tests :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">        try{
+            $ffi = new JsEvalService();
+            $this-&gt;assertInstanceOf(\FFi::class, $ffi-&gt;init());
+        }catch (\FFI\ParserException $e){
+            $this-&gt;fail('FFI\ParserException: ' . $e-&gt;getMessage());
+        }catch(\FFI\Exception $e){
+            $this-&gt;fail('FFI\Exception: ' . $e-&gt;getMessage());
+        }</code></pre>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-76.png"><img decoding="async" loading="lazy" width="567" height="225" src="https://www.partitech.com/wp-content/uploads/2023/01/image-76.png" alt="" class="wp-image-2471" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-76.png 567w, https://www.partitech.com/wp-content/uploads/2023/01/image-76-300x119.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-76-550x218.png 550w" sizes="(max-width: 567px) 100vw, 567px" /></a></figure>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/01/image-77.png"><img decoding="async" loading="lazy" width="815" height="228" src="https://www.partitech.com/wp-content/uploads/2023/01/image-77.png" alt="" class="wp-image-2472" srcset="https://www.partitech.com/wp-content/uploads/2023/01/image-77.png 815w, https://www.partitech.com/wp-content/uploads/2023/01/image-77-300x84.png 300w, https://www.partitech.com/wp-content/uploads/2023/01/image-77-768x215.png 768w, https://www.partitech.com/wp-content/uploads/2023/01/image-77-800x224.png 800w, https://www.partitech.com/wp-content/uploads/2023/01/image-77-550x154.png 550w" sizes="(max-width: 815px) 100vw, 815px" /></a></figure>
+
+
+
+<p>Comme vous pouvez le voir, je vérifie qu&rsquo;une instance de la classe FFI est bien présente. Mais si une erreur survient, j&rsquo;ai deux solutions. Soit tester le parser qui va lever une <em>\FFI\ParserException</em>, soit vérifier qu&rsquo;une <em>\FFI\Exception </em>n&rsquo;est pas levée. A l&rsquo;heure actuelle ce sont les deux seules exceptions existantes dans le module FFI de PHP. </p>
+
+
+
+<p><strong>Comment tester FFI::CData ?</strong> Là encore, je défriche car je  ne trouve pas d&rsquo;exemple sur le sujet. La doc étant encore bien vide et les tutos inexistants. Pour QuickJs je dois donc initialiser un runtime et ensuite un context. </p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$this-&gt;runtime = $this-&gt;ffi-&gt;JS_NewRuntime();
+$this-&gt;ffi-&gt;JS_NewContext($this-&gt;runtime)</code></pre>
+
+
+
+<p>JS_NewRuntime() me renvoit ceci :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">.object(FFI\CData:struct JSRuntime*)#366 (1) {
+
+[0]=&gt; object(FFI\CData:struct JSRuntime)#365 (0) {}
+
+}</code></pre>
+
+
+
+<p>Du coup, je peux tester si la classe est de type CData mais aussi vérifier que la structure est bien celle attendue :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$ffi = new JsEvalService();
+$ffi-&gt;setRuntime();
+$this-&gt;assertInstanceOf(\FFI\CData::class, $ffi-&gt;getRuntime());
+$ctype = \FFI::typeof($ffi-&gt;getRuntime());
+$this-&gt;assertEquals('struct JSRuntime*', $ctype-&gt;getName());</code></pre>
+
+
+
+<p>Idem pour le context :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$ffi = new JsEvalService();
+$ffi-&gt;setRuntime();
+$ffi-&gt;setContext();
+$this-&gt;assertInstanceOf(\FFI\CData::class, $ffi-&gt;getContext());
+$ctype = \FFI::typeof($ffi-&gt;getContext());
+$this-&gt;assertEquals('struct JSContext*', $ctype-&gt;getName());</code></pre>
+
+
+
+<p>Ici l&rsquo;astuce est d&rsquo;aller chercher l&rsquo;objet \FFI\CType de votre \FFI\CData. Vous aurez accès à tout un tas de méthodes. </p>
+
+
+
+<ul>
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getalignment.php">FFI\CType::getAlignment</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getarrayelementtype.php">FFI\CType::getArrayElementType</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getarraylength.php">FFI\CType::getArrayLength</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getattributes.php">FFI\CType::getAttributes</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getenumkind.php">FFI\CType::getEnumKind</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getfuncabi.php">FFI\CType::getFuncABI</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getfuncparametercount.php">FFI\CType::getFuncParameterCount</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getfuncparametertype.php">FFI\CType::getFuncParameterType</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getfuncreturntype.php">FFI\CType::getFuncReturnType</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getkind.php">FFI\CType::getKind</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getname.php">FFI\CType::getName</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getpointertype.php">FFI\CType::getPointerType</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getsize.php">FFI\CType::getSize</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getstructfieldnames.php">FFI\CType::getStructFieldNames</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getstructfieldoffset.php">FFI\CType::getStructFieldOffset</a>&nbsp;— Description</li>
+
+
+
+<li><a href="https://www.php.net/manual/fr/ffi-ctype.getstructfieldtype.php">FFI\CType::getStructFieldType</a>&nbsp;— Description</li>
+</ul>
+
+
+
+<p><strong>getName()</strong> me suffira pour vérifier que le type attendu de chacune de mes instructions est bien conforme.</p>
+
+
+
+<p>On poursuit dans le montage de notre appel au moteur JS. En regardant notre <em>header</em> on comprend bien que nous avons besoin de passer le contexte à notre fonction<em> JS_EVAL()</em>, bien entendu notre code javascript, la taille de notre code js et les deux paramètres suivants ne sont pas vraiment nécessaires pour ce que nous souhaitons faire. En gros nous pouvons passer un fichier avec des modules additionnels (compilés avec quickjs) et le dernier paramètre est un flag permettant de spécifier quelques options (si nous sommes dans un module, si nous voulons activer le backtrace, etc). Je ne maîtrise pas encore toutes les subtilités mais dans tous les cas ces options ne nous sont pas nécessaires.</p>
+
+
+
+<p>Une méthode de ce type devrait suffire pour valider que notre connexion à la lib est vraiment bonne.</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$this-&gt;ffi-&gt;JS_Eval( $this-&gt;context, $js, strlen($js) , "&lt;evalScript&gt;", 0);</code></pre>
+
+
+
+<p>Le code de notre premier appel :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">$jsString = '2 * 3';
+$ffi = new JsEvalService();
+$ffi-&gt;init();
+$math = $ffi-&gt;eval($jsString);</code></pre>
+
+
+
+<p>Nous renvoit ceci :</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">object(FFI\CData:struct JSValue)#354 (2) {
+
+["u"]=&gt;
+
+object(FFI\CData:union JSValueUnion)#350 (3) {
+
+["int32"]=&gt;
+
+int(6)
+
+["float64"]=&gt;
+
+float(3.0E-323)
+
+["ptr"]=&gt;
+
+string(3) "0x6"
+
+}
+["tag"]=&gt;
+
+int(0)
+
+}
+</code></pre>
+
+
+
+<p>Pour décoder vulgairement, JS_Eval() doit toujours renvoyer une structure de type JSValue. Ce qui va nous intéresser ici est le type et l&rsquo;adresse du pointeur. Le type nous indique si nous sommes en erreur ou si nous avons une valeur réel. Et l&rsquo;adresse va nous permettre de vraiment récupérer la valeur de notre retour de JavaScript.</p>
+
+
+
+<p>Voici la liste des types trouvés dans le code :</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">// quickjs.h:67
+const JS_TAG_FIRST       = -11; /* first negative tag */
+const JS_TAG_BIG_DECIMAL = -11;
+const JS_TAG_BIG_INT     = -10;
+const JS_TAG_BIG_FLOAT   = -9;
+const JS_TAG_SYMBOL      = -8;
+const JS_TAG_STRING      = -7;
+const JS_TAG_MODULE      = -3; /* used internally */
+const JS_TAG_FUNCTION_BYTECODE = -2; /* used internally */
+const JS_TAG_OBJECT      = -1;
+const JS_TAG_INT            = 0;
+const JS_TAG_BOOL           = 1;
+const JS_TAG_NULL           = 2;
+const JS_TAG_UNDEFINED      = 3;
+const JS_TAG_UNINITIALIZED  = 4;
+const JS_TAG_CATCH_OFFSET   = 5;
+const JS_TAG_EXCEPTION      = 6;
+const JS_TAG_FLOAT64        = 7;</code></pre>
+
+
+
+<p>Nous sommes donc de type JS_TAG_INT ce qui est plutôt une bonne nouvelle. QuickJS est bien foutu, aussi. Lorsqu&rsquo;on regarde le code source on remarque qu&rsquo;il existe une méthode pour récupérer chaque valeur pour chacun des types. Ici ce sera  JS_ToInt32()</p>
+
+
+
+<p>Nous allons donc rajouter les informations nécessaires à notre header.</p>
+
+
+
+<pre class="wp-block-code"><code lang="c" class="language-c">typedef int32_t int32;
+int JS_ToInt32(JSContext *ctx, int32_t *pres, JSValue val);</code></pre>
+
+
+
+<p>Je vais donc monter une petite méthode pour récupérer les données. </p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">const JS_TAG_FIRST = -11; /* first negative tag */
+const JS_TAG_BIG_DECIMAL = -11;
+const JS_TAG_BIG_INT = -10;
+const JS_TAG_BIG_FLOAT = -9;
+const JS_TAG_SYMBOL = -8;
+const JS_TAG_STRING = -7;
+const JS_TAG_MODULE = -3; /* used internally */
+const JS_TAG_FUNCTION_BYTECODE = -2; /* used internally */
+const JS_TAG_OBJECT = -1;
+const JS_TAG_INT = 0;
+const JS_TAG_BOOL = 1;
+const JS_TAG_NULL = 2;
+const JS_TAG_UNDEFINED = 3;
+const JS_TAG_UNINITIALIZED = 4;
+const JS_TAG_CATCH_OFFSET = 5;
+const JS_TAG_EXCEPTION = 6;
+const JS_TAG_FLOAT64 = 7;   
+ 
+public function getValue(\FFI\CData $jsValue){
+        switch($jsValue-&gt;tag) {
+            case self::JS_TAG_INT:
+                $value = \FFI::new('int32_t');
+                $this-&gt;ffi-&gt;JS_ToInt32($this-&gt;context, FFI::addr($value), $jsValue);
+                $value = $value-&gt;cdata;
+                break;
+            default:
+                break;
+        }
+        return $value;
+    }</code></pre>
+
+
+
+<p>J&rsquo;en profite pour préparer le terrain pour les prochains types à gérer. C&rsquo;est pas bien propre mais ça me permet d&rsquo;avancer et de me concentrer sur la partie QuickJS que je ne maîtrise pas. Avec un peu de chance j&rsquo;arriverai au bout du sujet et je mettrai au propre l&rsquo;ensemble du code. En attendant je peux rédiger l&rsquo;article en parallèle et vous faire part de l&rsquo;ensemble de mes petites trouvailles. </p>
+
+
+
+<p>Pour récupérer notre valeur, c&rsquo;est a dire en fonction du type, récupérer la bonne valeur typée, je vais devoir faire un teste sur le tag qui me donne son type et en fonction du type passer par la bonne méthode interne au moteur JS. Celle-ci aura besoin du contexte, du pointeur d&rsquo;un CData qui contiendra le résultat et pour finir notre JSValue qui contient le resultat de notre execution javascript. On peut donc retrouver le résultat via $value-&gt;CData</p>
+
+
+
+<p>Voici le test que je mets en place :</p>
+
+
+
+<pre class="wp-block-code"><code lang="php" class="language-php">    public function testMath(){
+        $jsString = '2 * 3';
+        $ffi = new JsEvalService();
+        $ffi-&gt;init();
+        $jsValue = $ffi-&gt;eval($jsString);
+        $this-&gt;assertEquals(JsEvalService::JS_TAG_INT, $jsValue-&gt;tag);
+        $this-&gt;assertIsInt($ffi-&gt;getValue($jsValue));
+        $this-&gt;assertEquals(6, $ffi-&gt;getValue($jsValue));
+    }</code></pre>
+
+
+
+<p></p>
+
+
+
+<p>Cet article touche à ça fin. Nous avons correctement effectué notre premier appel à la librairie QuickJS. Cela nous a permis de mettre en place un embryon de code. Mais surtout de voir comment effectuer des tests unitaires sur nos différents appels. </p>
+
+
+
+<p>Dans le prochain article nous allons étoffer un peu le code en ajoutant l&rsquo;ensemble des types de retours et effectuer nos premiers Callback vers du code PHP. Oui, QuickJS va être en mesure d&rsquo;appeler du code PHP pour récupérer dynamiquement des valeurs à utiliser dans notre code JavaScript. </p>
+
+
+
+<p>Je vous fournis le code « complet » (devrais-je dire incomplet) utilisé pour cet article afin de mieux cerner comment sont appelés les différents éléments. </p>
+
+
+
+<pre title="header.h" class="wp-block-code"><code lang="c" class="language-c">typedef struct JSRuntime JSRuntime;
+typedef struct JSContext JSContext;
+typedef struct JSObject JSObject;
+typedef struct JSClass JSClass;
+typedef uint32_t JSClassID;
+typedef uint32_t JSAtom;
+
+typedef union JSValueUnion {
+int32_t int32;
+double float64;
+void *ptr;
+} JSValueUnion;
+
+typedef struct JSValue {
+JSValueUnion u;
+int64_t tag;
+} JSValue;
+
+JSRuntime *JS_NewRuntime(void);
+JSContext *JS_NewContext(JSRuntime *rt);
+JSValue JS_Eval(JSContext *ctx, const char *input, size_t input_len, const char *filename, int eval_flags);
+typedef int32_t int32;
+int JS_ToInt32(JSContext *ctx, int32_t *pres, JSValue val);</code></pre>
+
+
+
+<pre title="JsEvalService.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace Partitech\PhpQuickjs;
+
+Class JsEvalService
+{
+    const JS_TAG_FIRST = -11; /* first negative tag */
+    const JS_TAG_BIG_DECIMAL = -11;
+    const JS_TAG_BIG_INT = -10;
+    const JS_TAG_BIG_FLOAT = -9;
+    const JS_TAG_SYMBOL = -8;
+    const JS_TAG_STRING = -7;
+    const JS_TAG_MODULE = -3; /* used internally */
+    const JS_TAG_FUNCTION_BYTECODE = -2; /* used internally */
+    const JS_TAG_OBJECT = -1;
+    const JS_TAG_INT = 0;
+    const JS_TAG_BOOL = 1;
+    const JS_TAG_NULL = 2;
+    const JS_TAG_UNDEFINED = 3;
+    const JS_TAG_UNINITIALIZED = 4;
+    const JS_TAG_CATCH_OFFSET = 5;
+    const JS_TAG_EXCEPTION = 6;
+    const JS_TAG_FLOAT64 = 7;
+
+    private string $libPath = '/home/geraud/Projets/Partitech/QuickJs/php/src/lib/';
+    private string $quickjsSharedObjectName = 'libquickjs.so';
+    private string $headerFileName = 'headers.h';
+    private $ffi;
+    private $runtime;
+    private $context;
+    public function __construct(){
+        $headers = file_get_contents($this-&gt;getHeaderFilePath());
+        $this-&gt;ffi = \FFI::cdef($headers, $this-&gt;getQuickjsSharedObjectPath());
+    }
+
+    public function getQuickjsSharedObjectPath(): string
+    {
+        return $this-&gt;libPath . $this-&gt;quickjsSharedObjectName;
+    }
+
+    public function getHeaderFilePath(): string
+    {
+        return  $this-&gt;libPath . $this-&gt;headerFileName;
+    }
+
+    public function setRuntime(): self
+    {
+        $this-&gt;runtime = $this-&gt;ffi-&gt;JS_NewRuntime();
+        return $this;
+    }
+    public function getRuntime()
+    {
+        return $this-&gt;runtime;
+    }
+    public function setContext(): self
+    {
+        $this-&gt;context = $this-&gt;ffi-&gt;JS_NewContext($this-&gt;runtime);
+        return $this;
+    }
+    public function getContext(){
+        return $this-&gt;context;
+    }
+
+    public function init(){
+        $this-&gt;setRuntime();
+        $this-&gt;setContext();
+        return $this-&gt;ffi;
+    }
+
+    public function eval($js)
+    {
+        return $this-&gt;ffi-&gt;JS_Eval( $this-&gt;context, $js, strlen($js) , '', 0);
+    }
+
+    public function getValue(\FFI\CData $jsValue){
+        switch($jsValue-&gt;tag) {
+            case self::JS_TAG_INT:
+                $value = \FFI::new('int32_t');
+                $this-&gt;ffi-&gt;JS_ToInt32($this-&gt;context, \FFI::addr($value), $jsValue);
+                $value = $value-&gt;cdata;
+                break;
+            default:
+                $value = null;
+                break;
+        }
+        return $value;
+    }
+}</code></pre>
+
+
+
+<pre title="JsEvalTest.php" class="wp-block-code"><code lang="php" class="language-php">&lt;?php
+declare(strict_types=1);
+
+namespace Partitech\PhpQuickjs\Tests;
+
+use Partitech\PhpQuickjs\JsEvalService;
+
+class JsEvalTest extends \PHPUnit\Framework\TestCase
+{
+    public function testRuntime()
+    {
+        $ffi = new JsEvalService();
+        $ffi-&gt;setRuntime();
+        $this-&gt;assertInstanceOf(\FFI\CData::class, $ffi-&gt;getRuntime());
+        $ctype = \FFI::typeof($ffi-&gt;getRuntime());
+        $this-&gt;assertEquals('struct JSRuntime*', $ctype-&gt;getName());
+    }
+    public function testContext()
+    {
+        $ffi = new JsEvalService();
+        $ffi-&gt;setRuntime();
+        $ffi-&gt;setContext();
+        $this-&gt;assertInstanceOf(\FFI\CData::class, $ffi-&gt;getContext());
+        $ctype = \FFI::typeof($ffi-&gt;getContext());
+        $this-&gt;assertEquals('struct JSContext*', $ctype-&gt;getName());
+    }
+
+    public function testInit()
+    {
+        try{
+            $ffi = new JsEvalService();
+            $this-&gt;assertInstanceOf(\FFi::class, $ffi-&gt;init());
+        }catch (\FFI\ParserException $e){
+            $this-&gt;fail('FFI\ParserException: ' . $e-&gt;getMessage());
+        }catch(\FFI\Exception $e){
+            $this-&gt;fail('FFI\Exception: ' . $e-&gt;getMessage());
+        }
+    }
+
+    public function testMath(){
+        $jsString = '2 * 3';
+        $ffi = new JsEvalService();
+        $ffi-&gt;init();
+        $jsValue = $ffi-&gt;eval($jsString);
+        $this-&gt;assertEquals(JsEvalService::JS_TAG_INT, $jsValue-&gt;tag);
+        $this-&gt;assertIsInt($ffi-&gt;getValue($jsValue));
+        $this-&gt;assertEquals(6, $ffi-&gt;getValue($jsValue));
+    }
+}</code></pre>

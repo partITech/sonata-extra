@@ -1,0 +1,20 @@
+
+
+#controllers:
+#  resource:
+#    path: ../src/Controller/
+#    namespace: App\Controller
+#  type: attribute
+partitech_sonata_extra.routes:
+  type: annotation
+  resource: '../src/Controller'
+
+
+#admin_route_list:
+#  path: /admin/routes
+#  controller: App\Controller\Admin\RouteAdminController::listAction
+#  methods: GET
+
+partitech_sonata_extra.db.page.routes:
+  resource: 'Partitech\SonataExtra\Routing\DatabaseRouteLoader'
+  type: 'partitech_db_page_route'

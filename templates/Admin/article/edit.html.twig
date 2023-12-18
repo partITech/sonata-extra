@@ -1,0 +1,179 @@
+{% extends get_global_template('edit') %}
+
+{%- block tab_menu -%}
+    {% set sites = admin.siteList %}
+    {% set currentSite = admin.currentSite %}
+    {% set currentSelectedLocalId = admin.currentSelectedLocal %}
+    {% set request_site = app.request.query.get('site') %}
+    {% if object is defined %}
+        {% set currentSite =  object.site %}
+    {% endif %}
+
+    {# {% set action = admin.action %} #}
+
+
+
+    <div class="box-header" style="padding-left:0;">
+
+
+        <h1 class="box-title sonata-page-top-bar">
+
+            <div class="btn-group">
+
+
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown"
+                        aria-expanded="true">
+                    <strong class="text-info" style="margin-right:10px">
+
+                        {%- if sites and sites|length > 0 -%}
+                            {% if currentSite %}
+                                <i class="fi {{ 'fi-' ~ currentSite.localShort }} fis m-2" style="margin-right:10px"></i>
+                                {{ currentSite.name }}
+                            {% else %}
+                                {{ 'pages.label_no_site_selected'|trans({}, 'SonataPageBundle') }}
+                            {% endif %}
+                        {%- else -%}
+                            {{ 'pages.label_no_sites'|trans({}, 'SonataPageBundle') }}
+                        {%- endif -%}
+                    </strong> <span class="caret"></span>
+
+
+
+                </button>
+
+
+                <ul class="dropdown-menu" role="menu">
+                    {% for site in sites %}
+                        {% if currentSite and site.id != currentSite.id %}
+                            <li>
+                                <a href="{{ admin.generateUrl('list', { 'site': site.id }) }}">
+                                    <i class="fi {{ 'fi-' ~ site.localShort }} fis m-2" style="margin-right:10px"></i>
+                                    {{ site.name }}
+                                </a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+            </div>
+        </h1>
+
+{% if action is defined  and action=="edit" %}
+        <h1 class="box-title sonata-page-top-bar">
+
+            <div class="btn-group">
+
+                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown" aria-expanded="true">
+                    <strong class="text-info" style="margin-right:10px">
+                        {% if object.getTypeEditor()=='gutenberg' %}
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/wordpress.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.editor_gutenberg'|trans({}, 'PartitechSonataExtraBundle') }}
+                        {% endif %}
+
+                        {% if object.getTypeEditor()=='ckeditor' %}
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/ckeditor-2.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.editor_ckeditor'|trans({}, 'PartitechSonataExtraBundle') }}
+                        {% endif %}
+
+                        {% if object.getTypeEditor()=='textarea' %}
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/textarea.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.editor_textarea'|trans({}, 'PartitechSonataExtraBundle') }}
+                        {% endif %}
+
+                        {% if object.getTypeEditor()=='markdown' %}
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/markdown.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.editor_markdown'|trans({}, 'PartitechSonataExtraBundle') }}
+                        {% endif %}
+
+                    </strong> <span class="caret"></span>
+
+
+
+                </button>
+
+
+                <ul class="dropdown-menu" role="menu">
+                    <li>
+                        <a href="{{ admin.generateUrl('editor-type', { 'id': object.id ,'type': 'gutenberg' }) }}">
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/wordpress.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.label_gutenberg'|trans({}, 'PartitechSonataExtraBundle') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ admin.generateUrl('editor-type', { 'id': object.id ,'type': 'ckeditor' }) }}">
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/ckeditor-2.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.label_ckeditor'|trans({}, 'PartitechSonataExtraBundle') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ admin.generateUrl('editor-type', { 'id': object.id ,'type': 'textarea' }) }}">
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/textarea.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.label_textarea'|trans({}, 'PartitechSonataExtraBundle') }}
+                        </a>
+                    </li>
+                    <li>
+                        <a href="{{ admin.generateUrl('editor-type', { 'id': object.id ,'type': 'markdown' }) }}">
+                            <img src="{{ asset('/bundles/partitechsonataextra/assets/img/editor/markdown.svg') }}" width="16" height="16" style="margin-top: -3px;">
+                            {{ 'sonata-extra.article_admin.label_markdown'|trans({}, 'PartitechSonataExtraBundle') }}
+                        </a>
+                    </li>
+                </ul>
+
+                {% include '@PartitechSonataExtra/Admin/article/seo_proposal.html.twig' with {'page': object,'admin': admin} %}
+
+
+
+
+            </div>
+        </h1>
+
+{% endif %}
+{% if action is defined %}
+    {{ knp_menu_render(admin.sidemenu(action), {
+        'currentClass': 'active',
+        'template': '@PartitechSonataExtra/Admin/article/tab_menu_template.html.twig'
+    }, 'twig') }}
+{% endif %}
+
+
+
+    </div>
+
+<style>
+    .content-header .navbar-collapse {
+        padding: 0 !important;
+    }
+    .content-header .navbar-nav > li > a {
+        padding-bottom: 0px;
+        padding-top: 0px;
+        padding-right: 10px;
+        padding-left: 1px;
+        height: 15px
+    }
+    .content-header .navbar-nav > li > a .btn {
+        height: 35px;
+    }
+
+</style>
+
+
+
+{%- endblock -%}
+
+{% block javascripts %}
+    {{ parent() }}
+{% endblock %}
+
+
+{% block navbar_title %}
+{% endblock %}
+
+{% block sonata_admin_content_actions_wrappers %}
+    {% include '@PartitechSonataExtra/Admin/translation/crud_header_actions_buttons.html.twig' %}
+{% endblock %}
+
+{% block sonata_form_actions %}
+    {% set site = app.request.query.get('site') %}
+    <input type="hidden" name="site_id" value="{{ site }}">
+    {{ parent() }}
+{% endblock %}

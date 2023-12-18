@@ -1,0 +1,218 @@
+
+<p>Nous allons voir comment gérer une interface d&rsquo;admin qui se connecte à plusieurs serveurs.<br>Dans notre exemple nous avons monté un serveur mysql par défaut qui gère notre interface d&rsquo;admin. Les utilisateurs, les médias, etc.<br>Et nous avons monté un serveur postgreSql qui contient une table que nous souhaitons administrer.<br>Nous pouvons ajouter autant de serveurs que nous souhaitons.</p>
+
+
+
+<h2>Notre serveur Mysql</h2>
+
+
+
+<p>Nous avons classiquement monté une instance symfony sonata par défaut avec une connexion mysql classique. On peut donc créer notre base, le schéma, et l&rsquo;utilisateur par défaut de notre interface d&rsquo;admin.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+php bin/console doctrine:database:create
+php bin/console doctrine:schema:update --force
+php bin/console fos:user:create --super-admin
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="231" src="https://www.partitech.com/wp-content/uploads/2020/09/Sélection_162-1024x231.png" alt="" class="wp-image-742" srcset="https://www.partitech.com/wp-content/uploads/2020/09/Sélection_162-1024x231.png 1024w, https://www.partitech.com/wp-content/uploads/2020/09/Sélection_162-300x68.png 300w, https://www.partitech.com/wp-content/uploads/2020/09/Sélection_162-768x174.png 768w, https://www.partitech.com/wp-content/uploads/2020/09/Sélection_162.png 1124w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<h2>Notre serveur postgreSql</h2>
+
+
+
+<p>Nous avons d&rsquo;un autre coté un serveur postgreSql qui contient une table « test ».</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="739" height="87" src="https://www.partitech.com/wp-content/uploads/2020/09/Sélection_161-1.png" alt="" class="wp-image-743" srcset="https://www.partitech.com/wp-content/uploads/2020/09/Sélection_161-1.png 739w, https://www.partitech.com/wp-content/uploads/2020/09/Sélection_161-1-300x35.png 300w" sizes="(max-width: 739px) 100vw, 739px" /></figure>
+
+
+
+<h2>Les connexions</h2>
+
+
+
+<p>Depuis les dernières versions de symfony les crédentials des connexions sont gérées dans le fichier .env à la racine de de votre projet.<br>Nous allons créer 1 connexions  pour chaque serveur.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+DATABASE_URL_PGSQL=pgsql://tbourdin:123456@127.0.0.1:5432/test?
+DATABASE_URL_MYSQL=mysql://root:toor@127.0.0.1:3306/symfony-sonata-skeleton?serverVersion=5.7
+</pre></div>
+
+
+<p>Nous allons ensuite configurer notre paramétrage doctrine en créant une connexion par défaut (mysql) et une connexion additionnelle pour notre serveur postgreSql.<br>Attention, pour éviter les confusions, on utilise un nommage avec des underscores « _ » au lieu des tirets « &#8211; » car symfony va ensuite convertir nos  « &#8211; » en « _ » et le mapping ne va pas bien se faire.<br><br>Nous spécifions que toutes nos entités par défaut seront gérées dans src/entity/ServerMysql et que les entités qui doivent se connecter à Pgsql seront toutes stockées dans le répertoire /src/Entity/ServerPgsql<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+doctrine:
+    dbal:
+        default_connection: db_mysql_local
+        types:
+            json: Sonata\Doctrine\Types\JsonType   
+        connections:
+            db_mysql_local:
+                url: '%env(resolve:DATABASE_URL_MYSQL)%'
+                driver: 'pdo_mysql'
+                server_version: '5.7'
+                charset: utf8
+
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+                    
+            db_pgsql_local:
+                url: '%env(resolve:DATABASE_URL_PGSQL)%'
+                driver: 'pdo_pgsql'
+                server_version: '9.6.11'
+                charset: utf8
+                default_table_options:
+                    charset: utf8mb4
+                    collate: utf8mb4_unicode_ci
+                                    
+
+        
+        # IMPORTANT: You MUST configure your server version,
+        # either here or in the DATABASE_URL env var (see .env file)
+        #server_version: '5.7'
+    orm:
+        auto_generate_proxy_classes: true
+        
+        default_entity_manager: App
+        
+        entity_managers:
+        #default code, the sonata admin, that use the default connexion (no need to define it here)
+            App:
+                connection: db_mysql_local
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                auto_mapping: true
+                mappings:
+                    ApplicationSonataMediaBundle: ~
+                    SonataMediaBundle: ~
+                    App:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/Entity/ServerMysql'
+                        prefix: 'App\Entity\ServerMysql'
+                        alias: App       
+        
+        #our pgSql entities that use our pgsql connexion       
+            app-pgsql:
+                connection: db_pgsql_local
+                naming_strategy: doctrine.orm.naming_strategy.underscore
+                auto_mapping: false
+                mappings:
+                    AppPgsql:
+                        is_bundle: false
+                        type: annotation
+                        dir: '%kernel.project_dir%/src/Entity/ServerPgsql'
+                        prefix: 'App\Entity\ServerPgsql\'
+                        alias: AppPgsql           
+
+
+
+</pre></div>
+
+
+<p>Et pour vérifier notre procédure on tente d&rsquo;administrer notre interface test</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="158" src="https://www.partitech.com/wp-content/uploads/2020/09/image-4-1024x158.png" alt="" class="wp-image-746" srcset="https://www.partitech.com/wp-content/uploads/2020/09/image-4-1024x158.png 1024w, https://www.partitech.com/wp-content/uploads/2020/09/image-4-300x46.png 300w, https://www.partitech.com/wp-content/uploads/2020/09/image-4-768x118.png 768w, https://www.partitech.com/wp-content/uploads/2020/09/image-4.png 1077w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Et forcément, ça ne fonctionne pas. Car notre entité est stockés dans notre répertoire par défaut.<br>On la déplace donc dans notre répertoire « /src/Entity/ServerPgsql »<br>On doit juste  modifier le service et la définition de l&rsquo;entité, et on est bon !</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; first-line: 4; title: ; notranslate" title="">
+#/config/services.yaml 
+   admin.table1:
+        class: App\Admin\Table1Admin
+        arguments: &#91;~, App\Entity\ServerPgsql\Table1, App\Controller\Table1AdminController]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: Table1 }
+        public: true
+
+</pre></div>
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; first-line: 3; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Entity\ServerPgsql;
+
+use Doctrine\ORM\Mapping as ORM;
+
+/**
+ * Table1
+ *
+ * @ORM\Table(name=&quot;table1&quot;)
+ * @ORM\Entity
+ */
+class Table1
+{
+    /**
+     * @var int
+     *
+     * @ORM\Column(name=&quot;id&quot;, type=&quot;integer&quot;, nullable=false)
+     * @ORM\Id
+     * @ORM\GeneratedValue(strategy=&quot;SEQUENCE&quot;)
+     * @ORM\SequenceGenerator(sequenceName=&quot;table1_id_seq&quot;, allocationSize=1, initialValue=1)
+     */
+    private $id;
+
+    /**
+     * @var string|null
+     *
+     * @ORM\Column(name=&quot;var1&quot;, type=&quot;string&quot;, length=250, nullable=true)
+     */
+    private $var1;
+
+    /**
+     * @var json|null
+     *
+     * @ORM\Column(name=&quot;var2&quot;, type=&quot;json&quot;, nullable=true)
+     */
+    private $var2;
+
+    public function getId(): ?int
+    {
+        return $this-&gt;id;
+    }
+
+    public function getVar1(): ?string
+    {
+        return $this-&gt;var1;
+    }
+
+    public function setVar1(?string $var1): self
+    {
+        $this-&gt;var1 = $var1;
+
+        return $this;
+    }
+
+    public function getVar2(): ?array
+    {
+        return $this-&gt;var2;
+    }
+
+    public function setVar2(?array $var2): self
+    {
+        $this-&gt;var2 = $var2;
+
+        return $this;
+    }
+
+
+}
+
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="379" src="https://www.partitech.com/wp-content/uploads/2020/09/image-5-1024x379.png" alt="" class="wp-image-752" srcset="https://www.partitech.com/wp-content/uploads/2020/09/image-5-1024x379.png 1024w, https://www.partitech.com/wp-content/uploads/2020/09/image-5-300x111.png 300w, https://www.partitech.com/wp-content/uploads/2020/09/image-5-768x284.png 768w, https://www.partitech.com/wp-content/uploads/2020/09/image-5-1536x569.png 1536w, https://www.partitech.com/wp-content/uploads/2020/09/image-5.png 1866w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>

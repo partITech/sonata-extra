@@ -1,0 +1,226 @@
+
+<p>Si vous avez déjà utilisé SonataPage et SonataMedia, vous savez à quel point ils sont puissants pour gérer le contenu et les médias de votre site. Dans cet article, je vais vous montrer comment étendre ces outils pour ajouter facilement des balises Open Graph à vos pages, afin d&rsquo;améliorer leur partage sur les réseaux sociaux.</p>
+
+
+
+<h4>Pourquoi les balises Open Graph ?</h4>
+
+
+
+<p>Les balises Open Graph (OG) sont des méta-tags que vous pouvez ajouter à vos pages pour définir des titres, descriptions, images et autres informations qui seront utilisées lorsque la page est partagée sur des plateformes comme Facebook. Avec ces balises, vous avez un contrôle précis sur la manière dont votre contenu est présenté.</p>
+
+
+
+<h4>Intégration avec Sonata</h4>
+
+
+
+<p>Avec notre extension <code>OGAdminExtension</code>, nous allons ajouter trois nouveaux champs à l&rsquo;interface d&rsquo;administration de SonataPage : <code>ogTitle</code>, <code>ogDescription</code> et <code>ogImage</code>.</p>
+
+
+
+<h2>1. Modification de l&rsquo;entité</h2>
+
+
+
+<p>Tout d&rsquo;abord, modifions l&rsquo;entité <code>SonataPagePage</code> pour inclure trois nouveaux champs: <code>ogTitle</code>, <code>ogDescription</code> et <code>ogImage</code>.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+namespace App\Entity;
+use Doctrine\DBAL\Types\Types;
+use Doctrine\ORM\Mapping as ORM;
+use Sonata\PageBundle\Entity\BasePage;
+
+#&#91;ORM\Entity]
+#&#91;ORM\Table(name: 'page__page')]
+class SonataPagePage extends BasePage
+{
+    #&#91;ORM\Id]
+    #&#91;ORM\Column(type: Types::INTEGER)]
+    #&#91;ORM\GeneratedValue]
+    protected $id;
+
+
+    #&#91;ORM\Column(type: 'string', length: 255, nullable: true)]
+    private string $ogTitle;
+
+    #&#91;ORM\Column(type: 'text', nullable: true)]
+    private string $ogDescription;
+
+
+    #&#91;ORM\ManyToOne(targetEntity: &quot;SonataMediaMedia&quot;)]
+    #&#91;ORM\JoinColumn(name: &quot;media__media_id&quot;, referencedColumnName: &quot;id&quot;, nullable: true)]
+    private ?SonataMediaMedia $ogImage = null;
+
+    public function getOgTitle(): string
+    {
+        return $this-&gt;ogTitle;
+    }
+
+    public function setOgTitle(string $ogTitle): self
+    {
+        $this-&gt;ogTitle = $ogTitle;
+        return $this;
+    }
+
+    public function getOgDescription(): string
+    {
+        return $this-&gt;ogDescription;
+    }
+
+    public function setOgDescription(string $ogDescription): self
+    {
+        $this-&gt;ogDescription = $ogDescription;
+        return $this;
+    }
+
+    public function getOgImage(): ?SonataMediaMedia
+    {
+        return $this-&gt;ogImage;
+    }
+
+    public function setOgImage(?SonataMediaMedia $ogImage): self
+    {
+        $this-&gt;ogImage = $ogImage;
+
+        return $this;
+    }
+}
+
+</pre></div>
+
+
+<p>Ici, nous avons ajouté trois propriétés et leurs getters et setters associés.</p>
+
+
+
+<h2>2. Création de l&rsquo;extension</h2>
+
+
+
+<p>Ensuite, créons une extension pour personnaliser le formulaire d&rsquo;administration de la page :</p>
+
+
+
+<p></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+namespace App\Admin\Extension;
+
+use Sonata\AdminBundle\Admin\AbstractAdminExtension;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Form\Type\ModelListType;
+use Sonata\MediaBundle\Provider\ImageProvider;
+use Sonata\MediaBundle\Entity\MediaManager;
+
+class OGAdminExtension extends AbstractAdminExtension
+{
+    private $mediaManager;
+    private $providerImage;
+
+    public function __construct(MediaManager $mediaManager, ImageProvider $providerImage)
+    {
+        $this-&gt;mediaManager = $mediaManager;
+        $this-&gt;providerImage = $providerImage;
+    }
+
+    public function configureFormFields(FormMapper $form): void
+    {
+
+        $admin = $form-&gt;getAdmin();
+        if ($admin-&gt;hasSubject() &amp;&amp; null !== $admin-&gt;getSubject()-&gt;getOgImage()) {
+            $media = $this-&gt;mediaManager-&gt;findOneBy(&#91;
+                'id' =&gt; $admin-&gt;getSubject()-&gt;getOgImage()-&gt;getId()
+            ]);
+            $mediaUrl = $this-&gt;providerImage-&gt;generatePublicUrl($media, 'default_small');
+        } else {
+            $mediaUrl = null;
+        }
+
+        $imageHtml = $mediaUrl ? '&lt;img src=&quot;' . $mediaUrl . '&quot; alt=&quot;' . $media-&gt;getName() . '&quot; class=&quot;img-thumbnail&quot; /&gt;' : 'Aucune image sélectionnée';
+
+
+
+        $form
+            -&gt;with('seo')
+            -&gt;add('ogTitle', null, &#91;
+                'label' =&gt; 'og:title',
+            ])
+            -&gt;add('ogDescription', null, &#91;
+                'label' =&gt; 'og:description',
+            ])
+            /*-&gt;add('ogImage', null, &#91;
+                'label' =&gt; 'og:image',
+            ])*/
+            -&gt;add('ogImage', ModelListType::class, &#91;
+                'label'=&gt;&quot;og:image&quot;,
+                'required' =&gt; false,
+                'btn_add'=&gt;true,
+                'btn_edit'=&gt;true,
+                'btn_list'=&gt;false,
+                'btn_delete'=&gt;false,
+                'class'=&gt;&quot;App\Entity\SonataMediaMedia&quot;,
+                'help' =&gt; $imageHtml,
+                'help_html'=&gt;true
+
+            ],
+                &#91;'link_parameters' =&gt;&#91;
+                    'context' =&gt; 'default',
+                    'provider' =&gt; 'sonata.media.provider.image'
+                ]]
+            )
+            -&gt;end();
+    }
+}
+</pre></div>
+
+
+<p>Ici, l&rsquo;extension personnalisera le formulaire d&rsquo;administration pour ajouter les champs nécessaires.</p>
+
+
+
+<figure class="wp-block-image size-full"><a href="https://www.partitech.com/wp-content/uploads/2023/10/Selection_017.png"><img decoding="async" loading="lazy" width="803" height="272" src="https://www.partitech.com/wp-content/uploads/2023/10/Selection_017.png" alt="" class="wp-image-2756" srcset="https://www.partitech.com/wp-content/uploads/2023/10/Selection_017.png 803w, https://www.partitech.com/wp-content/uploads/2023/10/Selection_017-300x102.png 300w, https://www.partitech.com/wp-content/uploads/2023/10/Selection_017-768x260.png 768w, https://www.partitech.com/wp-content/uploads/2023/10/Selection_017-800x271.png 800w, https://www.partitech.com/wp-content/uploads/2023/10/Selection_017-550x186.png 550w" sizes="(max-width: 803px) 100vw, 803px" /></a></figure>
+
+
+
+<h2>3. Configuration des services</h2>
+
+
+
+<p>Après avoir créé l&rsquo;extension, il est nécessaire de la déclarer comme un service dans le fichier de configuration des services :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+    App\Admin\Extension\OGAdminExtension:
+        arguments:
+            $mediaManager: '@sonata.media.manager.media'
+            $providerImage: '@sonata.media.provider.image'
+        tags:
+            - { name: 'sonata.admin.extension', target: 'sonata.page.admin.page' }
+
+</pre></div>
+
+
+<h2>4. Mise à jour du template</h2>
+
+
+
+<p>Dans votre template Twig, ajoutez les balises Open Graph en utilisant les propriétés que vous avez ajoutées à votre entité :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: xml; title: ; notranslate" title="">
+&lt;meta property=&quot;og:title&quot; content=&quot;{{ page.ogTitle }}&quot; /&gt;
+&lt;meta property=&quot;og:description&quot; content=&quot;{{ page.ogDescription }}&quot; /&gt;
+&lt;meta property=&quot;og:image&quot; content=&quot;{{ sonata_path(page.ogImage, 'reference') }}&quot; /&gt;
+</pre></div>
+
+
+<p>Avec ces étapes, vous avez réussi à intégrer des balises Open Graph à votre entité <code>Page</code> de Sonata, améliorant ainsi le référencement de votre site web sur les plateformes sociales comme Facebook, Twitter et LinkedIn.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2023/10/image.png"><img decoding="async" loading="lazy" width="1024" height="460" src="https://www.partitech.com/wp-content/uploads/2023/10/image-1024x460.png" alt="" class="wp-image-2751" srcset="https://www.partitech.com/wp-content/uploads/2023/10/image-1024x460.png 1024w, https://www.partitech.com/wp-content/uploads/2023/10/image-300x135.png 300w, https://www.partitech.com/wp-content/uploads/2023/10/image-768x345.png 768w, https://www.partitech.com/wp-content/uploads/2023/10/image-1536x690.png 1536w, https://www.partitech.com/wp-content/uploads/2023/10/image-1440x647.png 1440w, https://www.partitech.com/wp-content/uploads/2023/10/image-800x359.png 800w, https://www.partitech.com/wp-content/uploads/2023/10/image-550x247.png 550w, https://www.partitech.com/wp-content/uploads/2023/10/image-1335x600.png 1335w, https://www.partitech.com/wp-content/uploads/2023/10/image.png 1865w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>

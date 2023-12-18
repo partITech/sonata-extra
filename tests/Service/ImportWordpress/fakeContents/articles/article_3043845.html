@@ -1,0 +1,11 @@
+<p>Pour modifier les couleurs par défaut disponible dans l&rsquo;éditeur WYSIWYG de WordPress, il suffit d&rsquo;ajouter le code suivant dans le fichier functions.php :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+// change buttons in WYSWIG post editor, edit color palette
+function change_mce_options( $init ) {
+$init['theme_advanced_text_colors'] = 'd21268,146c52,82b600,00949b,010080,001c4b';
+$init['theme_advanced_more_colors'] = true;
+return $init;
+}
+
+add_filter('tiny_mce_before_init', 'change_mce_options');
+</pre>

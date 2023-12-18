@@ -1,0 +1,3 @@
+<p>Utile lorsque l&rsquo;on vous livre un projet, et que l&rsquo;abrutis qui vous fait la livraison oublis de vous dire que le mot de pass c&rsquo;est admin1234.<br />
+Au lieux de se retrouver comme un con sans pouvoir faire votre recette, il suffit d&rsquo;appliquer la requette sql suivante :</p>
+<p><code>UPDATE wp_users SET user_pass = MD5( 'new_password' ) WHERE user_login = 'your-username';</code></p>

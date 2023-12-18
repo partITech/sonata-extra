@@ -1,0 +1,487 @@
+
+<p>Cette installation est testé sous Ubuntu 14.04LTS mais pourrait etre utilisée pour un serveur debian en production.</p>
+
+
+
+<h2>Installation des packages de base</h2>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo apt-get install \
+build-essential  \
+fakeroot dh-make  \
+debconf execstack  \
+dh-modaliases  \
+xserver-xorg-dev  \
+automake  \
+autoconf  \
+libaprutil1  \
+libaprutil1-dev  \
+libsvn-dev  \
+wx2.8-headers  \
+libwxgtk2.8-dev  \
+libxml2-dev  \
+libpcre3-dev  \
+libbz2-dev  \
+libcurl4-openssl-dev  \
+libjpeg-dev  \
+libpng12-dev  \
+libxpm-dev  \
+libfreetype6-dev  \
+libmysqlclient-dev  \
+libt1-dev  \
+libgd2-xpm-dev  \
+libgmp-dev  \
+libsasl2-dev  \
+libmhash-dev  \
+unixodbc-dev  \
+freetds-dev  \
+libpspell-dev  \
+libsnmp-dev  \
+libtidy-dev  \
+libxslt1-dev  \
+libmcrypt-dev  \
+apache2  \
+apache2-threaded-dev  \
+libxml2  \
+libaprutil1-dev  \
+libxml2  \
+libxml2-dev  \
+libssl-dev  \
+pkg-config  \
+curl  \
+libcurl4-nss-dev  \
+enchant  \
+libenchant-dev  \
+libjpeg8  \
+libjpeg8-dev  \
+libpng12-0  \
+libpng12-dev  \
+libvpx1  \
+libvpx-dev  \
+libfreetype6  \
+libfreetype6-dev  \
+libt1-5  \
+libt1-dev  \
+libgmp10  \
+libgmp-dev  \
+libicu52 libicu-dev  \
+mcrypt  \
+libmcrypt4  \
+libmcrypt-dev  \
+libpspell-dev  \
+libedit2  \
+libedit-dev libsnmp30  \
+libsnmp-dev  \
+libxslt1.1  \
+libxslt1-dev</code></pre>
+
+
+
+<p>MAJ pour Ubuntu 15.01</p>
+
+
+
+<pre id="block-9973d777-754c-4681-b24d-26585591d362" class="wp-block-code"><code lang="bash" class="language-bash">sudo \
+apt-get \
+install \
+build-essential \
+fakeroot \
+dh-make \
+debconf \
+execstack \
+dh-modaliases \
+xserver-xorg-dev \
+automake \
+autoconf \
+libaprutil1 \
+libaprutil1-dev \
+libsvn-dev \
+wx2.8-headers \
+libwxgtk2.8-dev \
+libxml2-dev \
+libpcre3-dev \
+libbz2-dev \
+libcurl4-openssl-dev \
+libjpeg-dev \
+libpng12-dev \
+libxpm-dev \
+libfreetype6-dev \
+libmysqlclient-dev \
+libgd-dev \
+libgmp-dev \
+libsasl2-dev \
+libmhash-dev \
+unixodbc-dev \
+freetds-dev \
+libpspell-dev \
+libsnmp-dev \
+libtidy-dev \
+libxslt1-dev \
+libmcrypt-dev \
+apache2 \
+apache2-dev \
+libxml2 \
+libaprutil1-dev \
+libxml2 \
+libxml2-dev \
+libssl-dev \
+pkg-config \
+curl \
+libcurl4-openssl-dev \
+enchant \
+libenchant-dev \
+libjpeg8 \
+libjpeg8-dev \
+libpng12-0 \
+libpng12-dev \
+libvpx-dev \
+libfreetype6 \
+libfreetype6-dev \
+libgmp10 \
+libgmp-dev \
+libicu-dev \
+mcrypt \
+libmcryp4t \
+libmcrypt-dev \
+libpspell-dev \
+libedit2 \
+libedit-dev \
+libsnmp30 \
+libsnmp-dev \
+libxslt1.1 \
+libxslt1-dev \
+postgresql-server-dev-9.4 \
+postgresql-server-dev-all</code></pre>
+
+
+
+<h2>Compilation de PHP</h2>
+
+
+
+<p>On commence par faire un lien symbolique d&rsquo;une lib qui serait potentiellement introuvable lors de la compilation</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo ln -s /usr/include/x86_64-linux-gnu/gmp.h /usr/include/gmp.h</code></pre>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">On récupère les sources de PHP
+
+sudo wget -O php-5.6.2.tar.gz http://fr2.php.net/get/php-5.6.2.tar.gz/from/this/mirror &amp;&amp; tar xzvf php-5.6.2.tar.gz &amp;amp;amp;&amp;amp;amp; cd php-5.6.2</code></pre>
+
+
+
+<p>MAJ php 5.6.16</p>
+
+
+
+<pre id="block-fe366148-bdcf-463f-94ac-07d57c6929cd" class="wp-block-code"><code lang="bash" class="language-bash">sudo wget -O php-5.6.16.tar.gz http://fr2.php.net/get/php-5.6.16.tar.gz/from/this/mirror &amp;&amp;\
+tar xzvf php-5.6.16.tar.gz &amp;&amp;\
+cd php-5.6.16</code></pre>
+
+
+
+<p>Puis on compile</p>
+
+
+
+<pre id="block-0a5476cc-fd02-4d53-be46-ac7092b17008" class="wp-block-code"><code lang="bash" class="language-bash">sudo \
+./configure \
+--prefix=/usr/local/php \
+--with-apxs2=/usr/bin/apxs2 \
+--with-config-file-path=/usr/local/php/conf \
+--with-config-file-scan-dir=/usr/local/php/conf.d \
+--enable-debug \
+--with-openssl \
+--with-kerberos \
+--with-zlib \
+--enable-calendar \
+--with-curl \
+--with-enchant \
+--enable-exif \
+--enable-ftp \
+--with-gd \
+--with-jpeg-dir=/usr \
+--with-png-dir=/usr \
+--with-vpx-dir=/usr \
+--with-freetype-dir=/usr \
+--with-t1lib \
+--enable-exif \
+--enable-gd-native-ttf \
+--enable-gd-jis-conv \
+--with-gettext \
+--with-gmp \
+--with-mhash \
+--enable-intl \
+--enable-mbstring \
+--with-mcrypt \
+--with-mysql \
+--with-mysqli \
+--enable-pcntl \
+--with-pdo-mysql \
+--with-pdo-pgsql \
+--with-pgsql \
+--with-pspell \
+--with-libedit \
+--with-readline \
+--enable-shmop \
+--enable-soap \
+--enable-sockets \
+--enable-sysvmsg \
+--enable-sysvshm \
+--with-xsl \
+--enable-zip \
+--with-pear \
+--enable-zend-signals \
+--enable-maintainer-zts \
+--enable-bcmath &amp;&amp;\
+sudo make &amp;&amp;\
+sudo make install</code></pre>
+
+
+
+<p>MAJ pour Ubuntu 15.01</p>
+
+
+
+<pre id="block-7b661b50-07e9-4440-89b2-ca7adc9003ee" class="wp-block-code"><code lang="bash" class="language-bash">sudo \
+./configure \
+--prefix=/usr/local/php \
+--with-apxs2=/usr/bin/apxs2 \
+--with-config-file-path=/usr/local/php/conf \
+--with-config-file-scan-dir=/usr/local/php/conf.d \
+--enable-debug \
+--with-openssl \
+--with-kerberos \
+--with-zlib \
+--enable-calendar \
+--with-curl \
+--with-enchant \
+--enable-exif \
+--enable-ftp \
+--with-gd \
+--with-jpeg-dir=/usr \
+--with-png-dir=/usr \
+--with-vpx-dir=/usr \
+--with-freetype-dir=/usr \
+--enable-exif \
+--enable-gd-native-ttf \
+--enable-gd-jis-conv \
+--with-gettext \
+--with-gmp \
+--with-mhash \
+--enable-intl \
+--enable-mbstring \
+--with-mcrypt \
+--with-mysql \
+--with-mysqli \
+--enable-pcntl \
+--with-pdo-mysql \
+--with-pdo-pgsql \
+--with-pgsql \
+--with-pspell \
+--with-libedit \
+--with-readline \
+--enable-shmop \
+--enable-soap \
+--enable-sockets \
+--enable-sysvmsg \
+--enable-sysvshm \
+--with-xsl \
+--enable-zip \
+--with-pear \
+--enable-zend-signals \
+--enable-maintainer-zts \
+--enable-bcmath &amp;&amp;\
+sudo make &amp;&amp; \
+sudo make install</code></pre>
+
+
+
+<h2 id="block-03cc9ba2-ea0e-485f-a1f9-4028f0c3133e">Compilation de suPhp</h2>
+
+
+
+<p id="block-03cc9ba2-ea0e-485f-a1f9-4028f0c3133e">On récupère les sources</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo wget  -O suphp-0.7.2.tar.gz  http://www.suphp.org/download/suphp-0.7.2.tar.gz &amp;&amp;\
+sudo tar xzvf suphp-0.7.2.tar.gz &amp;&amp;\
+cd suphp-0.7.2</code></pre>
+
+
+
+<p>On créé les différents répertoires de gestion</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo mkdir /etc/suphp &amp;&amp; \
+sudo mkdir /var/log/suphp</code></pre>
+
+
+
+<p>Il faut ensuite passer quelques commandes pour que la compilation se fasse correctement. Nous utiliserons les commandes suivantes</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo libtoolize --force #provides libtool support and replaces the default libtool files
+sudo aclocal #creates the aclocal.m4 file by consolidating various macro files
+sudo autoheader #creates a template file of C ‘#define’ statements
+sudo automake --force-missing --add-missing #generates Makefile.in files
+sudo autoconf #produces shell scripts for the automatic configuration</code></pre>
+
+
+
+<p>On peux déjà tester si on a bien tous les outils sur la machine pour faire la compilation finale en lançant les commandes suivantes :</p>
+
+
+
+<pre id="block-4a1e1471-f2dc-4cd1-9f90-c72e7f799e76" class="wp-block-code"><code class="">sudo libtoolize --force &amp;&amp;\
+sudo aclocal &amp;&amp; sudo autoheader &amp;&amp;\
+sudo automake --force-missing --add-missing &amp;&amp; sudo autoconf</code></pre>
+
+
+
+<p>On créé les liens symboliques pour que les entêtes soient correctement trouvée (normalement ça devrait fonctionner sans cette étape)</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo ln -s /usr/include/apr-1.0/*.h /usr/include/apache2/</code></pre>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo autoreconf -f -i &amp;&amp; sudo libtoolize --force &amp;&amp; sudo aclocal &amp;&amp; sudo autoheader &amp;&amp; sudo automake --force-missing --add-missing &amp;&amp; sudo autoconf  &amp;&amp; sudo ./configure --prefix=/usr --sysconfdir=/etc/suphp --with-apache-user=www-data --with-setid-mode=owner --with-apr=/usr/bin/apr-1-config --with-min-uid=33 --with-min-gid=33 --with-logfile=/var/log/suphp</code></pre>
+
+
+
+<p>Puis rechercher le fichier src/Makefile puis éditer la ligne MAYBE_AP=apache en MAYBE_AP=apache2.<br>On peux finalement faire la compilation.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo make &amp;&amp; sudo make install</code></pre>
+
+
+
+<h2>Configuration de suPhp</h2>
+
+
+
+<p>On active les modules les plus courants d’abord (on peux les désactiver au besoin avec « a2dismod »)</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo a2enmod rewrite</code></pre>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo a2enmod suphp</code></pre>
+
+
+
+<p>On supprime ensuite l&rsquo;ensemble des informations présentes dans le fichier conf</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo a2enmod suphp</code></pre>
+
+
+
+<p>On configure maintenant le fichier de conf de suPhp</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo vi /etc/suphp/suphp.conf</code></pre>
+
+
+
+<pre class="wp-block-code"><code lang="adoc" class="language-adoc">
+[global]
+;Path to logfile
+logfile=/var/log/suphp/suphp.log
+
+;Loglevel
+loglevel=info
+
+;User Apache is running as
+webserver_user=www-data
+
+;Path all scripts have to be in
+docroot=/var/www:${HOME}/public_html
+
+;Path to chroot() to before executing script
+;chroot=/mychroot
+
+; Security options
+allow_file_group_writeable=false
+allow_file_others_writeable=false
+allow_directory_group_writeable=false
+allow_directory_others_writeable=false
+
+;Check wheter script is within DOCUMENT_ROOT
+check_vhost_docroot=true
+
+;Send minor error messages to browser
+errors_to_browser=false
+
+;PATH environment variable
+env_path="/bin:/usr/bin"
+
+;Umask to set, specify in octal notation
+umask=0077
+
+; Minimum UID
+min_uid=33
+
+; Minimum GID
+min_gid=33
+
+[handlers]
+;Handler for php-scripts
+application/x-httpd-suphp-php-cgi-562="php:/usr/local/php/bin/php-cgi-5.6.2"
+
+;Handler for CGI-scripts
+x-suphp-cgi="execute:!self"
+
+</code></pre>
+
+
+
+<p>Et dernière étape, on fait un vhost pour notre projet.</p>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">sudo vi /etc/apache2/sites-enabled/000-default.conf</code></pre>
+
+
+
+<pre class="wp-block-code"><code lang="bash" class="language-bash">&lt;VirtualHost *:80>
+ServerAdmin contact@localhost
+ServerName  spikly.melis.dev
+DocumentRoot /var/www/spikly-hyundai/trunk/melis/front/www
+DirectoryIndex index.php
+
+&lt;Directory /var/www/spikly-hyundai/trunk/melis/front/www>
+Options Indexes FollowSymLinks MultiViews
+AllowOverride All
+Order allow,deny
+allow from all
+DirectoryIndex index.php
+&lt;/Directory>
+
+suPHP_Engine on
+suPHP_ConfigPath /var/www/spikly-hyundai/php.ini
+suPHP_AddHandler application/x-httpd-suphp-php-cgi-562
+AddHandler application/x-httpd-suphp-php-cgi-562 .php .php3 .php4 .php5
+
+ErrorLog /var/log/error.log
+
+# Possible values include: debug, info, notice, warn, error, crit,
+# alert, emerg.
+LogLevel warn
+suPHP_UserGroup tbourdin tbourdin
+CustomLog /var/log/access.log combined
+&lt;/VirtualHost></code></pre>

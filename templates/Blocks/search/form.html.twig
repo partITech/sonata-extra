@@ -1,0 +1,25 @@
+{% extends sonata_block.templates.block_base %}
+
+{% block block %}
+    {% block content %}
+        <div class="container mt-4">
+            <div class="row">
+                <div class="col-md-12">
+                    <form type="GET" class="d-flex" action="{{ generate_url_locale('sonata_extra_blog_search') }}">
+                    <input
+                            type="text"
+                            class="form-control me-1"
+                            name="s"
+                            value="{{ search_value }}"
+                            id="search-input"
+                            placeholder="{{ placeholder }}" aria-label="{{ placeholder }}"
+                    />
+                    <button class="btn" id="search-btn" type="submit">
+                        <i class="fa-solid fa-magnifying-glass"></i>{{ submit_label }}
+                    </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    {% endblock %}
+{% endblock %}

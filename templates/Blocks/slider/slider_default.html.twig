@@ -1,0 +1,57 @@
+{% extends sonata_block.templates.block_base %}
+
+{% block block %}
+    {% if slider %}
+        <div class="slick-slider {{ settings.class }}">
+            {% for slide in slider.slides %}
+
+                <div class="item">
+                    <div class="item-bg-wrapper"></div>
+                    <div class="item-inner">
+                        <div class="image">
+                            {% if slide.mediaMedia is not null %}
+                                <img class="picture__image lazyloaded" src="{{ sonata_path(slide.mediaMedia, 'reference') }}" alt="{{ slide.title }}">
+                            {% endif %}
+                        </div>
+                        <div class="item-content">
+                            <div class="text-content">
+                                <div class="text main-text">{{ slide.title }}</div>
+                                <div class="text">{{ slide.subtitle }}</div>
+                            </div>
+                            <div class="right-button" id="btn-slider-{{ slide.title |slugify }}">
+                                <a href="{{ slide.url }}" target="{{ slide.target }}">
+                                    <button class="btn-custom-main position-relative is-hover-animation-main w-100">
+                                        <div class="cta-content">
+                                            <span class="cta-arrow icon-cta-arrow"></span>
+                                            <div>{{ slide.btnLabel }}</div>
+                                        </div>
+                                    </button>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+
+
+
+                {% if slide.mediaMedia is not null %}
+                    <img class="picture__image lazyloaded" src="{{ sonata_path(slide.mediaMedia, 'reference') }}" alt="{{ slide.title }}">
+                {% endif %}
+
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    {% block javascripts %}
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $('.slick-slider').slick({
+                    // Vos options Slick Slider ici
+                });
+            });
+        </script>
+    {% endblock %}
+
+{% endblock %}
+

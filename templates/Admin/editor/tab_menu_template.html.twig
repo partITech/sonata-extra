@@ -1,0 +1,31 @@
+{% extends get_global_template('tab_menu_template') %}
+
+{% block label %}
+    {% if item.extras['btn_class'] is defined %}
+        <span type="submit" class="btn {{ item.extras['btn_class'] }}">
+        {% if item.extras['btn_icon'] is defined %}
+            <i class="fas {{ item.extras['btn_icon'] }}" aria-hidden="true"></i>
+        {% endif %}
+    {% endif %}
+
+    {# We use method accessor instead of ".label" since `item` implements `ArrayAccess` and could have a property called "label". #}
+    {{-
+    item.getLabel()|trans(
+        item.getExtra('translation_params', {}),
+        item.getExtra(
+            'translation_domain',
+            item.getParent() ? item.getParent().getExtra('translation_domain') : null
+        )
+    )|raw
+    -}}
+    {% if item.extras['sup'] is defined %}
+        <sup> {{ item.extras['sup'] }} </sup>
+    {% endif %}
+    {% if item.extras['btn_class'] is defined %}
+     </span>
+    {% endif %}
+
+{% endblock label %}
+
+
+

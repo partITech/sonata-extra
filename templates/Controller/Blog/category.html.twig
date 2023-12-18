@@ -1,0 +1,98 @@
+{% block content_blog %}
+<header class="entry-header">
+    <h1 class="entry-title">
+        <i>{{ 'sonata-extra.blog.section_category_list_title'|trans({}, 'PartitechSonataExtraBundle') }}</i>
+
+        <span class="cat-title">{{ category }}</span>
+    </h1>
+</header>
+
+<section class="articles blog_template bdp_blog_template classical">
+
+    {% if pagination is not empty %}
+        {% for article in pagination %}
+
+            <article>
+                <header class="bd-post-image">
+
+                    {% if article.getFeaturedImage() %}
+                        {% set media = article.getFeaturedImage %}
+                        {{ sonata_media(media, 'retina_large') }}
+                    {% endif %}
+                </header>
+
+
+                <div class="bd-blog-header">
+                    <h2>
+                        <a href="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}">{{ article.getTitle() }}</a>
+                    </h2>
+                    <div class="bd-metadatabox">
+                        <div class="bd-meta-datas" style="display:inline-block;">
+                            {{ 'sonata-extra.blog.write_by'|trans({}, 'PartitechSonataExtraBundle') }} <span>{{ article.getAuthor() }}</span>
+                            {{ 'sonata-extra.blog.publish_date'|trans({}, 'PartitechSonataExtraBundle') }} {{ article.getPublishedAt()|date('d/m/Y') }}
+                        </div>
+
+                        <div class="bd-tags blog-tags">
+                            <span class="bd-category-link ">
+							    <span class="bd-link-label">
+                                    <i class="fas fa-folder-open"></i>
+                                    {{ 'sonata-extra.blog.categories'|trans({}, 'PartitechSonataExtraBundle') }}&nbsp;
+                                </span>
+                                {% for category in article.category %}
+                                    {% if category.translations[category.site.id]['routes'] is defined %}
+                                        <a href="{{ category.translations[category.site.id]['routes']['sonata_extra_blog_category']  }}" rel="category tag">{{ category.name }}</a>{% if not loop.last %},{% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+
+
+                        </div>
+
+                        <div class="bd-tags blog-tags">
+                            <span class="bd-category-link ">
+							    <span class="bd-link-label">
+                                    <i class="fas fa-folder-open"></i>
+                                    {{ 'sonata-extra.blog.tags'|trans({}, 'PartitechSonataExtraBundle') }}&nbsp;
+                                </span>
+
+                                {% for tag in article.tags %}
+                                    {% if tag.translations[tag.site.id]['routes'] is defined %}
+                                        <a href="{{ tag.translations[tag.site.id]['routes']['sonata_extra_blog_tag'] }}" rel="category tag">{{ tag.name }}</a>{% if not loop.last %},{% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                            </span>
+                        </div>
+                        <div class="bd-post-content">{{ article.generateExcerpt()|raw }}</div>
+                    </div>
+                </div>
+
+                <footer>
+
+                    <div class="bd-post-footer">
+                        <div class="social-component">
+                            <a data-share="facebook" data-href="https://www.facebook.com/sharer/sharer.php" data-text="{{ article.getTitle() }}"   data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}" class="bd-facebook-share bd-social-share"><i class="fab fa-facebook-f"></i></a>
+                            <a data-share="twitter" data-href="https://twitter.com/share"                   data-text="{{ article.getTitle() }}"   data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}" class="bd-twitter-share bd-social-share"><i class="fab fa-twitter"></i></a>
+                            <a data-share="linkedin" data-href="https://www.linkedin.com/shareArticle"      data-text="{{ article.getTitle() }}"   data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}" class="bd-linkedin-share bd-social-share"><i class="fab fa-linkedin-in"></i></a>
+                            <a data-share="pinterest" data-href="https://pinterest.com/pin/create/button/"  data-text="{{ article.getTitle() }}"   data-url="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}"  class="bd-pinterest-share bd-social-share" data-mdia="" data-description=""  > <i class="fab fa-pinterest-p"></i></a>
+                        </div>
+                        <a class="bd-more-tag" href="{{ article.translations[article.site.id]['routes']['sonata_extra_blog_article'] }}">{{ 'sonata-extra.blog.btn_read_more'|trans({}, 'PartitechSonataExtraBundle') }}</a>
+                    </div>
+
+                 </footer>
+
+            </article>
+        {% endfor %}
+
+        {# Pagination #}
+        <div class="pagination">
+            {{ knp_pagination_render(pagination) }}
+        </div>
+
+
+
+    {% else %}
+        <p>{{ 'sonata-extra.blog.no_article_found_for_this_tag'|trans({}, 'PartitechSonataExtraBundle') }}</p>
+    {% endif %}
+</section>
+
+{% endblock %}

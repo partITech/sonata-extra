@@ -1,0 +1,12 @@
+{% extends '@SonataAdmin/CRUD/base_list.html.twig' %}
+
+{% block navbar_title %}
+    {{ parent() }}
+    <a  href="{{ admin.generateUrl('purge') }}"
+        class="btn btn-danger" style="margin-top: 8px;"
+        onclick="return confirm('{{ 'sonata-extra.approve.confirm_purge_all'|trans({}, 'PartitechSonataExtraBundle') }}');"
+        data-csrf-token="{{ csrf_token('purge') }}"
+                >
+        {{ 'sonata-extra.approve.purge_all_btn'|trans({}, 'PartitechSonataExtraBundle') }}
+    </a>
+{% endblock navbar_title %}

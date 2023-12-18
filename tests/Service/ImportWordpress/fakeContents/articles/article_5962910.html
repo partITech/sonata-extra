@@ -1,0 +1,16 @@
+<p>Pour ajouter un filtre par auteur dans la page de liste des articles disponible dans WordPress, il suffit d&rsquo;ajouter le code suivant dans le fichier functions.php :<br />
+Note : j&rsquo;ai laissé le commentaire de l&rsquo;instruction conditionnelle sur les post types, ça peux toujours servir 😉</p>
+<pre class="brush: php; title: ; notranslate" title="">
+function restrict_manage_authors() {
+/*if (isset($_GET['post_type']) &amp;amp;&amp;amp; post_type_exists($_GET['post_type']) &amp;amp;&amp;amp; in_array(strtolower($_GET['post_type']), array('your_custom_post_types', 'here'))) {
+*/wp_dropdown_users(array(
+'show_option_all'	=&amp;gt; 'Show all Authors',
+'show_option_none'	=&amp;gt; false,
+'name'			=&amp;gt; 'author',
+'selected'		=&amp;gt; !empty($_GET['author']) ? $_GET['author'] : 0,
+'include_selected'	=&amp;gt; false
+));
+/*}*/
+}
+add_action('restrict_manage_posts', 'restrict_manage_authors');
+</pre>

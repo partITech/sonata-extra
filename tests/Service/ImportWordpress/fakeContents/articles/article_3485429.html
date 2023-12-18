@@ -1,0 +1,14 @@
+<p>Dans des cas très rares, ont peux avoir besoin de surcharger la template par défaut (c&rsquo;est un peux crado de faire ça tout de même).</p>
+<p>Dans le fichier functions.php, ajouter le code suivant :</p>
+<pre class="brush: php; title: ; notranslate" title="">
+function wpa_overload_template( $template ) {
+
+if( isset( $_GET['parameter'] ) ) {
+
+$template = locate_template('template-overload.php', false );
+}
+
+return $template;
+}
+add_filter( 'template_include', 'wpa_overload_template' );
+</pre>

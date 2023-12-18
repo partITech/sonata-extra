@@ -1,0 +1,324 @@
+
+<p>Nous allons voir comment on construit une interface d&rsquo;admin, composée de plusieurs tables qui ont des relations Many2Many.<br><br>Reprenons notre exemple d&rsquo;interface many/many disponible <a href="/symfony-sonata-creer-un-admin-many-many/">ici </a><br>Nous avons une table zone, qui est composé de plusieurs éléments de la table départements. Sur ces départements, nous avons des agences.<br>Pour couronner le tout, et pour donner du sens à cette chaîne de données, nous ajoutons une table zx_credential, qui représente des commerciaux.<br>Voici notre chaîne de donnée : Commerciaux-&gt;Zones-&gt;Départements-&gt;Agences.<br></p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_129.png"><img decoding="async" loading="lazy" width="770" height="528" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_129.png" alt="" class="wp-image-527" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_129.png 770w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_129-300x206.png 300w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_129-768x527.png 768w" sizes="(max-width: 770px) 100vw, 770px" /></a></figure>
+
+
+
+<p>Pour notre projet, nous avons modélisé l&rsquo;ensemble de la base via MysqWorkbench, et exporté le schéma dans MySql.<br><br>Il ne nous reste plus qu&rsquo;à exporter les entity (avec getter et setters), et créer les CRUD Sonata</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+php bin/console doctrine:mapping:import &quot;App\Entity&quot; annotation --path=src/Entity
+php bin/console make:entity --regenerate App
+php bin/console make:sonata:admin App/Entity/ZxZone
+php bin/console make:sonata:admin App/Entity/ZxCredential
+php bin/console make:sonata:admin App/Entity/Agences
+php bin/console make:sonata:admin App/Entity/Departement
+php bin/console cache:clear
+</pre></div>
+
+
+<p>Pour la forme, nous renommons notre table « zx_credential » en « Accès commerciaux ».<br>Dans le fichier service.yaml il suffit de modifier l&rsquo;argument « Label ».</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+    admin.zx_credential:
+        class: App\Admin\ZxCredentialAdmin
+        arguments: &#91;~, App\Entity\ZxCredential, App\Controller\ZxCredentialAdminController]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: &quot;Accès commerciaux&quot; }
+        public: true
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="651" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_131-1024x651.png" alt="" class="wp-image-529" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_131-1024x651.png 1024w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_131-300x191.png 300w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_131-768x489.png 768w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_131.png 1127w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Jusqu&rsquo;ici, rien de plus classique. Mais ce que l&rsquo;on souhaite c&rsquo;est avoir une interface avec toute la chaîne de donnée liée entre elle, de sorte que lorsque l&rsquo;on édite un commercial, on ait la possibilité d&rsquo;aller directement dans la configuration de sa zone, puis ses départements, puis ses agences.<br>Pour cela, nous allons spécifier les liaisons des tables entre elles via un appel à la méthode « addChild » dans le service de notre CRUD. Et nous allons spécifié les enfants de chaques tables. <br>Pour que le process puisse fonctionner nous devons spécifier le service enfant, ainsi que le champs du parent utilisé pour faire la liaison.<br><br>Dans notre liaison ZxCredential-&gt;ZxZone, nous avons le champs suivant dans notre entity child (ZxZone) :</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="767" height="130" src="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_133.png" alt="" class="wp-image-533" srcset="https://www.partitech.com/wp-content/uploads/2020/03/Sélection_133.png 767w, https://www.partitech.com/wp-content/uploads/2020/03/Sélection_133-300x51.png 300w" sizes="(max-width: 767px) 100vw, 767px" /></figure>
+
+
+
+<p>C&rsquo;est donc celui-ci qui est utilisé pour faire la liaison, et que nous allons utiliser dans notre configuration.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+    admin.zx_credential:
+        class: App\Admin\ZxCredentialAdmin
+        arguments: &#91;~, App\Entity\ZxCredential, App\Controller\ZxCredentialAdminController]
+        calls:
+            - &#91;addChild, &#91;&quot;@admin.zx_zone&quot;, 'zxCredential']] 
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: &quot;Accès commerciaux&quot; }
+        public: true
+</pre></div>
+
+
+<p>La configuration complète nous donne ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+   admin.departement:
+        class: App\Admin\DepartementAdmin
+        arguments: &#91;~, App\Entity\Departement, ~]
+        calls:
+            - &#91;addChild, &#91;&quot;@admin.agences&quot;,&quot;departement&quot;]] 
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: Departement }
+        public: true
+        
+    admin.zx_zone:
+        class: App\Admin\ZxZoneAdmin
+        arguments: &#91;~, App\Entity\ZxZone, App\Controller\ZxZoneAdminController]
+        calls:
+            - &#91;addChild, &#91;&quot;@admin.departement&quot;, &quot;zxZone&quot;]] 
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: Zones }
+        public: true
+
+    admin.zx_credential:
+        class: App\Admin\ZxCredentialAdmin
+        arguments: &#91;~, App\Entity\ZxCredential, App\Controller\ZxCredentialAdminController]
+        calls:
+            - &#91;addChild, &#91;&quot;@admin.zx_zone&quot;, 'zxCredential']] 
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: &quot;Accès commerciaux&quot; }
+        public: true
+
+    admin.agences:
+        class: App\Admin\AgencesAdmin
+        arguments: &#91;~, App\Entity\Agences, ~]
+        tags:
+            - { name: sonata.admin, manager_type: orm, group: admin, label: Agences }
+        public: true
+
+</pre></div>
+
+
+<p>A ce stade, toutes nos tables sont liées, mais il faudra configurer le menu pour naviguer entre elles. <br>Pour cela, nous allons ajouter la méthode configureSideMenu dans notre admin des commerciaux « ZxCredentialAdmin ».<br>Attention, c&rsquo;est dans le point d&rsquo;entré de l&rsquo;interface qu&rsquo;il faut configurer le menu. Donc toute la chaîne  Commerciaux-&gt;Zones-&gt;Départements-&gt;Agences va se faire dans Commerciaux.<br><br>1iere étape, on ajoute les use dans toutes nos interfaces d&rsquo;admin, comme ça c&rsquo;est bouclé.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+declare(strict_types=1);
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Sonata\AdminBundle\Show\ShowMapper;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
+
+/*gestion de nos interfaces imbriquées*/
+use Knp\Menu\ItemInterface as MenuItemInterface;
+use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Route\RouteCollection;
+</pre></div>
+
+
+<p>Ensuite on ajoute notre premier lien vers la gestion des zones, depuis l&rsquo;interface Zx_Credential.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; auto-links: false; title: ; notranslate" title="">
+   protected function configureSideMenu(MenuItemInterface $menu, $action, AdminInterface $childAdmin = null): void
+    {
+        if (!$childAdmin &amp;&amp; !\in_array($action, &#91;'edit'], true)) {
+            return;
+        }
+         
+        $admin = $this-&gt;isChild() ? $this-&gt;getParent() : $this;
+        $id = $admin-&gt;getRequest()-&gt;get('id');
+        $label=$this-&gt;hasSubject() &amp;&amp; null !== $this-&gt;getSubject()-&gt;getLabel() ? $this-&gt;getSubject()-&gt;getLabel():null;
+        
+
+    
+        $menu-&gt;addChild(
+            'Configuration de l\'accès commercial : '.$label,
+            $admin-&gt;generateMenuUrl('edit', &#91;'id' =&gt; $id])
+             
+            );
+    
+        $child=$menu-&gt;addChild( 'Listes des zones',
+            &#91;
+                'uri' =&gt; $admin-&gt;generateUrl('admin.zx_zone.list', &#91;'id' =&gt; $id])
+            ]);
+        
+        
+        
+    }
+    
+</pre></div>
+
+
+<p>En gros, ce qu&rsquo;il faut retenir, et qui n&rsquo;est pas clair dans la documentation, c&rsquo;est la route à configurer. Il nous faut le nom de la route, puis l&rsquo;id.<br>Pour l&rsquo;id, c&rsquo;est simple, pour un premier niveaux, c&rsquo;est toujours :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+$id = $admin-&gt;getRequest()-&gt;get('id');
+</pre></div>
+
+
+<p>Et pour la route, c&rsquo;est toujours la même chose, c&rsquo;est le nom du service suivit du type de la vue. Donc ici <strong>admin.zx_zone.list</strong><br>Ce qui nous donne : </p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+$child=$menu-&gt;addChild( 'Listes des zones',
+            &#91;
+                'uri' =&gt; $admin-&gt;generateUrl('admin.zx_zone.list', &#91;'id' =&gt; $id])
+            ]);
+</pre></div>
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="736" height="364" src="https://www.partitech.com/wp-content/uploads/2020/03/commercial_zone-1.gif" alt="" class="wp-image-537"/></figure>
+
+
+
+<p>A ce stade, nous avons notre première interface imbriquée. Pour les suivantes, nous allons répéter la configuration.<br>Ce qui suit n&rsquo;est pas expliqué dans la documentation, car c&rsquo;est d&rsquo;une logique implacable. Mais vous pourrez chercher longtemps si vous n&rsquo;avez pas compris le fonctionnement de l&rsquo;imbrication des interfaces.<br>Ce qu&rsquo;il faut bien comprendre c&rsquo;est que tout se fait à partir de la première interface. L&rsquo;inclusion des boutons du menu et la construction des routes.<br>La premier, puis la première+la seconde, puis la premier+la seconde+ la troisième.<br><br>L&rsquo;interface doit se construire toujours dans notre première interface, pour chaque étapes. Pour cela nous avons besoin de récupérer l&rsquo;id à chaque étapes, et construire la route. <br>Et pour récupérer les clés, le truc c&rsquo;est de scruter les routes qui sont générées par symfony, via la commande debug:router</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; highlight: [52]; title: ; notranslate" title="">
+php bin/console debug:router
+---------------------------------------------------------- ---------- -------- ------ ------------------------------------------------------------------------------------------------------------- 
+  Name                                                       Method     Scheme   Host   Path                                                                                                         
+ ---------------------------------------------------------- ---------- -------- ------ ------------------------------------------------------------------------------------------------------------- 
+  _preview_error                                             ANY        ANY      ANY    /_error/{code}.{_format}                                                                                     
+  _wdt                                                       ANY        ANY      ANY    /_wdt/{token}                                                                                                
+  _profiler_home                                             ANY        ANY      ANY    /_profiler/                                                                                                  
+  _profiler_search                                           ANY        ANY      ANY    /_profiler/search                                                                                            
+  _profiler_search_bar                                       ANY        ANY      ANY    /_profiler/search_bar                                                                                        
+  _profiler_phpinfo                                          ANY        ANY      ANY    /_profiler/phpinfo                                                                                           
+  _profiler_search_results                                   ANY        ANY      ANY    /_profiler/{token}/search/results                                                                            
+  _profiler_open_file                                        ANY        ANY      ANY    /_profiler/open                                                                                              
+  _profiler                                                  ANY        ANY      ANY    /_profiler/{token}                                                                                           
+  _profiler_router                                           ANY        ANY      ANY    /_profiler/{token}/router                                                                                    
+  _profiler_exception                                        ANY        ANY      ANY    /_profiler/{token}/exception                                                                                 
+  _profiler_exception_css                                    ANY        ANY      ANY    /_profiler/{token}/exception.css   
+  admin_app_departement_list                                 ANY        ANY      ANY    /admin/app/departement/list                                                                                  
+  admin_app_departement_create                               ANY        ANY      ANY    /admin/app/departement/create                                                                                
+  admin_app_departement_batch                                ANY        ANY      ANY    /admin/app/departement/batch                                                                                 
+  admin_app_departement_edit                                 ANY        ANY      ANY    /admin/app/departement/{id}/edit                                                                             
+  admin_app_departement_delete                               ANY        ANY      ANY    /admin/app/departement/{id}/delete                                                                           
+  admin_app_departement_show                                 ANY        ANY      ANY    /admin/app/departement/{id}/show                                                                             
+  admin_app_departement_export                               ANY        ANY      ANY    /admin/app/departement/export                                                                                
+  admin_app_departement_agences_list                         ANY        ANY      ANY    /admin/app/departement/{id}/agences/list                                                                     
+  admin_app_departement_agences_create                       ANY        ANY      ANY    /admin/app/departement/{id}/agences/create                                                                   
+  admin_app_departement_agences_batch                        ANY        ANY      ANY    /admin/app/departement/{id}/agences/batch                                                                    
+  admin_app_departement_agences_edit                         ANY        ANY      ANY    /admin/app/departement/{id}/agences/{childId}/edit                                                           
+  admin_app_departement_agences_delete                       ANY        ANY      ANY    /admin/app/departement/{id}/agences/{childId}/delete                                                         
+  admin_app_departement_agences_show                         ANY        ANY      ANY    /admin/app/departement/{id}/agences/{childId}/show                                                           
+  admin_app_departement_agences_export                       ANY        ANY      ANY    /admin/app/departement/{id}/agences/export                                                                   
+  admin_app_zxcredential_list                                ANY        ANY      ANY    /admin/app/zxcredential/list                                                                                 
+  admin_app_zxcredential_create                              ANY        ANY      ANY    /admin/app/zxcredential/create                                                                               
+  admin_app_zxcredential_batch                               ANY        ANY      ANY    /admin/app/zxcredential/batch                                                                                
+  admin_app_zxcredential_edit                                ANY        ANY      ANY    /admin/app/zxcredential/{id}/edit                                                                            
+  admin_app_zxcredential_delete                              ANY        ANY      ANY    /admin/app/zxcredential/{id}/delete                                                                          
+  admin_app_zxcredential_show                                ANY        ANY      ANY    /admin/app/zxcredential/{id}/show                                                                            
+  admin_app_zxcredential_export                              ANY        ANY      ANY    /admin/app/zxcredential/export                                                                               
+  admin_app_zxcredential_zxzone_list                         ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/list                                                                     
+  admin_app_zxcredential_zxzone_create                       ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/create                                                                   
+  admin_app_zxcredential_zxzone_batch                        ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/batch                                                                    
+  admin_app_zxcredential_zxzone_edit                         ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/edit                                                           
+  admin_app_zxcredential_zxzone_delete                       ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/delete                                                         
+  admin_app_zxcredential_zxzone_show                         ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/show                                                           
+  admin_app_zxcredential_zxzone_export                       ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/export                                                                   
+  admin_app_zxcredential_zxzone_departement_list             ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/list                                               
+  admin_app_zxcredential_zxzone_departement_create           ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/create                                             
+  admin_app_zxcredential_zxzone_departement_batch            ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/batch                                              
+  admin_app_zxcredential_zxzone_departement_edit             ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/edit                                
+  admin_app_zxcredential_zxzone_departement_delete           ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/delete                              
+  admin_app_zxcredential_zxzone_departement_show             ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/show                                
+  admin_app_zxcredential_zxzone_departement_export           ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/export                                             
+  admin_app_zxcredential_zxzone_departement_agences_list     ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/list                        
+  admin_app_zxcredential_zxzone_departement_agences_create   ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/create                      
+  admin_app_zxcredential_zxzone_departement_agences_batch    ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/batch                       
+  admin_app_zxcredential_zxzone_departement_agences_edit     ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/{childChildChildId}/edit    
+  admin_app_zxcredential_zxzone_departement_agences_delete   ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/{childChildChildId}/delete  
+  admin_app_zxcredential_zxzone_departement_agences_show     ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/{childChildChildId}/show    
+  admin_app_zxcredential_zxzone_departement_agences_export   ANY        ANY      ANY    /admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/export                      
+  admin_app_agences_list                                     ANY        ANY      ANY    /admin/app/agences/list                                                                                      
+  admin_app_agences_create                                   ANY        ANY      ANY    /admin/app/agences/create                                                                                    
+  admin_app_agences_batch                                    ANY        ANY      ANY    /admin/app/agences/batch                                                                                     
+  admin_app_agences_edit                                     ANY        ANY      ANY    /admin/app/agences/{id}/edit                                                                                 
+  admin_app_agences_delete                                   ANY        ANY      ANY    /admin/app/agences/{id}/delete                                                                               
+  admin_app_agences_show                                     ANY        ANY      ANY    /admin/app/agences/{id}/show    
+</pre></div>
+
+
+<p>Et notre attention particuliere va se porter sur notre route admin_app_zxcredential_zxzone_departement_agences_list qui comporte toute notre chaine de donnée. <br>Elle est composée de nos tables avec le nom des id que nous allons récupéré pour construire les routes de nos interfaces.<br>/admin/app/zxcredential/{id}/zxzone/{childId}/departement/{childChildId}/agences/list<br>zxcredential : id<br>zxzone : childId<br>departement : childChildId<br><br>Donc en testant la présence de ces variables dans nos urls entrantes, nous allons pouvoir définir la profondeur de notre interface et construire les menus en conséquences.<br><br>Pour les routes c&rsquo;est simple, pour chaques étapes, on rajoute la route courrante séparé par un pipe | :<br>zxcredential : admin.zx_zone.list<br>zxzone : admin.zx_zone|admin.departement.list<br>departement : admin.zx_zone|admin.departement|admin.agences.list<br><br>Ce qui nous donnes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+   protected function configureSideMenu(MenuItemInterface $menu, $action, AdminInterface $childAdmin = null): void
+    {
+        if (!$childAdmin &amp;&amp; !\in_array($action, &#91;'edit'], true)) {
+            return;
+        }
+         
+        $admin = $this-&gt;isChild() ? $this-&gt;getParent() : $this;
+        $id = $admin-&gt;getRequest()-&gt;get('id');
+        $label=$this-&gt;hasSubject() &amp;&amp; null !== $this-&gt;getSubject()-&gt;getLabel() ? $this-&gt;getSubject()-&gt;getLabel():null;
+        
+
+    
+        $menu-&gt;addChild(
+            'Configuration de l\'accès commercial : '.$label,
+            $admin-&gt;generateMenuUrl('edit', &#91;'id' =&gt; $id])
+             
+            );
+    
+        $child=$menu-&gt;addChild( 'Listes des zones',
+            &#91;
+                'uri' =&gt; $admin-&gt;generateUrl('admin.zx_zone.list', &#91;
+                    'id' =&gt; $id
+                    
+                ])
+            ]);
+        
+        if(!empty($admin-&gt;getRequest()-&gt;get('childId'))){
+            $child=$menu-&gt;addChild( 'Listes des departements',
+                &#91;
+                    'uri' =&gt; $admin-&gt;generateUrl('admin.zx_zone|admin.departement.list', &#91;
+                        'id' =&gt; $id, 
+                        'childId' =&gt; $admin-&gt;getRequest()-&gt;get('childId')
+                        
+                    ])
+                ]);
+        }
+        if(!empty($admin-&gt;getRequest()-&gt;get('childChildId'))){
+            $child=$menu-&gt;addChild( 'Listes des agences',
+                &#91;
+                    'uri' =&gt; $admin-&gt;generateUrl('admin.zx_zone|admin.departement|admin.agences.list', &#91;
+                        'id' =&gt; $id, 
+                        'childId' =&gt; $admin-&gt;getRequest()-&gt;get('childId'),
+                        'childChildId' =&gt; $admin-&gt;getRequest()-&gt;get('childChildId')
+                    ])
+                ]);
+        }
+
+    }
+</pre></div>
+
+
+<p>Notre interface est maintenant complète :<br></p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="736" height="364" src="https://www.partitech.com/wp-content/uploads/2020/03/commercial_to_agence.gif" alt="" class="wp-image-541"/></figure>
+
+
+
+<div class="wp-block-file"><a id="wp-block-file--media-83def881-df6e-4b0c-b59e-1c06ec4bb05a" href="https://www.partitech.com/wp-content/uploads/2020/03/commercial_to_agence-1.mp4">la vidéo HD</a><a href="https://www.partitech.com/wp-content/uploads/2020/03/commercial_to_agence-1.mp4" class="wp-block-file__button wp-element-button" download aria-describedby="wp-block-file--media-83def881-df6e-4b0c-b59e-1c06ec4bb05a">Télécharger</a></div>
+
+
+
+<p></p>

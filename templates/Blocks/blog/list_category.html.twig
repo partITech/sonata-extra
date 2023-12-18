@@ -1,0 +1,11 @@
+<aside id="categories-2" class="widget widget_categories">
+    <h3 class="widget-title">{{title|trans }}</h3>
+    <ul>
+        {% for category in categories %}
+            {% if category.translations[category.site.getId()] is defined %}
+                <li class="cat-item cat-item-{{ category.getId() }}"><a href="{{ category.translations[category.site.getId()]['routes']['sonata_extra_blog_category'] }}">{{ category.name }}</a></li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+
+</aside>

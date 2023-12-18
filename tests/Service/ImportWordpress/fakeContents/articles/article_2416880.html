@@ -1,0 +1,133 @@
+
+<section id="section-3e8b5a3c-331b-4299-9067-6a44fc64ee1f" class="wp-block-gutentor-notification gutentor-section gutentor-notification"><div class="grid-container"><div class="gutentor-grid-item-wrap gutentor-notification-wrap gutentor-notification-warning"><div class="gutentor-single-item"><div class="gutentor-single-item-content"><h3 class="gutentor-single-item-title">Disclaimer</h3><p class="gutentor-single-item-desc"><br>Nous ne pouvons être tenus responsables des dommages pouvant résulter des téléchargements, de l’installation, du stockage ou de l’usage de logiciels, scripts, ou du contenu de notre site web.</p></div></div></div></div></section>
+
+
+
+<p>Il faut le savoir, par défaut, Gmail ne supprime jamais les messages de votre boite. Il les archives.<br>Du coup, il n&rsquo;est pas rare d&rsquo;atteindre la limite de l&rsquo;espace disponible, alors même que vous venez de supprimer tous vos message.</p>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/Selection_377.png"><img decoding="async" loading="lazy" width="243" height="68" src="https://www.partitech.com/wp-content/uploads/2021/03/Selection_377.png" alt="" class="wp-image-1165"/></a></figure></div>
+
+
+<p><br>Gmail les places, non pas dans une section « Archives », mais dans « Tous les messages ». De sorte que vous vous retrouvez avec un dossier contenant tous les bon messages, et tous les messages supprimés.<br><strong>Et démerde-toi avec ça !</strong></p>
+
+
+
+<p>Quand on a que quelques pages, à la limite ça se gère. Mais si on arrive à la limite des 15GO par défaut, c&rsquo;est que l&rsquo;on a des centaines de milliers de messages à trier.<br></p>
+
+
+
+<p>Pour remédier à cela, on va devoir automatiser la suppression de nos message archivés. Et nous allons utiliser jQuery.<br><br>Premièrement, il nous faut comprendre comment détecter un message archivé d&rsquo;un message encore dans notre boite de réception. C&rsquo;est tout simple, Gmail met le dossier dans lequel il est classé, juste avant le sujet. Donc si un message n&rsquo;as pas de dossier, alors c&rsquo;est un message archivé, donc à supprimer.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/image.png"><img decoding="async" loading="lazy" width="1024" height="187" src="https://www.partitech.com/wp-content/uploads/2021/03/image-1024x187.png" alt="" class="wp-image-1170" srcset="https://www.partitech.com/wp-content/uploads/2021/03/image-1024x187.png 1024w, https://www.partitech.com/wp-content/uploads/2021/03/image-300x55.png 300w, https://www.partitech.com/wp-content/uploads/2021/03/image-768x141.png 768w, https://www.partitech.com/wp-content/uploads/2021/03/image-1536x281.png 1536w, https://www.partitech.com/wp-content/uploads/2021/03/image-1440x264.png 1440w, https://www.partitech.com/wp-content/uploads/2021/03/image-800x146.png 800w, https://www.partitech.com/wp-content/uploads/2021/03/image-550x101.png 550w, https://www.partitech.com/wp-content/uploads/2021/03/image.png 1617w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p><br>Alors que les emails archivé n&rsquo;en ont pas.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/image-1.png"><img decoding="async" loading="lazy" width="1024" height="166" src="https://www.partitech.com/wp-content/uploads/2021/03/image-1-1024x166.png" alt="" class="wp-image-1172" srcset="https://www.partitech.com/wp-content/uploads/2021/03/image-1-1024x166.png 1024w, https://www.partitech.com/wp-content/uploads/2021/03/image-1-300x49.png 300w, https://www.partitech.com/wp-content/uploads/2021/03/image-1-768x125.png 768w, https://www.partitech.com/wp-content/uploads/2021/03/image-1-1536x250.png 1536w, https://www.partitech.com/wp-content/uploads/2021/03/image-1-1440x234.png 1440w, https://www.partitech.com/wp-content/uploads/2021/03/image-1-800x130.png 800w, https://www.partitech.com/wp-content/uploads/2021/03/image-1-550x89.png 550w, https://www.partitech.com/wp-content/uploads/2021/03/image-1.png 1619w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+
+<p>Voici les étapes de notre script :</p>
+
+
+
+<ol>
+<li>Injecter jQuery dans la page</li>
+
+
+
+<li>Aller dans la page qui contient tous les messages</li>
+
+
+
+<li>détecter le nombre de message par page, et le nombre de messages total pour extrapoler la pagination</li>
+
+
+
+<li>boucler sur toutes les pages, pour sélectionner les message archivés et les supprimer.</li>
+</ol>
+
+
+
+<p>Pour injecter javascript, on ouvre la console et on exécute ceci :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: jscript; title: ; notranslate" title="">
+var jquery_injection = document.createElement('script');
+jquery_injection.setAttribute('src','https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js');
+document.head.appendChild(jquery_injection);
+</pre></div>
+
+
+<p>On attends quelques secondes que la page ait bien terminée de charger la librairie et on lance la suite.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: jscript; title: ; notranslate" title="">
+console.log('Display all message (including archive)');
+window.location.href=GM_SESSION_PATH+'#all';
+
+setTimeout(() =&gt; { 
+    var msg_total=$('div.G-atb .Dj span.ts').eq(2).html(); 
+    var msg_per_page= $('div.G-atb .Dj span.ts').eq(1).html();
+    var nb_page=parseInt(msg_total.replace(/\s/g, ''))/parseInt(msg_per_page.replace(/\s/g, ''));
+    nb_page=Math.ceil(nb_page);
+    console.log('Found '+nb_page+' pages');
+    console.log('Start cycling through pages');
+    setTimeout(() =&gt; { 
+        Gmail_go_to_page(nb_page);
+    }, 1000);
+ 
+}, 1000);
+ 
+function Gmail_go_to_page(page)
+{
+    console.log('deleting page : '+page);
+ 
+    if(page &gt;= 0 ){
+        window.location.href=GM_SESSION_PATH+'#all/p'+page;
+        setTimeout(() =&gt; { 
+            Gmail_delete_archive(page);}, 5000);
+    }
+     
+}
+ 
+function Gmail_delete_archive(page)
+{
+    console.log('deleting messages');
+    document.head.appendChild(jquery_injection);
+    $('.UI table&#91;role=grid]:visible').eq(0).find('tr').each(function(i,e){
+        if($(e).find('.at').length==0){
+            $(e).find('ul&#91;role=toolbar] li').eq(1).trigger('click');
+		console.log('.');
+        }
+ 
+    });
+    if(page-1 &gt;= 0 ){
+        setTimeout(() =&gt; { Gmail_go_to_page(page-1);}, 10000);
+    }else{
+        console.log('Cycling ended !!');
+    }
+ 
+}
+</pre></div>
+
+
+<p>Une fois la boucle terminée, le message « Cycling ended » s&rsquo;affiche.</p>
+
+
+
+<figure class="wp-block-image size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/image-2.png"><img decoding="async" loading="lazy" width="1024" height="194" src="https://www.partitech.com/wp-content/uploads/2021/03/image-2-1024x194.png" alt="" class="wp-image-1175" srcset="https://www.partitech.com/wp-content/uploads/2021/03/image-2-1024x194.png 1024w, https://www.partitech.com/wp-content/uploads/2021/03/image-2-300x57.png 300w, https://www.partitech.com/wp-content/uploads/2021/03/image-2-768x146.png 768w, https://www.partitech.com/wp-content/uploads/2021/03/image-2-1536x292.png 1536w, https://www.partitech.com/wp-content/uploads/2021/03/image-2-1440x273.png 1440w, https://www.partitech.com/wp-content/uploads/2021/03/image-2-800x152.png 800w, https://www.partitech.com/wp-content/uploads/2021/03/image-2-550x104.png 550w, https://www.partitech.com/wp-content/uploads/2021/03/image-2.png 1870w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure>
+
+
+<div class="wp-block-image">
+<figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/03/suppression_Gmail.gif"><img decoding="async" loading="lazy" width="700" height="357" src="https://www.partitech.com/wp-content/uploads/2021/03/suppression_Gmail.gif" alt="" class="wp-image-1176"/></a></figure></div>
+
+
+<p></p>

@@ -1,0 +1,109 @@
+{#
+
+This file is part of the Sonata package.
+
+(c) Thomas Rabaix <thomas.rabaix@sonata-project.org>
+
+For the full copyright and license information, please view the LICENSE
+file that was distributed with this source code.
+
+#}
+
+{% import _self as macros %}
+
+{% macro bytesToSize(bytes) %}
+    {% apply spaceless %}
+        {% set kilobyte = 1024 %}
+        {% set megabyte = kilobyte * 1024 %}
+
+        {% if bytes < kilobyte %}
+            {{ bytes ~ ' B' }}
+        {% elseif bytes < megabyte %}
+            {{ (bytes / kilobyte)|number_format(2) ~ ' KB' }}
+        {% else %}
+            {{ (bytes / megabyte)|number_format(2) ~ ' MB' }}
+        {% endif %}
+    {% endapply %}
+{% endmacro %}
+
+{% extends '@SonataAdmin/CRUD/base_edit.html.twig' %}
+
+{% block form %}
+    <div class="row">
+        {% if object.id %}
+            <div class="col-md-6">
+                {% block sonata_media_show_reference %}
+                    <div class="box box-primary">
+                        <div class="box-header">
+                            <h3 class="box-title">{{ 'title.media_preview'|trans({}, 'SonataMediaBundle') }}</h3>
+                        </div>
+                        <div class="box-body table-responsive">
+
+                            <div class="text-center">
+                                {{ sonata_media(object, 'reference', {'class': 'img-responsive img-rounded'}) }}
+                            </div>
+
+                            <table class="table">
+                                <tr>
+                                    <th>{{ 'label.size'|trans({}, 'SonataMediaBundle') }}</th>
+                                    <td>
+                                        {{ object.width }} x {{ object.height }}
+                                        {% if object.size > 0 %}({{ macros.bytesToSize(object.size) }}){% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>{{ 'label.content_type'|trans({}, 'SonataMediaBundle') }}</th>
+                                    <td>{{ object.contenttype }}</td>
+                                </tr>
+                                <tr>
+                                    <th>{{ 'label.cdn'|trans({}, 'SonataMediaBundle') }}</th>
+                                    <td>
+                                        {% if object.cdnIsFlushable %}
+                                            {{ 'label.to_be_flushed'|trans({}, 'SonataMediaBundle') }}
+                                        {% else %}
+                                            {{ 'label.flushed_at'|trans({}, 'SonataMediaBundle') }}
+                                            {{ object.cdnFlushAt|date }}
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th><a href="{{ path('sonata_media_download', {'id': object|sonata_urlsafeid }) }}">{{ 'label.protected_download_url'|trans({}, 'SonataMediaBundle') }}</a></th>
+                                    <td>
+                                        <input type="text" class="form-control" onClick="this.select();" readonly="readonly" value="{{ path('sonata_media_download', {'id': object|sonata_urlsafeid }) }}"/>
+                                        <span class="label label-warning">{{ 'label.protected_download_url_notice'|trans({}, 'SonataMediaBundle') }}</span> {{ sonata_media.pool.downloadStrategy(object).description|raw }}
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <a href="{{ sonata_path(object, 'reference') }}" target="_blank">reference</a>
+                                    </th>
+                                    <td>
+                                        <input type="text" class="form-control" onClick="this.select();" readonly="readonly" value="{{ sonata_path(object, 'reference') }}"/>
+                                    </td>
+                                </tr>
+                                {% if object.providerName == 'sonata.media.provider.image' %}
+                                    {% for name, format in sonata_media.pool.formatNamesByContext(object.context) %}
+                                        <tr>
+                                            <th>
+                                                <a href="{{ sonata_path(object, name) }}" target="_blank">{{ name }}</a>
+                                            </th>
+                                            <td>
+                                                <input type="text" class="form-control" onClick="this.select();" readonly="readonly" value="{{ sonata_path(object, name) }}"/>
+                                            </td>
+                                        </tr>
+                                    {% endfor %}
+                                {% endif %}
+                            </table>
+                        </div>
+
+                    </div>
+                {% endblock sonata_media_show_reference %}
+            </div>
+        {% endif %}
+
+        <div class="col-md-6">
+            {# Renders the form #}
+            {{ parent() }}
+        </div>
+    </div>
+{% endblock form %}

@@ -1,0 +1,17 @@
+{% if object.actionType == 'update' %}
+    <a href="{{ path('admin_partitech_sonataextra_approval_approve', { 'id': object.id }) }}" class="btn-sm  btn btn-warning" onclick="return confirm('{{ 'sonata-extra.approve.approve_update'|trans({}, 'PartitechSonataExtraBundle') }}');">
+        {{ 'sonata-extra.approve.approve_update_btn'|trans({}, 'PartitechSonataExtraBundle') }}
+    </a>
+{% endif %}
+
+{% if object.actionType == 'create' %}
+    <a href="{{ path('admin_partitech_sonataextra_approval_approve', { 'id': object.id }) }}" class="btn-sm  btn btn-warning" onclick="return confirm('{{ 'sonata-extra.approve.approve_create'|trans({}, 'PartitechSonataExtraBundle') }}');">
+        {{ 'sonata-extra.approve.approve_create_btn'|trans({}, 'PartitechSonataExtraBundle') }}
+    </a>
+{% endif %}
+
+{% if object.actionType == 'delete' %}
+    <a href="{{ path('admin_partitech_sonataextra_approval_approve', { 'id': object.id }) }}" class="btn-sm  btn btn-warning" onclick="return confirm('{{ 'sonata-extra.approve.approve_delete'|trans({}, 'PartitechSonataExtraBundle') }}');">
+        {{ 'sonata-extra.approve.approve_delete_btn'|trans({}, 'PartitechSonataExtraBundle') }}
+    </a>
+{% endif %}

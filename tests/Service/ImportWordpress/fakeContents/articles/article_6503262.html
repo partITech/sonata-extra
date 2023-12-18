@@ -1,0 +1,414 @@
+
+<p>Les interfaces par défaut de Sonata sont des CRUD. Ce qui est archi pratique (sinon on ne l&rsquo;utiliserais pas). Mais une administration n&rsquo;est pas uniquement composée de CRUD. <br>Ici nous allons voir comment on peux faire une page d&rsquo;export de donnée de manière simple, en supprimant les vues par défaut des interfaces, et en créant la notre pour gérer notre bouton d&rsquo;export.<br></p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="840" height="379" src="https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239-1.png" alt="" class="wp-image-576" srcset="https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239-1.png 840w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239-1-300x135.png 300w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239-1-768x347.png 768w" sizes="(max-width: 840px) 100vw, 840px" /></figure>
+
+
+
+<h2>1 &#8211; Ajout de la librairie d&rsquo;export</h2>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: bash; title: ; notranslate" title="">
+composer require sonata-project/exporter
+</pre></div>
+
+
+<p>Nous devons ensuite ajouter un fichier de configuration pour notre exporter.<br></p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+#config/packages/sonata_exporter.yml
+sonata_exporter:
+  writers:
+    csv:
+      delimiter: &quot;;&quot;
+</pre></div>
+
+
+<h2>2 &#8211; Création de notre controller</h2>
+
+
+
+<p>Nous allons créer notre controller qui contiendra notre configuration de base.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;?php
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface as RoutingUrlGeneratorInterface;
+use Sonata\FormatterBundle\Form\Type\SimpleFormatterType;
+use Knp\Menu\ItemInterface as MenuItemInterface;
+use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Route\RouteCollection;
+
+
+
+class ExportModuleAdmin extends AbstractAdmin
+{
+    
+    public function __construct( $code, $class, $baseControllerName ) {
+        parent::__construct( $code, $class, $baseControllerName );
+        
+
+    }
+    
+    public function configure()
+    {
+        parent::configure();
+    }
+}
+</pre></div>
+
+
+<p>Nous devons ensuite créer nos actions :<br>On supprime toutes nos routes, nous nous créons une route export-module pour notre page.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    protected function configureRoutes(RouteCollection $collection)
+    {
+        $collection-&gt;clearExcept(&#91;'export-module']);
+        $collection-&gt;remove('create');
+        $collection-&gt;add('export-module');
+    }
+</pre></div>
+
+
+<p>Nous devons ensuite enregistrer notre interface dans les services</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+    admin.export:
+        class: App\Admin\ExportModuleAdmin
+        arguments: &#91;~, App\Entity\Export, App\Admin\CustomAction]
+        tags:
+            - { name: sonata.admin, manager_type: orm, label: &quot;Export CSV&quot; , label_translator_strategy: sonata.admin.label.strategy.underscore, label_catalogue: default}
+        public: true
+</pre></div>
+
+
+<p>Comme vous pouvez le remarquer notre troisième argument est un controller admin additionnel, qui va gérer nos actions (src/Admin/CustomAction.php).</p>
+
+
+
+<p>Et c&rsquo;est directement dans l&rsquo;action que nous allons définir la vue que nous allons utiliser pour ajouter notre bouton.<br>Nous créons donc une méthode exportModuleAction() qui contient notre référence à notre template.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Admin;
+
+use Sonata\AdminBundle\Controller\CRUDController;
+use Symfony\Component\HttpFoundation\RedirectResponse;
+use Symfony\Component\HttpFoundation\Response;
+use PhpOffice\PhpSpreadsheet\IOFactory;
+use Doctrine\ORM\Query\ResultSetMappingBuilder;
+use Doctrine\ORM\Query\ResultSetMapping;
+
+class CustomAction extends CRUDController
+{
+    public function exportDelefAction(){
+        return $this-&gt;renderWithExtraParams('Admin/export.html.twig', array(
+            'action' =&gt; 'export',
+            'elements' =&gt; $this-&gt;admin-&gt;getShow(),
+        ), null);
+    }
+}
+</pre></div>
+
+
+<p>Et notre fichier twig qui se trouve sur cette arborescence templates/Admin/export.html.twig contient notre code, tout simple, avec un lien pour récupérer l&rsquo;export.<br>Le lien est uniquement la route d&rsquo;export d&rsquo;une interface d&rsquo;admin CRUD qui contient en argument le format souhaité (csv).<br>La fonction d&rsquo;export est une fonction automatique des interfaces CRUD.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+{% extends '@SonataAdmin/standard_layout.html.twig' %}
+{% block sonata_admin_content %}
+{% include 'SonataCoreBundle:FlashMessage:render.html.twig' %}
+
+&lt;div&gt;
+    &lt;h2 class=&quot;title-border&quot;&gt;Export CSV&lt;/h2&gt;
+
+    &lt;div class=&quot;box box-primary&quot;&gt;
+        &lt;div class=&quot;box-body&quot;&gt;
+            &lt;ul class=&quot;menu list-unstyled mb-0&quot;&gt;
+                &lt;li&gt;&lt;a class=&quot;btn-link&quot; href=&quot;{{ path('admin_app_wdeclar_export', {'format' : 'csv'}) }}&quot;&gt;Cliquez ici pour télécharger le fichier csv&lt;/a&gt;&lt;/li&gt;
+            &lt;/ul&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+{% endblock %}
+</pre></div>
+
+
+<p>Pour que notre action soit disponible directement depuis le dashboard, nous devons inscrire l&rsquo;action dans le fichier sonata_admin.yml<br><br>Et pour vérifier la route que nous allons renseigner, il nous suffit d&rsquo;utiliser la commande  :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: plain; title: ; notranslate" title="">
+php bin/console debug:router
+</pre></div>
+
+
+<p>Une fois repérée nous l&rsquo;utilisons comme URL d’accès à notre bouton d&rsquo;export dans le menu.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: yaml; title: ; notranslate" title="">
+#config/packages/sonata_admin.yaml
+sonata_admin:
+    title: 'Sonata Admin'
+    dashboard:
+        blocks:
+            - { type: sonata.admin.block.admin_list, position: left }
+        groups:
+            delef.admin.group.contrats:
+                label: Gestion des contrats
+                icon: '&lt;i class=&quot;fa fa-cogs &quot;&gt;&lt;/i&gt;'
+                items:
+                    - route: admin_app_export_export-module
+                      label:  &quot;Export CSV&quot;
+</pre></div>
+
+
+<p>Mais ce n&rsquo;est pas tout. Il nous faut ensuite configurer notre bouton sur le dashboard. Nous allons ajouter la méthode getDashboardActions().<br>On y ajoute notre action et la classe css de l’icône que nous voulons utiliser. Ici on utilise une icône fontawsome 5 que nous avons ajouté à notre projet.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+public function getDashboardActions()
+    {
+        $actions = parent::getDashboardActions();
+    
+        $actions&#91;'import'] = &#91;
+            'label'              =&gt; 'Export',
+            'url'                =&gt; $this-&gt;generateUrl('export-delef'),
+            'icon'               =&gt; ' fas fa-file-export',
+            'translation_domain' =&gt; 'SonataAdminBundle', // optional
+            'template'           =&gt; '@SonataAdmin/CRUD/dashboard__action.html.twig', // optional
+        ];
+    
+        return $actions;
+    }
+</pre></div>
+
+
+<p>Ceci nous donne le fichier php suivant :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+namespace App\Admin;
+
+use Sonata\AdminBundle\Admin\AbstractAdmin;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Form\FormMapper;
+use Symfony\Component\Routing\Generator\UrlGeneratorInterface as RoutingUrlGeneratorInterface;
+use Sonata\FormatterBundle\Form\Type\SimpleFormatterType;
+use Knp\Menu\ItemInterface as MenuItemInterface;
+use Sonata\AdminBundle\Admin\AdminInterface;
+use Sonata\AdminBundle\Route\RouteCollection;
+
+
+class ExportModuleAdmin extends AbstractAdmin
+{
+    
+    public function __construct( $code, $class, $baseControllerName ) {
+        parent::__construct( $code, $class, $baseControllerName );
+        
+
+    }
+    
+    public function configure()
+    {
+        parent::configure();
+    }
+    
+    
+    protected function configureRoutes(RouteCollection $collection)
+    {
+        //$collection-&gt;clearExcept(&#91;'list']);
+        $collection-&gt;clearExcept(&#91;'export-delef']);
+        $collection-&gt;remove('create');
+        $collection-&gt;add('export-delef');
+    }
+    
+
+    public function setContainer(ContainerInterface $container)
+    {
+        $this-&gt;container = $container;
+    }
+    
+   
+    public function getDashboardActions()
+    {
+        $actions = parent::getDashboardActions();
+    
+        $actions&#91;'import'] = &#91;
+            'label'              =&gt; 'Export',
+            'url'                =&gt; $this-&gt;generateUrl('export-delef'),
+            'icon'               =&gt; ' fas fa-file-export',
+            'translation_domain' =&gt; 'SonataAdminBundle', // optional
+            'template'           =&gt; '@SonataAdmin/CRUD/dashboard__action.html.twig', // optional
+        ];
+    
+        return $actions;
+    }
+    
+}
+</pre></div>
+
+
+<p>A ce stade nous avons notre accès depuis le dashboard :</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="1024" height="403" src="https://www.partitech.com/wp-content/uploads/2020/04/Sélection_238-1024x403.png" alt="" class="wp-image-571" srcset="https://www.partitech.com/wp-content/uploads/2020/04/Sélection_238-1024x403.png 1024w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_238-300x118.png 300w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_238-768x303.png 768w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_238.png 1066w" sizes="(max-width: 1024px) 100vw, 1024px" /></figure>
+
+
+
+<p>Et notre page de téléchargement :</p>
+
+
+
+<figure class="wp-block-image size-large"><img decoding="async" loading="lazy" width="840" height="379" src="https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239.png" alt="" class="wp-image-572" srcset="https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239.png 840w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239-300x135.png 300w, https://www.partitech.com/wp-content/uploads/2020/04/Sélection_239-768x347.png 768w" sizes="(max-width: 840px) 100vw, 840px" /></figure>
+
+
+
+<h2>3 &#8211; Configuration de l&rsquo;export</h2>
+
+
+
+<p>Il nous manque plus que la configuration de notre export.<br>Nous avons vu plus haut que nous faisons référence à une action par défaut &lsquo;export&rsquo; d&rsquo;une interface CRUD de notre admin.<br>C&rsquo;est donc directement dans notre entité que nous allons configurer l&rsquo;export.<br><br>Dans notre CRUD nous ajoutons la référence suivante :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+use App\Source\DBALStatementSourceIterator;
+</pre></div>
+
+
+<p>Et les deux méthodes suivantes :</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+    public function getDataSourceIterator()
+    {
+        $container = $this-&gt;getConfigurationPool()-&gt;getContainer();
+        $em = $container-&gt;get('doctrine.orm.entity_manager');
+        $conn = $em-&gt;getConnection();
+        $fields = $this-&gt;getExportFields();
+        $field_str = implode(',', $fields);
+        $sql = &quot;SELECT {$field_str} FROM myTable d where champs1 ='valeur' order by id asc&quot;;
+        $stmt = $conn-&gt;prepare($sql);
+        $stmt-&gt;execute();
+
+        return new DBALStatementSourceIterator($stmt);
+    }
+
+    public function getExportFields() {
+        return &#91;
+            'd.champs1','d.champs2','d.champs3'
+        ];
+    }
+
+</pre></div>
+
+
+<p>Il nous reste à ajouter notre source iterator qui se trouve dans src/Source/DBALStatementSourceIterator.php</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+&lt;?php
+
+namespace App\Source;
+
+use Sonata\Exporter\Exception\InvalidMethodCallException;
+use Sonata\Exporter\Source\SourceIteratorInterface;
+
+class DBALStatementSourceIterator implements SourceIteratorInterface
+{
+    /**
+     * @var \Doctrine\DBAL\Statement
+     */
+    protected $statement;
+
+    /**
+     * @var mixed
+     */
+    protected $current;
+
+    /**
+     * @var int
+     */
+    protected $position;
+
+    /**
+     * @var bool
+     */
+    protected $rewinded;
+
+    /**
+     * @param \Doctrine\DBAL\Statement $statement
+     */
+    public function __construct(\Doctrine\DBAL\Statement $statement)
+    {
+        $this-&gt;statement = $statement;
+        $this-&gt;position = 0;
+        $this-&gt;rewinded = false;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function current()
+    {
+        return $this-&gt;current;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function next()
+    {
+        $this-&gt;current = $this-&gt;statement-&gt;fetch(\Doctrine\DBAL\FetchMode::ASSOCIATIVE);
+        ++$this-&gt;position;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function key()
+    {
+        return $this-&gt;position;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function valid()
+    {
+        return \is_array($this-&gt;current);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function rewind()
+    {
+        if ($this-&gt;rewinded) {
+            throw new InvalidMethodCallException('Cannot rewind a PDOStatement');
+        }
+
+        $this-&gt;current = $this-&gt;statement-&gt;fetch(\Doctrine\DBAL\FetchMode::ASSOCIATIVE);
+        $this-&gt;rewinded = true;
+    }
+}
+
+</pre></div>
+
+
+<p>Et le tour est joué !</p>

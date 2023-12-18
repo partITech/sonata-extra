@@ -1,0 +1,11 @@
+<p>Sur ubuntu 14.04 LTS, un bug critique et non corrigé a été remonté.<br />
+Lorsqu&rsquo;un appareil bluetooth est appairé, il est impossible de forcer le systeme a jouer le son sur celui-ci.<br />
+La parade consiste a forcer en shell la sortie :</p>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo pactl list cards short
+0	alsa_card.pci-0000_00_1b.0	module-alsa-card.c
+4	bluez_card.FC_58_FA_89_91_2C	module-bluetooth-device.c
+</pre>
+<pre class="brush: bash; title: ; notranslate" title="">
+sudo pactl set-card-profile 4 a2dp
+</pre>

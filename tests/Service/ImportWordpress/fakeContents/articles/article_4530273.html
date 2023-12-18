@@ -1,0 +1,38 @@
+
+<p>Il ne vous a sûrement pas échappé que WordPress avait mis a jour son éditeur de contenu WYSIWYG.<br>Et cela marche très bien pour les pages de contenu classiques.</p>
+
+
+
+<p><br>Il y a quelques mois, l&rsquo;éditeur a été implémenté dans la gestion des widgets. <br>Et là, patatras&#8230;</p>
+
+
+
+<section id="section-7a3b79c4-dfda-4e69-9abf-f6d7f7692970" class="wp-block-gutentor-notification gutentor-section gutentor-notification"><div class="grid-container"><div class="gutentor-block-header"><div class="gutentor-section-title enable-title-design seperator-bottom"><span class="gutentor-title">Erreur js au chargement de la page :</span></div></div><div class="gutentor-grid-item-wrap gutentor-notification-wrap gutentor-notification-error"><div class="gutentor-single-item"><div class="gutentor-single-item-content"><h3 class="gutentor-single-item-title">index.js:1:3953</h3><p class="gutentor-single-item-desc">Uncaught (in promise) TypeError: e is undefined</p></div></div></div></div></section>
+
+
+
+<p>Et impossible de pouvoir éditer les sidebars déjà configurées :</p>
+
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/04/Selection_415.png"><img decoding="async" loading="lazy" width="725" height="473" src="https://www.partitech.com/wp-content/uploads/2021/04/Selection_415.png" alt="" class="wp-image-1410" srcset="https://www.partitech.com/wp-content/uploads/2021/04/Selection_415.png 725w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_415-300x196.png 300w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_415-550x359.png 550w" sizes="(max-width: 725px) 100vw, 725px" /></a></figure></div>
+
+
+
+<p>En attendant que le problème de Gutenberg soit réglé, vous voudrez repasser sur l&rsquo;ancien mode d&rsquo;édition des widgets.<br>Pour cela, il suffit d&rsquo;ajouter cette petite directive dans le fichier functions.php de votre thème, ou de créer un child thème si vous utilisez un thème acheté, susceptible d’être mis à jour.</p>
+
+
+<div class="wp-block-syntaxhighlighter-code "><pre class="brush: php; title: ; notranslate" title="">
+remove_theme_support( 'widgets-block-editor' );
+</pre></div>
+
+
+<div class="wp-block-image"><figure class="aligncenter size-large"><a href="https://www.partitech.com/wp-content/uploads/2021/04/Selection_416.png"><img decoding="async" loading="lazy" width="1024" height="450" src="https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-1024x450.png" alt="" class="wp-image-1411" srcset="https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-1024x450.png 1024w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-300x132.png 300w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-768x337.png 768w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-1536x675.png 1536w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-1440x632.png 1440w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-800x351.png 800w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-550x242.png 550w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416-1366x600.png 1366w, https://www.partitech.com/wp-content/uploads/2021/04/Selection_416.png 1669w" sizes="(max-width: 1024px) 100vw, 1024px" /></a></figure></div>
+
+
+
+<p></p>
+
+
+
+<p></p>
