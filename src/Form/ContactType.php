@@ -83,6 +83,12 @@ class ContactType extends AbstractType
                     'required' => false,
                     'attr' => ['rows' => 6]]);
         }
+        $builder->add('honeypot', TextType::class, [
+            'label' => '',
+            'mapped' => false,
+            'required' => false,
+            'attr' => ['style' => 'display:none;']
+        ]);
 
         $builder->add('submit', SubmitType::class, [
             'label' => $settings['submitLabel'] ?? 'envoyer',

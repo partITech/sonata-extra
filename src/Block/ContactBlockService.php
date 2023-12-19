@@ -71,23 +71,29 @@ final class ContactBlockService extends AbstractBlockService implements Editable
             $recaptcha_success=$resp->isSuccess();
         }
 
-        if ($form->isSubmitted() && $recaptcha_success && $form->isValid()) {
-
+        if ($form->isSubmitted()) {
             $formData = $form->getData();
-            $this->contactRepository->save($contact, true);
-            if ($settings['sendMeACopy'] && !empty($formData->getEmail())) {
-                $this->mailerContact->sendConfirmation($settings, $formData);
+
+            //honeypot should be empty, otherwise it could be a bot.
+            if( empty($form->get('honeypot')->getViewData()) && $recaptcha_success && $form->isValid())
+            {
+                $this->contactRepository->save($contact, true);
+                if ($settings['sendMeACopy'] && !empty($formData->getEmail())) {
+                    $this->mailerContact->sendConfirmation($settings, $formData);
+                }
+
+                if ($settings['sendTo'] && !empty($settings['sendToAddress'])) {
+                    $this->mailerContact->sendAdminConfirmation($settings, $formData);
+                }
+                $this->requestStack->getSession()->getFlashBag()->add('success', 'Votre message a été envoyé');
+
+                return $this->renderResponse($settings['confirmation_template'], [
+                    'confirmation_message' => $settings['confirmation_message'],
+                    'confirmation_javascript'=> $settings['confirmation_javascript'],
+                ], $response);
             }
 
-            if ($settings['sendTo'] && !empty($settings['sendToAddress'])) {
-                $this->mailerContact->sendAdminConfirmation($settings, $formData);
-            }
-            $this->requestStack->getSession()->getFlashBag()->add('success', 'Votre message a été envoyé');
-            
-            return $this->renderResponse($settings['confirmation_template'], [
-                'confirmation_message' => $settings['confirmation_message'],
-                'confirmation_javascript'=> $settings['confirmation_javascript'],
-            ], $response);
+
         }
 
         return $this->renderResponse($blockContext->getTemplate(), [
