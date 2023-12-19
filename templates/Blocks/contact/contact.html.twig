@@ -11,7 +11,25 @@
                         </div>
                         <div class="card-body">
                             {{ form_start(form, {'attr': {'novalidate': 'novalidate'}}) }}
-
+                            {% if recaptchaSiteKey is defined %}
+                                <script src="https://www.google.com/recaptcha/api.js?render={{ recaptchaSiteKey }}"></script>
+                                <script>
+                                    document.querySelector('form[name="contact"]').addEventListener('submit', function(e) {
+                                        e.preventDefault();
+                                        var form = this;
+                                        grecaptcha.ready(function() {
+                                            grecaptcha.execute('{{ recaptchaSiteKey }}', {action: 'submit'}).then(function(token) {
+                                                var input = document.createElement('input');
+                                                input.setAttribute('type', 'hidden');
+                                                input.setAttribute('name', 'g-recaptcha-response');
+                                                input.setAttribute('value', token);
+                                                form.appendChild(input);
+                                                form.submit();
+                                            });
+                                        });
+                                    });
+                                </script>
+                            {% endif %}
                             <div class="row">
                                 <div class="col-md-6">{{ form_row(form.firstName) }}</div>
                                 <div class="col-md-6"> {{ form_row(form.lastName) }} </div>

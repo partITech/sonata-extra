@@ -26,17 +26,20 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
+use ReCaptcha\ReCaptcha;
+use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AutoconfigureTag(name: 'sonata.block')]
 final class ContactBlockService extends AbstractBlockService implements EditableBlockService
 {
     public function __construct(
         Environment $twig,
+        private ParameterBagInterface $parameterBag,
         private readonly TranslatorInterface $translator,
         private readonly RequestStack $requestStack,
         private readonly FormFactoryInterface $formFactory,
         private readonly ContactRepository $contactRepository,
-        private readonly ContactBlockMailerService $mailerContact,
+        private readonly ContactBlockMailerService $mailerContact
     ) {
         parent::__construct($twig);
     }
@@ -55,7 +58,20 @@ final class ContactBlockService extends AbstractBlockService implements Editable
 
         $form->handleRequest($request);
 
-        if ($form->isSubmitted() && $form->isValid()) {
+
+        $recaptcha_site_key = $settings['GOOGLE_RECAPTCHA_SITE_KEY'];
+        $recaptcha_site_secret = $settings['GOOGLE_RECAPTCHA_SECRET'];
+        $recaptchaOn = $settings['GOOGLE_RECAPTCHA'];
+
+
+        $recaptcha_success=true;
+        if ($recaptchaOn && $form->isSubmitted()){
+            $recaptcha = new ReCaptcha($recaptcha_site_secret);
+            $resp = $recaptcha->verify($request->request->get('g-recaptcha-response'), $request->getClientIp());
+            $recaptcha_success=$resp->isSuccess();
+        }
+
+        if ($form->isSubmitted() && $recaptcha_success && $form->isValid()) {
 
             $formData = $form->getData();
             $this->contactRepository->save($contact, true);
@@ -78,6 +94,7 @@ final class ContactBlockService extends AbstractBlockService implements Editable
             'block' => $blockContext->getBlock(),
             'title'=> $title,
             'settings' => $blockContext->getSettings(),
+            'recaptchaSiteKey'=>!empty($recaptchaOn)?$recaptcha_site_key:false,
             'form' => $form->createView(),
         ], $response);
     }
@@ -89,8 +106,40 @@ final class ContactBlockService extends AbstractBlockService implements Editable
 
     public function configureEditForm(FormMapper $form, BlockInterface $block): void
     {
+
         $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
+               [
+                    'GOOGLE_RECAPTCHA',
+                    CheckboxType::class,
+                    [
+                        'label' => 'sonata-extra.block_contact.recaptcha',
+                        'translation_domain' => 'PartitechSonataExtraBundle',
+                        'required' => false,
+                    ],
+                ],
+
+                [
+                    'GOOGLE_RECAPTCHA_SITE_KEY',
+                    TextType::class,
+                    [
+                        'label' => 'sonata-extra.block_contact.recaptcha_site_key',
+                        'translation_domain' => 'PartitechSonataExtraBundle',
+                        'required' => false,
+                    ],
+                ],
+
+                [
+                    'GOOGLE_RECAPTCHA_SECRET',
+                    TextType::class,
+                    [
+                        'label' => 'sonata-extra.block_contact.recaptcha_site_secret',
+                        'translation_domain' => 'PartitechSonataExtraBundle',
+                        'required' => false,
+                    ],
+                ],
+
+
                 [
                     'title',
                     TextType::class,
@@ -440,6 +489,9 @@ final class ContactBlockService extends AbstractBlockService implements Editable
     public function configureSettings(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
+            'GOOGLE_RECAPTCHA' => false,
+            'GOOGLE_RECAPTCHA_SITE_KEY' => "",
+            'GOOGLE_RECAPTCHA_SECRET' => "",
             'title' => "Contact us",
             'firstName' => true,
             'firstNameLabel' => $this->translator->trans(

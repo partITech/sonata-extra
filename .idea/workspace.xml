@@ -1,0 +1,736 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AnalysisUIOptions">
+    <option name="ANALYZE_TEST_SOURCES" value="false" />
+    <option name="ANALYZE_INJECTED_CODE" value="false" />
+    <option name="SCOPE_TYPE" value="3" />
+  </component>
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="177b351e-864a-4803-8db1-95e8da19813b" name="Changes" comment="Add index.md">
+      <change afterPath="$PROJECT_DIR$/.idea/meeting.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/.idea/php.xml" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="ComposerConfigs">
+    <option name="configs">
+      <option value="$PROJECT_DIR$/public/bundles/fosckeditor/composer.json" />
+      <option value="$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/composer.json" />
+      <option value="$PROJECT_DIR$/src/Application/SonataMenuBundle/composer.json" />
+    </option>
+  </component>
+  <component name="ComposerSettings" synchronizationState="SYNCHRONIZE">
+    <pharConfigPath>$PROJECT_DIR$/composer.json</pharConfigPath>
+    <execution />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_BRANCH_BY_REPOSITORY">
+      <map>
+        <entry key="$PROJECT_DIR$" value="sitemap-modif-routes" />
+      </map>
+    </option>
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/admin-bundle/src/Admin/AbstractAdmin.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/admin-bundle/src/Admin/AbstractAdminExtension.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/classification-bundle/src/Entity/BaseTag.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/classification-bundle/src/Model/Tag.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/page-bundle/src/Admin/PageAdmin.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/page-bundle/src/Entity/BasePage.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/page-bundle/src/Model/Page.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+    <setting file="file://$PROJECT_DIR$/vendor/sonata-project/page-bundle/src/Model/PageInterface.php" root0="FORCE_HIGHLIGHTING" root1="SKIP_INSPECTION" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="PhpDebugGeneral" show_user_defined_constants="false">
+    <xdebug_debug_ports port="9003" />
+  </component>
+  <component name="PhpServers">
+    <servers>
+      <server host="sonata-extra.localhost" id="c83c23f6-0e81-45fd-9d10-924c3228c70f" name="localhost" use_path_mappings="true">
+        <path_mappings>
+          <mapping local-root="$PROJECT_DIR$" remote-root="/var/www/sonata-extra" />
+        </path_mappings>
+      </server>
+    </servers>
+  </component>
+  <component name="PhpWorkspaceProjectConfiguration" interpreter_name="/usr/bin/php" />
+  <component name="PhpXdebugProxy" ide_key="docker" host="localhost" port="9003" />
+  <component name="ProblemsViewState">
+    <option name="selectedTabId" value="CurrentFile" />
+  </component>
+  <component name="ProjectColorInfo"><![CDATA[{
+  "associatedIndex": 7
+}]]></component>
+  <component name="ProjectId" id="2PgaT5i63o4f3XQ8anzS0EnTfbS" />
+  <component name="ProjectLevelVcsManager">
+    <ConfirmationsSetting value="2" id="Add" />
+  </component>
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_ADD_EXTERNAL_FILES&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;WebServerToolWindowFactoryState&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/var/www/accor/Accord_image/readme.md&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;yarn&quot;,
+    &quot;php.override.implement.member.chooser.php.doc&quot;: &quot;NONE&quot;,
+    &quot;run.code.analysis.last.selected.profile&quot;: &quot;pProject Default&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;settings.php.debug.servers&quot;,
+    &quot;ts.external.directory.path&quot;: &quot;/var/www/hyundai/hyundai-apache8.2/www/kikar/public/bundles/gutenberg/isolated-block-editor-trunk/node_modules/typescript/lib&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
+  }
+}</component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/templates/Blocks" />
+      <recent name="$PROJECT_DIR$/translations" />
+      <recent name="$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/templates/Form" />
+      <recent name="$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/src/Admin/Extension" />
+      <recent name="$PROJECT_DIR$/public/themes/partitech/css" />
+    </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/docs/HowTo" />
+      <recent name="$PROJECT_DIR$/public/themes/partitech/css" />
+      <recent name="$PROJECT_DIR$/assets/app/theme/js" />
+      <recent name="$PROJECT_DIR$/assets/app/theme" />
+      <recent name="$PROJECT_DIR$/assets/app/theme/css" />
+    </key>
+  </component>
+  <component name="RunManager">
+    <configuration name="sonata:extra:translate-content" type="symfony.command" factoryName="Symfony Command" temporary="true">
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-php-predefined-ba97393d7c68-74080bdb84d3-com.jetbrains.php.sharedIndexes-PS-233.11799.297" />
+      </set>
+    </attachedChunks>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="177b351e-864a-4803-8db1-95e8da19813b" name="Changes" comment="" />
+      <created>1683881183144</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1683881183144</updated>
+      <workItem from="1683881186602" duration="626000" />
+      <workItem from="1683883334352" duration="323000" />
+      <workItem from="1683885975671" duration="805000" />
+      <workItem from="1695882251824" duration="6762000" />
+      <workItem from="1695902168856" duration="7263000" />
+      <workItem from="1695978815024" duration="1452000" />
+      <workItem from="1695990238284" duration="19573000" />
+      <workItem from="1696077344453" duration="48213000" />
+      <workItem from="1696404065244" duration="13102000" />
+      <workItem from="1696493156486" duration="20110000" />
+      <workItem from="1696516676140" duration="33576000" />
+      <workItem from="1696672892705" duration="45883000" />
+      <workItem from="1697006478911" duration="30000" />
+      <workItem from="1697193495264" duration="54803000" />
+      <workItem from="1697447981351" duration="21140000" />
+      <workItem from="1697529452126" duration="19231000" />
+      <workItem from="1697553599485" duration="36932000" />
+      <workItem from="1697698908951" duration="17839000" />
+      <workItem from="1697722990935" duration="83090000" />
+      <workItem from="1697989253174" duration="52076000" />
+      <workItem from="1698249883280" duration="46540000" />
+      <workItem from="1698389837531" duration="27766000" />
+      <workItem from="1698470001946" duration="42575000" />
+      <workItem from="1698651547739" duration="18714000" />
+      <workItem from="1698732189240" duration="1632000" />
+      <workItem from="1698733857741" duration="18185000" />
+      <workItem from="1698851591947" duration="15579000" />
+      <workItem from="1698924874945" duration="12527000" />
+      <workItem from="1698999895992" duration="47794000" />
+      <workItem from="1699166228298" duration="26961000" />
+      <workItem from="1699212242000" duration="3838000" />
+      <workItem from="1699343532567" duration="2000" />
+      <workItem from="1699343681953" duration="45877000" />
+      <workItem from="1699443112634" duration="42319000" />
+      <workItem from="1699540443899" duration="7798000" />
+      <workItem from="1699557360246" duration="5285000" />
+      <workItem from="1699601241810" duration="56896000" />
+      <workItem from="1699775906428" duration="21802000" />
+      <workItem from="1699811677773" duration="32380000" />
+      <workItem from="1700030350732" duration="27760000" />
+      <workItem from="1700118701184" duration="22164000" />
+      <workItem from="1700160211918" duration="30969000" />
+      <workItem from="1700289794104" duration="1914000" />
+      <workItem from="1700291998297" duration="28659000" />
+      <workItem from="1700380873374" duration="139126000" />
+      <workItem from="1700728609309" duration="29636000" />
+      <workItem from="1700898416710" duration="59018000" />
+      <workItem from="1701179184210" duration="41886000" />
+      <workItem from="1701421858453" duration="10074000" />
+      <workItem from="1701619463703" duration="6546000" />
+      <workItem from="1701628389577" duration="31537000" />
+      <workItem from="1701763764277" duration="24833000" />
+      <workItem from="1701946390271" duration="652000" />
+      <workItem from="1701947072858" duration="11953000" />
+      <workItem from="1702024871444" duration="17782000" />
+      <workItem from="1702305360833" duration="7630000" />
+      <workItem from="1702367965573" duration="9729000" />
+      <workItem from="1702392601499" duration="4532000" />
+      <workItem from="1702453737135" duration="12011000" />
+      <workItem from="1702648016053" duration="5000" />
+      <workItem from="1702720370889" duration="5441000" />
+      <workItem from="1702891054398" duration="646000" />
+    </task>
+    <task id="LOCAL-00204" summary="Correct route list in page admin">
+      <option name="closed" value="true" />
+      <created>1701693455814</created>
+      <option name="number" value="00204" />
+      <option name="presentableId" value="LOCAL-00204" />
+      <option name="project" value="LOCAL" />
+      <updated>1701693455815</updated>
+    </task>
+    <task id="LOCAL-00205" summary="Correct blocks and translations">
+      <option name="closed" value="true" />
+      <created>1701697004198</created>
+      <option name="number" value="00205" />
+      <option name="presentableId" value="LOCAL-00205" />
+      <option name="project" value="LOCAL" />
+      <updated>1701697004198</updated>
+    </task>
+    <task id="LOCAL-00206" summary="Correct blocks and translations">
+      <option name="closed" value="true" />
+      <created>1701715483229</created>
+      <option name="number" value="00206" />
+      <option name="presentableId" value="LOCAL-00206" />
+      <option name="project" value="LOCAL" />
+      <updated>1701715483229</updated>
+    </task>
+    <task id="LOCAL-00207" summary="db">
+      <option name="closed" value="true" />
+      <created>1701715518255</created>
+      <option name="number" value="00207" />
+      <option name="presentableId" value="LOCAL-00207" />
+      <option name="project" value="LOCAL" />
+      <updated>1701715518256</updated>
+    </task>
+    <task id="LOCAL-00208" summary="Correct documentation + add markdown video extension">
+      <option name="closed" value="true" />
+      <created>1701809595524</created>
+      <option name="number" value="00208" />
+      <option name="presentableId" value="LOCAL-00208" />
+      <option name="project" value="LOCAL" />
+      <updated>1701809595524</updated>
+    </task>
+    <task id="LOCAL-00209" summary="Correct documentation + add markdown video extension">
+      <option name="closed" value="true" />
+      <created>1701809647077</created>
+      <option name="number" value="00209" />
+      <option name="presentableId" value="LOCAL-00209" />
+      <option name="project" value="LOCAL" />
+      <updated>1701809647077</updated>
+    </task>
+    <task id="LOCAL-00210" summary="inproved markdown editor">
+      <option name="closed" value="true" />
+      <created>1701849955156</created>
+      <option name="number" value="00210" />
+      <option name="presentableId" value="LOCAL-00210" />
+      <option name="project" value="LOCAL" />
+      <updated>1701849955156</updated>
+    </task>
+    <task id="LOCAL-00211" summary="export db, correct translation markdown, add domain modification on import on prod">
+      <option name="closed" value="true" />
+      <created>1701957673935</created>
+      <option name="number" value="00211" />
+      <option name="presentableId" value="LOCAL-00211" />
+      <option name="project" value="LOCAL" />
+      <updated>1701957673936</updated>
+    </task>
+    <task id="LOCAL-00212" summary="add favicon">
+      <option name="closed" value="true" />
+      <created>1701958568992</created>
+      <option name="number" value="00212" />
+      <option name="presentableId" value="LOCAL-00212" />
+      <option name="project" value="LOCAL" />
+      <updated>1701958568992</updated>
+    </task>
+    <task id="LOCAL-00213" summary="remove lazy ghost objects on prod">
+      <option name="closed" value="true" />
+      <created>1701966227874</created>
+      <option name="number" value="00213" />
+      <option name="presentableId" value="LOCAL-00213" />
+      <option name="project" value="LOCAL" />
+      <updated>1701966227874</updated>
+    </task>
+    <task id="LOCAL-00214" summary="correct revision table name + optimize export">
+      <option name="closed" value="true" />
+      <created>1702025894593</created>
+      <option name="number" value="00214" />
+      <option name="presentableId" value="LOCAL-00214" />
+      <option name="project" value="LOCAL" />
+      <updated>1702025894594</updated>
+    </task>
+    <task id="LOCAL-00215" summary="add reset opcache on import database">
+      <option name="closed" value="true" />
+      <created>1702026016430</created>
+      <option name="number" value="00215" />
+      <option name="presentableId" value="LOCAL-00215" />
+      <option name="project" value="LOCAL" />
+      <updated>1702026016430</updated>
+    </task>
+    <task id="LOCAL-00216" summary="update db">
+      <option name="closed" value="true" />
+      <created>1702026526879</created>
+      <option name="number" value="00216" />
+      <option name="presentableId" value="LOCAL-00216" />
+      <option name="project" value="LOCAL" />
+      <updated>1702026526879</updated>
+    </task>
+    <task id="LOCAL-00217" summary="correct import content from template + add VN translation for blog">
+      <option name="closed" value="true" />
+      <created>1702031881022</created>
+      <option name="number" value="00217" />
+      <option name="presentableId" value="LOCAL-00217" />
+      <option name="project" value="LOCAL" />
+      <updated>1702031881023</updated>
+    </task>
+    <task id="LOCAL-00218" summary="Correct import/export translation template">
+      <option name="closed" value="true" />
+      <created>1702039107669</created>
+      <option name="number" value="00218" />
+      <option name="presentableId" value="LOCAL-00218" />
+      <option name="project" value="LOCAL" />
+      <updated>1702039107669</updated>
+    </task>
+    <task id="LOCAL-00219" summary="Correction Class pour le menu IA">
+      <option name="closed" value="true" />
+      <created>1702042411992</created>
+      <option name="number" value="00219" />
+      <option name="presentableId" value="LOCAL-00219" />
+      <option name="project" value="LOCAL" />
+      <updated>1702042411992</updated>
+    </task>
+    <task id="LOCAL-00220" summary="Database">
+      <option name="closed" value="true" />
+      <created>1702042697854</created>
+      <option name="number" value="00220" />
+      <option name="presentableId" value="LOCAL-00220" />
+      <option name="project" value="LOCAL" />
+      <updated>1702042697854</updated>
+    </task>
+    <task id="LOCAL-00221" summary="change interface size&#10;correct Article list in blogArticleCategory">
+      <option name="closed" value="true" />
+      <created>1702106957588</created>
+      <option name="number" value="00221" />
+      <option name="presentableId" value="LOCAL-00221" />
+      <option name="project" value="LOCAL" />
+      <updated>1702106957588</updated>
+    </task>
+    <task id="LOCAL-00222" summary="Correct menu size + import script">
+      <option name="closed" value="true" />
+      <created>1702109223974</created>
+      <option name="number" value="00222" />
+      <option name="presentableId" value="LOCAL-00222" />
+      <option name="project" value="LOCAL" />
+      <updated>1702109223974</updated>
+    </task>
+    <task id="LOCAL-00223" summary="Correct menu size + import script">
+      <option name="closed" value="true" />
+      <created>1702110602959</created>
+      <option name="number" value="00223" />
+      <option name="presentableId" value="LOCAL-00223" />
+      <option name="project" value="LOCAL" />
+      <updated>1702110602959</updated>
+    </task>
+    <task id="LOCAL-00224" summary="documentation gdpr">
+      <option name="closed" value="true" />
+      <created>1702112150127</created>
+      <option name="number" value="00224" />
+      <option name="presentableId" value="LOCAL-00224" />
+      <option name="project" value="LOCAL" />
+      <updated>1702112150127</updated>
+    </task>
+    <task id="LOCAL-00225" summary="correct import">
+      <option name="closed" value="true" />
+      <created>1702307343324</created>
+      <option name="number" value="00225" />
+      <option name="presentableId" value="LOCAL-00225" />
+      <option name="project" value="LOCAL" />
+      <updated>1702307343324</updated>
+    </task>
+    <task id="LOCAL-00226" summary="correct markdown display">
+      <option name="closed" value="true" />
+      <created>1702309476807</created>
+      <option name="number" value="00226" />
+      <option name="presentableId" value="LOCAL-00226" />
+      <option name="project" value="LOCAL" />
+      <updated>1702309476807</updated>
+    </task>
+    <task id="LOCAL-00227" summary="correct markdown display">
+      <option name="closed" value="true" />
+      <created>1702309722196</created>
+      <option name="number" value="00227" />
+      <option name="presentableId" value="LOCAL-00227" />
+      <option name="project" value="LOCAL" />
+      <updated>1702309722196</updated>
+    </task>
+    <task id="LOCAL-00228" summary="correct seo proposal on page">
+      <option name="closed" value="true" />
+      <created>1702316019140</created>
+      <option name="number" value="00228" />
+      <option name="presentableId" value="LOCAL-00228" />
+      <option name="project" value="LOCAL" />
+      <updated>1702316019140</updated>
+    </task>
+    <task id="LOCAL-00229" summary="increase font">
+      <option name="closed" value="true" />
+      <created>1702322085853</created>
+      <option name="number" value="00229" />
+      <option name="presentableId" value="LOCAL-00229" />
+      <option name="project" value="LOCAL" />
+      <updated>1702322085853</updated>
+    </task>
+    <task id="LOCAL-00230" summary="increase font">
+      <option name="closed" value="true" />
+      <created>1702322422268</created>
+      <option name="number" value="00230" />
+      <option name="presentableId" value="LOCAL-00230" />
+      <option name="project" value="LOCAL" />
+      <updated>1702322422269</updated>
+    </task>
+    <task id="LOCAL-00231" summary="change layout">
+      <option name="closed" value="true" />
+      <created>1702368177172</created>
+      <option name="number" value="00231" />
+      <option name="presentableId" value="LOCAL-00231" />
+      <option name="project" value="LOCAL" />
+      <updated>1702368177173</updated>
+    </task>
+    <task id="LOCAL-00232" summary="change layout">
+      <option name="closed" value="true" />
+      <created>1702370298860</created>
+      <option name="number" value="00232" />
+      <option name="presentableId" value="LOCAL-00232" />
+      <option name="project" value="LOCAL" />
+      <updated>1702370298860</updated>
+    </task>
+    <task id="LOCAL-00233" summary="différence de bold / manque de bold sur ls page IA">
+      <option name="closed" value="true" />
+      <created>1702393644862</created>
+      <option name="number" value="00233" />
+      <option name="presentableId" value="LOCAL-00233" />
+      <option name="project" value="LOCAL" />
+      <updated>1702393644863</updated>
+    </task>
+    <task id="LOCAL-00234" summary="correction adresse">
+      <option name="closed" value="true" />
+      <created>1702394202802</created>
+      <option name="number" value="00234" />
+      <option name="presentableId" value="LOCAL-00234" />
+      <option name="project" value="LOCAL" />
+      <updated>1702394202802</updated>
+    </task>
+    <task id="LOCAL-00235" summary="Correction textarea contact">
+      <option name="closed" value="true" />
+      <created>1702395438264</created>
+      <option name="number" value="00235" />
+      <option name="presentableId" value="LOCAL-00235" />
+      <option name="project" value="LOCAL" />
+      <updated>1702395438264</updated>
+    </task>
+    <task id="LOCAL-00236" summary="GTM">
+      <option name="closed" value="true" />
+      <created>1702453781720</created>
+      <option name="number" value="00236" />
+      <option name="presentableId" value="LOCAL-00236" />
+      <option name="project" value="LOCAL" />
+      <updated>1702453781720</updated>
+    </task>
+    <task id="LOCAL-00237" summary="add GTM CSP">
+      <option name="closed" value="true" />
+      <created>1702455599987</created>
+      <option name="number" value="00237" />
+      <option name="presentableId" value="LOCAL-00237" />
+      <option name="project" value="LOCAL" />
+      <updated>1702455599987</updated>
+    </task>
+    <task id="LOCAL-00238" summary="add GTM CSP">
+      <option name="closed" value="true" />
+      <created>1702455648294</created>
+      <option name="number" value="00238" />
+      <option name="presentableId" value="LOCAL-00238" />
+      <option name="project" value="LOCAL" />
+      <updated>1702455648294</updated>
+    </task>
+    <task id="LOCAL-00239" summary="add gtag datalayer">
+      <option name="closed" value="true" />
+      <created>1702465996501</created>
+      <option name="number" value="00239" />
+      <option name="presentableId" value="LOCAL-00239" />
+      <option name="project" value="LOCAL" />
+      <updated>1702465996501</updated>
+    </task>
+    <task id="LOCAL-00240" summary="add gtag datalayer">
+      <option name="closed" value="true" />
+      <created>1702466089736</created>
+      <option name="number" value="00240" />
+      <option name="presentableId" value="LOCAL-00240" />
+      <option name="project" value="LOCAL" />
+      <updated>1702466089737</updated>
+    </task>
+    <task id="LOCAL-00241" summary="add missing medias">
+      <option name="closed" value="true" />
+      <created>1702469489075</created>
+      <option name="number" value="00241" />
+      <option name="presentableId" value="LOCAL-00241" />
+      <option name="project" value="LOCAL" />
+      <updated>1702469489075</updated>
+    </task>
+    <task id="LOCAL-00242" summary="add missing medias">
+      <option name="closed" value="true" />
+      <created>1702469911140</created>
+      <option name="number" value="00242" />
+      <option name="presentableId" value="LOCAL-00242" />
+      <option name="project" value="LOCAL" />
+      <updated>1702469911140</updated>
+    </task>
+    <task id="LOCAL-00243" summary="add missing medias">
+      <option name="closed" value="true" />
+      <created>1702470018463</created>
+      <option name="number" value="00243" />
+      <option name="presentableId" value="LOCAL-00243" />
+      <option name="project" value="LOCAL" />
+      <updated>1702470018463</updated>
+    </task>
+    <task id="LOCAL-00244" summary="Title contact">
+      <option name="closed" value="true" />
+      <created>1702471686168</created>
+      <option name="number" value="00244" />
+      <option name="presentableId" value="LOCAL-00244" />
+      <option name="project" value="LOCAL" />
+      <updated>1702471686168</updated>
+    </task>
+    <task id="LOCAL-00245" summary="Title blog">
+      <option name="closed" value="true" />
+      <created>1702472537623</created>
+      <option name="number" value="00245" />
+      <option name="presentableId" value="LOCAL-00245" />
+      <option name="project" value="LOCAL" />
+      <updated>1702472537624</updated>
+    </task>
+    <task id="LOCAL-00246" summary="Correct article creation">
+      <option name="closed" value="true" />
+      <created>1702474451465</created>
+      <option name="number" value="00246" />
+      <option name="presentableId" value="LOCAL-00246" />
+      <option name="project" value="LOCAL" />
+      <updated>1702474451465</updated>
+    </task>
+    <task id="LOCAL-00247" summary="Correct article deletion">
+      <option name="closed" value="true" />
+      <created>1702475612845</created>
+      <option name="number" value="00247" />
+      <option name="presentableId" value="LOCAL-00247" />
+      <option name="project" value="LOCAL" />
+      <updated>1702475612845</updated>
+    </task>
+    <task id="LOCAL-00248" summary="Correct article deletion">
+      <option name="closed" value="true" />
+      <created>1702477055469</created>
+      <option name="number" value="00248" />
+      <option name="presentableId" value="LOCAL-00248" />
+      <option name="project" value="LOCAL" />
+      <updated>1702477055469</updated>
+    </task>
+    <task id="LOCAL-00249" summary="Correct CSP headers">
+      <option name="closed" value="true" />
+      <created>1702477587919</created>
+      <option name="number" value="00249" />
+      <option name="presentableId" value="LOCAL-00249" />
+      <option name="project" value="LOCAL" />
+      <updated>1702477587919</updated>
+    </task>
+    <task id="LOCAL-00250" summary="Prevent item to be cloned multiple time.">
+      <option name="closed" value="true" />
+      <created>1702722505836</created>
+      <option name="number" value="00250" />
+      <option name="presentableId" value="LOCAL-00250" />
+      <option name="project" value="LOCAL" />
+      <updated>1702722505836</updated>
+    </task>
+    <task id="LOCAL-00251" summary="correct display">
+      <option name="closed" value="true" />
+      <created>1702805662141</created>
+      <option name="number" value="00251" />
+      <option name="presentableId" value="LOCAL-00251" />
+      <option name="project" value="LOCAL" />
+      <updated>1702805662141</updated>
+    </task>
+    <task id="LOCAL-00252" summary="Add index.md">
+      <option name="closed" value="true" />
+      <created>1702886325306</created>
+      <option name="number" value="00252" />
+      <option name="presentableId" value="LOCAL-00252" />
+      <option name="project" value="LOCAL" />
+      <updated>1702886325306</updated>
+    </task>
+    <option name="localTasksCounter" value="253" />
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.History.Properties">
+    <option name="COLUMN_ID_ORDER">
+      <list>
+        <option value="Default.Root" />
+        <option value="Default.Author" />
+        <option value="Default.Date" />
+        <option value="Default.Subject" />
+        <option value="Space.CommitStatus" />
+      </list>
+    </option>
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="OPEN_GENERIC_TABS">
+      <map>
+        <entry key="7fba5b94-3502-4944-862f-660ee7b60113" value="TOOL_WINDOW" />
+        <entry key="a66cdf6e-396f-43eb-8c0f-e9f86bb420dd" value="TOOL_WINDOW" />
+      </map>
+    </option>
+    <option name="TAB_STATES">
+      <map>
+        <entry key="7fba5b94-3502-4944-862f-660ee7b60113">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="structure">
+                    <value>
+                      <list>
+                        <option value="dir:/var/www/hyundai/hyundai-apache8.2/www/sonata-extra/assets/app/theme/css" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+            </State>
+          </value>
+        </entry>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+        <entry key="a66cdf6e-396f-43eb-8c0f-e9f86bb420dd">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="branch">
+                    <value>
+                      <list>
+                        <option value="HEAD" />
+                      </list>
+                    </value>
+                  </entry>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+              <option name="SHOW_ONLY_AFFECTED_CHANGES" value="true" />
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+  <component name="VcsManagerConfiguration">
+    <option name="CHECK_CODE_SMELLS_BEFORE_PROJECT_COMMIT" value="false" />
+    <option name="CHECK_NEW_TODO" value="false" />
+    <option name="ADD_EXTERNAL_FILES_SILENTLY" value="true" />
+    <MESSAGE value="Correction Class pour le menu IA" />
+    <MESSAGE value="Database" />
+    <MESSAGE value="change interface size&#10;correct Article list in blogArticleCategory" />
+    <MESSAGE value="Correct menu size + import script" />
+    <MESSAGE value="documentation gdpr" />
+    <MESSAGE value="correct import" />
+    <MESSAGE value="correct markdown display" />
+    <MESSAGE value="correct seo proposal on page" />
+    <MESSAGE value="increase font" />
+    <MESSAGE value="change layout" />
+    <MESSAGE value="différence de bold / manque de bold sur ls page IA" />
+    <MESSAGE value="correction adresse" />
+    <MESSAGE value="Correction textarea contact" />
+    <MESSAGE value="GTM" />
+    <MESSAGE value="add GTM CSP" />
+    <MESSAGE value="add gtag datalayer" />
+    <MESSAGE value="add missing medias" />
+    <MESSAGE value="Title contact" />
+    <MESSAGE value="Title blog" />
+    <MESSAGE value="Correct article creation" />
+    <MESSAGE value="Correct article deletion" />
+    <MESSAGE value="Correct CSP headers" />
+    <MESSAGE value="Prevent item to be cloned multiple time." />
+    <MESSAGE value="correct display" />
+    <MESSAGE value="Add index.md" />
+    <option name="LAST_COMMIT_MESSAGE" value="Add index.md" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/vendor/prodigious/sonata-menu-bundle/Admin/MenuAdmin.php</url>
+          <line>4</line>
+          <option name="timeStamp" value="2" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" log-message="true" suspend="NONE" type="php">
+          <url>file://$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/src/Service/CodeExtractor.php</url>
+          <option name="timeStamp" value="26" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/templates/Admin/media/custom_edit.html.twig</url>
+          <option name="timeStamp" value="27" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/vendor/doctrine/dbal/src/Connection.php</url>
+          <line>1937</line>
+          <option name="timeStamp" value="29" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="php">
+          <url>file://$PROJECT_DIR$/Bundles/Partitech/SonataExtraBundle/src/Service/TranslateObjectService.php</url>
+          <line>166</line>
+          <option name="timeStamp" value="30" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

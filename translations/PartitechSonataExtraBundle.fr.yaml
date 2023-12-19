@@ -102,6 +102,9 @@ sonata-extra:
     header_list_label: "Traductions"
 
   block_contact:
+    recaptcha: "Activer recaptcha V3"
+    recaptcha_site_key: "Recaptcha clef site"
+    recaptcha_site_secret: "Recaptcha clef secret"
     title: "Titre"
     first_name: "Prénom"
     use_field_first_name: "Utiliser le champ prénom"
