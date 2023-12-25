@@ -108,6 +108,10 @@ The implementation will add icons for the locales `from sonata_page` sites, enab
 - Create a tranlsation from a local patern
   ![Multilanguage_create_translation.png](./doc-sonata-extra-images/Multilanguage_create_translation.png)
 
+### Firewall
+Provides an enhanced set of functionalities for managing firewall rules within the Sonata Admin environment. This bundle allows administrators to create and manage rules for filtering requests based on various criteria like stop words, IP addresses, and User Agents.
+- Documentation : [firewall.md](./firewall.md)
+
 ### Integration with PrestaSitemapBundle
 Our application automatically integrates with the "PrestaSitemapBundle" to generate a `sitemap.xml` file. This feature encompasses all image assets, article modules, and content pages within the application. The process is entirely automated and includes support for multilingual links.
 - Documentation : [sitemap.md](./sitemap.md)

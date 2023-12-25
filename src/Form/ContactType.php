@@ -84,7 +84,7 @@ class ContactType extends AbstractType
                     'attr' => ['rows' => 6]]);
         }
         $builder->add('honeypot', TextType::class, [
-            'label' => '',
+            'label' => ' ',
             'mapped' => false,
             'required' => false,
             'attr' => ['style' => 'display:none;']

@@ -1,0 +1,13 @@
+{% if field_description.name=='parameters' %}
+<td>
+    <ul>
+    {% for value in object.parameters %}
+        <li>
+            {{ value  }}
+        </li>
+    {% endfor %}
+    </ul>
+</td>
+
+
+{% endif %}

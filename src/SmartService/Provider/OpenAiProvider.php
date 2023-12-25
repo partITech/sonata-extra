@@ -432,7 +432,7 @@ class OpenAiProvider implements SmartServiceProviderInterface
         When you have a query you are fast, precise. From the text above, i need you to send me back some SEO informations. Values should be  in the same language than the text but format should remain the same as below. Current language is '$locale' locale :"."\r\n";
         $prompt.= "1. Excerpt 400 char max: \r\n";
         $prompt.= "2. SEO title: \r\n";
-        $prompt.= "3. SEO description: \r\n";
+        $prompt.= "3. SEO description 255 char max: \r\n";
         $prompt.= "4. SEO keywords: \r\n";
         $prompt.= "5. SLUG: \r\n\r\n";
         $prompt.= "Here is the text to analyse: \r\n";
@@ -469,17 +469,7 @@ class OpenAiProvider implements SmartServiceProviderInterface
             'slug' => '',
         ];
 
-        /*$pattern = '/1\. Excerpt 400 char max:\s*(.*?)\s*2\. SEO title:\s*(.*?)\s*3\. SEO description:\s*(.*?)\s*4\. SEO keywords:\s*(.*?)\s*5\. SLUG:\s*(.*?)\s*$/s';
 
-        if (preg_match($pattern, $responseData, $matches)) {
-            $data['excerpt'] = $this->removeDoubleQuotes(trim($matches[1]));
-            $data['seo_title'] = $this->removeDoubleQuotes(trim($matches[2]));
-            $data['seo_description'] = $this->removeDoubleQuotes(trim($matches[3]));
-            $data['seo_keywords'] = $this->removeDoubleQuotes(trim($matches[4]));
-            $data['slug'] = $this->removeDoubleQuotes(trim($matches[5]));
-        } else {
-            $data['error']="no message found";
-        }*/
         $lines = explode("\n", $responseData);
         $currentKey = '';
 

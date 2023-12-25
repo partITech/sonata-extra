@@ -283,10 +283,14 @@ class DoctrineActivityListener
 
             if ($oldValue instanceof \DateTime) {
                 $oldValue = $oldValue->format('Y-m-d H:i:s');
+            }elseif(is_array($oldValue)){
+                $oldValue=json_encode($oldValue);
             }
 
             if ($newValue instanceof \DateTime) {
                 $newValue = $newValue->format('Y-m-d H:i:s');
+            }elseif(is_array($newValue)){
+                $newValue=json_encode($newValue);
             } elseif (is_object($newValue)) {
                 $entity_serialized = $this->serializer->serialize($newValue, 'json');
                 $entity_decoded = json_decode($entity_serialized);
