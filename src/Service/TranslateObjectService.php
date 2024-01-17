@@ -295,7 +295,7 @@ class TranslateObjectService
                     $className = $this->TranslationCreateTemplateService->getClassNameByObject($object);
                     $translationProvider->createTemplateFromArray($className,$object->getId(), $translate_array, $this->site);
                 }else{
-                    $translation = $translationProvider->translateArray($translate_array, $this->site);
+                    $translation = $translationProvider->translateArray($translate_array, $this->site->getLocale());
                     // Set the translated string to the cloned object properties.
                     if ($translation) {
                         foreach ($translation as $propertyName => $newValue) {

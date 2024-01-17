@@ -171,28 +171,35 @@ class OpenAiProvider implements SmartServiceProviderInterface
         $CodeExtractor=new CodeExtractor;
         $cleanedHtml=$CodeExtractor->extractCodeBlocks( $html);
 
+        $fragments = $CodeExtractor->splitHtml($cleanedHtml, 3500);
 
-        $endpoint = $this->getEndpoint();
+        foreach ($fragments as $fragment) {
+            try {
+                $endpoint = $this->getEndpoint();
+                $payload = $this->getPayloadHtml($fragment, $targetLanguage);
+                $response = $this->client->post($endpoint, [
+                    'headers' => [
+                        'Authorization' => 'Bearer ' . $this->apiKey,
+                        'Content-Type' => 'application/json',
+                    ],
+                    'json' => $payload,
+                ]);
+                $body = $response->getBody();
+                $result = json_decode($body, true);
+                $this->logger->critical('Result :');
+                $this->logger->critical($body);
+                $translated_html=$this->extractTranslation($result);
+                $translatedFragments[]= $this->removeSpecialTags($translated_html);
+            } catch (\Exception $e) {
+                $this->logger->critical('Error during translation: ' . $e->getMessage());
+                // En cas d'erreur, ajouter le fragment original au lieu du traduit
+                $translatedFragments[] = "\r\n ### untranslated ###\r\n".$fragment."\r\n ### end untranslated ###\r\n";
+            }
+        }
 
-        $payload = $this->getPayloadHtml($cleanedHtml, $targetLanguage);
+        $translated_fragments=implode('', $translatedFragments);
 
-        $response = $this->client->post($endpoint, [
-            'headers' => [
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ],
-            'json' => $payload,
-        ]);
-
-        $body = $response->getBody();
-
-        $result = json_decode($body, true);
-
-        $this->logger->critical('Result :');
-        $this->logger->critical($body);
-        $translated_html=$this->extractTranslation($result);
-        $translated_html= $this->removeSpecialTags($translated_html);
-        $cleanedHtml=$CodeExtractor->replaceCodeBlocks($translated_html);
+        $cleanedHtml=$CodeExtractor->replaceCodeBlocks($translated_fragments);
         return $cleanedHtml;
     }
 
@@ -267,7 +274,6 @@ class OpenAiProvider implements SmartServiceProviderInterface
         $prompt.="Here is the translation string you need to translate into '{$targetLanguage}' locale language : ". "\r\n";
         $prompt.= $text. "\r\n";
 
-        
 
         $this->logger->critical('Prompt : ');
         $this->logger->critical($prompt);
@@ -518,4 +524,6 @@ class OpenAiProvider implements SmartServiceProviderInterface
 
         return $data;
     }
+
+
 }

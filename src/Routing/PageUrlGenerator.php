@@ -53,7 +53,9 @@ class PageUrlGenerator
             $site = $parameters['site'];
             unset($parameters['site']);
             $site_locale = $site->getLocale();
-
+            /*if(get_class($entity)=='Partitech\SonataExtra\Entity\Article') {
+                dump($route_name);
+            }*/
             if ($this->routeExists($name . '_' . $site_locale)) {
                 $name = $name.'_' . $site_locale;
             }
@@ -101,6 +103,8 @@ class PageUrlGenerator
 
     public function routeExists(string $routeName): bool
     {
+        /*dump($routeName);
+        dump($this->router->getRouteCollection()->get($routeName));*/
         return $this->router->getRouteCollection()->get($routeName) !== null;
     }
 
