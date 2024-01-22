@@ -92,18 +92,23 @@ class Article
     private $featured_image;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Translatable]
     private ?string $seo_title = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Translatable]
     private ?string $seo_keywords = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Translatable]
     private ?string $seo_description = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[Translatable]
     private ?string $seo_og_title = null;
 
     #[ORM\Column(type: 'text', nullable: true)]
+    #[Translatable]
     private ?string $seo_og_description = null;
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]

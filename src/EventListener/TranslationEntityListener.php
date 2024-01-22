@@ -47,7 +47,6 @@ readonly class TranslationEntityListener
             $site_array[$site->getId()]=$site;
         }
 
-
         // get all the translations related to this entity
         $translations = $objectManager->getRepository(get_class($entity))
             ->createQueryBuilder('e')
@@ -58,7 +57,6 @@ readonly class TranslationEntityListener
             ->getResult();
         //check if has a default one
         $defaultTranslation=false;
-
         foreach ($translations as $translation) {
             if(method_exists($translation, 'getIsDefault') && $translation->getIsDefault()){
                 $defaultTranslation=$translation;
@@ -71,7 +69,6 @@ readonly class TranslationEntityListener
         foreach ($translations as $translation) {
 
             if (!empty($translation->getSite())) {
-
                 $locales[$translation->getSite()->getId()]['entity_id'] = $translation->getId();
 
                 if (!empty($baseRouteName) && !$this->isPage($entity)) {
@@ -80,23 +77,17 @@ readonly class TranslationEntityListener
 
                         $routeVariables = $this->PageUrlGenerator->createRouteVariableValue($translation, $route_name);
                         $routeVariables = array_merge($routeVariables, ['site' => $translation->getSite(), 'currentSite' => $current_site]);
-
                         try{
                             $url = $this->PageUrlGenerator->generate($route_name, $routeVariables, UrlGeneratorInterface::ABSOLUTE_URL);
                             $locales[$translation->getSite()->getId()]['routes'][$route_name] = $url;
-                            if(get_class($entity)=='Partitech\SonataExtra\Entity\Article') {
-                                dump($url);
-                            }
                         }catch (\Exception $exception){ }
                     }
-
                 } else {
                     if ($this->isPage($entity) && $entity->getRouteName() == 'page_slug' /*&& empty($baseRouteName)*/) {
                             $url = $this->PageUrlGenerator->generate($entity->getRouteName(), ['url' => $translation->getUrl(), 'site' => $translation->getSite(), 'currentSite' => $current_site], UrlGeneratorInterface::ABSOLUTE_URL);
                             $locales[$translation->getSite()->getId()]['routes'][$entity->getRouteName()] = $url;
                         /*if ($entity->getRouteName() == 'page_slug') {}*/
                     }else{
-
                         foreach ($baseRouteName as $route_name) {
 
                             $routeVariables = $this->PageUrlGenerator->createRouteVariableValue($translation, $route_name);
@@ -135,10 +126,7 @@ readonly class TranslationEntityListener
 
 
         $entity->setTranslations($locales);
-        if(get_class($entity)=='Partitech\SonataExtra\Entity\Article') {
-            dd($entity);
 
-        }
     }
 
 
