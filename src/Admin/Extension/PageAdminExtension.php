@@ -34,7 +34,7 @@ class PageAdminExtension extends AbstractAdminExtension
     ) {
         $this->parameterBag  = $parameterBag;
         $this->entityManager = $entityManager;
-        $this->mediaManager  = $mediaManager
+        $this->mediaManager  = $mediaManager;
     }
 
     
