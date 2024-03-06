@@ -1,6 +1,7 @@
 parameters:
 
 
+
 services:
   _defaults:
     autowire: true
@@ -154,3 +155,7 @@ services:
     tags:
       - { name: kernel.event_listener, event: kernel.response }
 
+
+ #  Partitech\SonataExtra\EventSubscriber\SerializerSubscriber:
+      #   tags:
+  #     - { name: 'jms_serializer.event_subscriber' }

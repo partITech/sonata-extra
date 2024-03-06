@@ -15,7 +15,7 @@ use Partitech\SonataExtra\Contract\UserInterface;
 use Partitech\SonataExtra\Enum\ArticleStatus;
 use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 use Partitech\SonataExtra\Attribute\Translatable;
-
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\EditorRepository')]
 #[ORM\Table(name: 'sonata_extra__editor')]
@@ -48,6 +48,8 @@ class Editor
     private string $type_editor = 'textarea';
 
     #[ORM\OneToMany(mappedBy: 'editor', targetEntity: 'EditorRevision', cascade: ['persist', 'remove'])]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $revisions;
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]

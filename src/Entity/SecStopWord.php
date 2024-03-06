@@ -3,6 +3,7 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\SecStopWordRepository;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SecStopWordRepository::class)]
 #[ORM\Table(name: 'sonata_extra__sec_stop_word')]

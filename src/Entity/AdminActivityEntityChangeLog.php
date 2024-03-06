@@ -3,6 +3,7 @@
 namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\AdminActivityEntityChangeLogRepository')]
 #[ORM\Table(name: 'sonata_extra__admin_activity_change_log')]

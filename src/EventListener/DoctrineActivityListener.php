@@ -23,6 +23,14 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
+use Symfony\Component\Serializer\Serializer;
+use Symfony\Component\Serializer\Encoder\JsonEncoder;
+use Symfony\Component\Serializer\Normalizer\ObjectNormalizer;
+use Symfony\Component\Serializer\Normalizer\AbstractNormalizer;
+
+
+use JMS\Serializer\SerializationContext;
+
 class DoctrineActivityListener
 {
     private TokenStorageInterface $tokenStorage;
@@ -133,7 +141,9 @@ class DoctrineActivityListener
         $objectManager = $args->getObjectManager();
 
         if ($this->isAdmin()) {
+
             $adminLogId=$this->logActivity('update', $entity, $objectManager);
+
             $changeSet = $args->getEntityChangeSet($entity);
             $this->logChangeSet('update', $objectManager, $changeSet, $entity, $adminLogId);
 
@@ -353,18 +363,30 @@ class DoctrineActivityListener
         if ($hasToken) {
             $approvalStatus = 2; // if is a children of the main action then, status is 2
         }
+        //$entity->setType(null);
+        //$entity->setAccount(null);
+        //$entity->setAuthor(null);
+        //$entity->setContact(null);
+        //dd($entity);
+/*echo $this->serializer->serialize($entity, 'json');
+        die();*/
+        //$context = SerializationContext::create()->enableMaxDepthChecks();
+        $json_data=$this->serializer->serialize($entity, 'json');
+        //$json_data='[]';
+        //dd($entity);
+        //dump($json_data);
 
         $sql = '
         INSERT INTO sonata_extra__admin_activity_log (date, action_type, resource, data, user_id, description, approval, token)
         VALUES (:date, :actionType, :resource, :data, :userId, :description, :approval, :token)
     ';
-
+        //dd($this->serializer->serialize($entity, 'json'));
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'date' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
             'actionType' => $actionType,
             'resource' => get_class($entity),
-            'data' => $this->serializer->serialize($entity, 'json'),
+            'data' => $json_data,
             'userId' => $user?->getId(),
             'description' => $description,
             'approval' => $approvalStatus,

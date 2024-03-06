@@ -45,7 +45,7 @@ readonly class ResolveAsAdminAttributes
                 continue;
             }
 
-            if (is_string($arg) && $this->container->has($arg)) {
+            if (is_string($arg) && ($this->container->has($arg) || class_exists($arg))) {
                 $resolvedArgs[] = new Reference($arg);
             } elseif (is_array($arg)) {
                 $resolvedArgs[] = $this->resolveArrayArguments($arg);
@@ -61,7 +61,7 @@ readonly class ResolveAsAdminAttributes
     {
         $resolvedArgs = [];
         foreach ($args as $arg) {
-            $resolvedArgs[] = $this->container->has($arg) ? new Reference($arg) : $arg;
+            $resolvedArgs[] = ($this->container->has($arg) || class_exists($arg)) ? new Reference($arg) : $arg;
         }
 
         return $resolvedArgs;

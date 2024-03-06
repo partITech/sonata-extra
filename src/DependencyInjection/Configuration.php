@@ -41,7 +41,7 @@ class Configuration implements ConfigurationInterface
                 ->scalarNode('seo_provider')->defaultValue('open_ai')->end()
 
             ->arrayNode('providers')
-                        ->useAttributeAsKey('name')  // Utilisez le nom du provider comme clé
+                        ->useAttributeAsKey('name')
                             ->arrayPrototype()
                         ->variablePrototype()->end()  // Autorise des paramètres arbitraires
                         ->end()

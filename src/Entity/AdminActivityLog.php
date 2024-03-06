@@ -6,6 +6,7 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Contract\UserInterface;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Index(columns: ['token'], name: 'token_idx')]
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\AdminActivityLogRepository')]
@@ -35,9 +36,11 @@ class AdminActivityLog
     private $user;  // User entity relation, adjust accordingly
 
     #[ORM\OneToMany(targetEntity: AdminActivityEntityChangeLog::class, mappedBy: 'adminActivityLog')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $entityChangeLogs;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(type: 'boolean', options: ['default' => 0])]
     private bool $approval;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]

@@ -1,0 +1,202 @@
+{% extends get_global_template('edit') %}
+
+{%- block tab_menu -%}
+    {% if action is defined %}
+        {{ knp_menu_render(admin.sidemenu(action), {
+            'currentClass': 'active',
+            'template': '@PartitechSonataExtra/Admin/article/tab_menu_template.html.twig'
+        }, 'twig') }}
+    {% endif %}
+
+{%- endblock -%}
+
+{% block sonata_page_content_header %}
+    {%  set template_list=admin.getTemplateRegistry().templates %}
+    {% if template_list.edit_prepend_page_content_header_template is defined %}
+        {% include template_list.edit_prepend_page_content_header_template with {'admin': admin} %}
+    {% endif %}
+
+    {{ parent() }}
+
+    {% if template_list.edit_append_page_content_header_template is defined %}
+        {% include template_list.edit_append_page_content_header_template with {'admin': admin} %}
+    {% endif %}
+
+{% endblock %}
+
+{% block edit_groups %}
+
+    <div class="row">
+        {% block field_row %}
+            {% for code in groups %}
+                {% set show_group = admin.showgroups[code] %}
+
+                {# configure show_header true|false #}
+                {% if show_group.show_header is defined %}
+                    {% if show_group.show_header == true %}
+                        {% set show_header=true %}
+                    {% else %}
+                        {% set show_header=false %}
+                    {% endif %}
+                {% else %}
+                    {% set show_header=true %}
+                {% endif %}
+
+                {# configure show_header_border true|false #}
+                {% if show_group.show_header_border is defined %}
+                    {% if show_group.show_header_border == true %}
+                        {% set show_header_border=true %}
+                    {% else %}
+                        {% set show_header_border=false %}
+                    {% endif %}
+                {% else %}
+                    {% set show_header_border=true %}
+                {% endif %}
+
+
+
+                <div class="{{ show_group.class|default('col-md-12') }} {{ no_padding|default(false) ? 'nopadding' }}">
+                    <div class="{{ show_group.box_class }}" {% if show_header == false %} style="border-top: 0px"{% endif %}>
+                        {% if show_header == true %}
+
+                            <div class="box-header">
+                                <h4 class="box-title">
+                                    {% block show_title %}
+                                        {% if show_group.translation_domain is defined and show_group.translation_domain is same as(false) %}
+                                            {{ show_group.label }}
+                                        {% else %}
+                                            {{ show_group.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}
+                                        {% endif %}
+                                    {% endblock %}
+                                </h4>
+
+                                <div class="box-tools">
+                                    {% if show_group.header_btn is defined %}
+
+                                        {% for btn in show_group.header_btn %}
+                                            <a
+                                                    href="{% if btn.url is defined %}{{ btn.url }}{% endif %}"
+                                                    class="btn {% if btn.class is defined %}{{ btn.class }}{% else %}btn-primary{% endif %}"
+                                                    {% if btn.target is defined %}target="{{ btn.target }}"{% endif %}
+                                            >
+                                                {% if btn.label is defined %}
+                                                    {{ btn.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}
+                                                {% endif %}
+                                            </a>
+                                        {% endfor %}
+                                    {% endif %}
+
+
+                                    {% if show_group.search_list is defined %}
+                                        {% set search_id='id_' ~ random() %}
+                                        <div class="input-group input-group-sm hidden-xs box-tools" style="width: 200px; float:right;margin-left: 2px;">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn {% if show_group.search_list.class is defined %}{{ show_group.search_list.class }}{% else %}btn-default{% endif %} dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height: 33px;">
+                                                    {% if show_group.search_list.label is defined %}{{ show_group.search_list.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
+                                                    <span class="fa fa-caret-down"></span></button>
+                                                <ul class="dropdown-menu">
+                                                    {% for btn in show_group.search_list.list %}
+                                                        {% if btn.class is defined and btn.class=='divider' %}
+                                                            <li class="divider"></li>
+                                                        {% else %}
+                                                            <li>
+                                                                <a {% if btn.url is defined %}href="{{ btn.url }}" onclick="event.preventDefault(); if(document.getElementById('{{ search_id }}').value.length==0){return void(0);}window.location.href = this.href +document.getElementById('{{ search_id }}').value;"{% endif %} >
+                                                                    {% if btn.label is defined %}{{ btn.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+
+                                                </ul>
+                                            </div>
+
+                                            <input id="{{ search_id }}" type="text" class="form-control {{ search_id }}" style="height: 34px;">
+                                        </div>
+                                    {% endif %}
+                                </div>
+
+
+
+                            </div>
+                        {% endif %}
+
+                        <div class="box-body table-responsive no-padding">
+                            <table class="table">
+                                <tbody>
+                                {% for show_field_name in show_group.fields %}
+                                    {% block show_field %}
+                                        <tr class="sonata-ba-view-container">
+                                            {% if elements[show_field_name] is defined %}
+                                                {{ elements[show_field_name]|render_view_element(object) }}
+                                            {% endif %}
+                                        </tr>
+                                    {% endblock %}
+                                {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        {% endblock %}
+
+    </div>
+{% endblock %}
+
+
+{% block sonata_tab_content %}
+    {% import "@PartitechSonataExtra/Admin/CRUD/base_edit_form_macro.html.twig" as form_helper %}
+    {% set formtabs = admin.getformtabs() %}
+    {% set has_tab = ((formtabs|length == 1 and formtabs|keys[0] != 'default') or formtabs|length > 1 ) %}
+
+    <div class="col-md-12">
+        {% if has_tab %}
+            {% set tab_prefix = 'tab_' ~ admin.uniqid ~ '_' ~ random() %}
+            {% set tab_query_index = app.request.query.get('_tab', 0)|split("_")|last %}
+            <div class="nav-tabs-custom">
+                <ul class="nav nav-tabs" role="tablist">
+                    {% for name, form_tab in formtabs %}
+                        {% set _tab_name = tab_prefix ~ '_' ~ loop.index %}
+                        <li{% if (not app.request.query.has('_tab') and loop.index == 1) or (tab_query_index == loop.index) %} class="active"{% endif %}>
+                            <a href="#{{ _tab_name }}" class="changer-tab" aria-controls="{{ _tab_name }}" data-toggle="tab">
+                                <i class="fas fa-exclamation-circle has-errors hide" aria-hidden="true"></i>
+                                {% if form_tab.translation_domain is defined and form_tab.translation_domain is same as(false) %}
+                                    {{ form_tab.label }}
+                                {% else %}
+                                    {{ form_tab.label|trans({}, form_tab.translation_domain ?? admin.translationDomain) }}
+                                {% endif %}
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="tab-content">
+                    {% for code, form_tab in formtabs %}
+                        {% set _tab_name = tab_prefix ~ '_' ~ loop.index %}
+                        <div
+                                class="tab-pane fade{% if (not app.request.query.has('_tab') and loop.first) or (tab_query_index == loop.index) %} in active{% endif %}"
+                                id="{{ _tab_name }}"
+                        >
+                            <div class="box-body  container-fluid">
+                                <div class="sonata-ba-collapsed-fields">
+                                    {% if form_tab.description != false %}
+                                        {% if form_tab.translation_domain is defined and form_tab.translation_domain is same as(false) %}
+                                            <p>{{ form_tab.description|raw }}</p>
+                                        {% else %}
+                                            <p>{{ form_tab.description|trans({}, form_tab.translation_domain ?? admin.translationDomain)|raw }}</p>
+                                        {% endif %}
+                                    {% endif %}
+
+                                    {{ form_helper.render_groups(admin, form, form_tab['groups'], has_tab) }}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="_tab" value="{{ app.request.query.get('_tab') }}">
+            </div>
+        {% elseif formtabs['default'] is defined %}
+            {{ form_helper.render_groups(admin, form, formtabs['default'].groups, has_tab) }}
+        {% endif %}
+    </div>
+{% endblock %}
+

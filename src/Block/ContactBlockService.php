@@ -67,7 +67,7 @@ final class ContactBlockService extends AbstractBlockService implements Editable
         $recaptcha_success=true;
         if ($recaptchaOn && $form->isSubmitted()){
             $recaptcha = new ReCaptcha($recaptcha_site_secret);
-            $resp = $recaptcha->verify($request->request->get('g-recaptcha-response'), $request->getClientIp());
+            $resp = $recaptcha->setScoreThreshold(0.5)->verify($request->request->get('g-recaptcha-response'), $request->getClientIp());
             $recaptcha_success=$resp->isSuccess();
         }
 

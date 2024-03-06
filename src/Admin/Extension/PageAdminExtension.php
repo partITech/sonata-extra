@@ -9,6 +9,7 @@ use Partitech\SonataExtra\Contract\MediaInterface;
 use Sonata\AdminBundle\Admin\AbstractAdminExtension;
 use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Datagrid\ListMapper;
+// use Sonata\AdminBundle\Form\ListMapper;
 use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Form\Type\ModelListType;
@@ -26,24 +27,20 @@ class PageAdminExtension extends AbstractAdminExtension
     private ImageProvider $providerImage;
     private ParameterBagInterface $parameterBag;
 
-    
-    public function __construct(
-        #[Autowire(service:'\Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface')] ParameterBagInterface $parameterBag,
-        #[Autowire(service:'\Doctrine\ORM\EntityManagerInterface')] EntityManagerInterface $entityManager,
-        #[Autowire(service:'\Sonata\MediaBundle\Entity\MediaManager')] MediaManager $mediaManager
-    ) {
-        $this->parameterBag  = $parameterBag;
-        $this->entityManager = $entityManager;
-        $this->mediaManager  = $mediaManager;
-    }
-
-    
     #[Required]
     public function autowireDependencies(
+        EntityManagerInterface $entityManager,
+        ParameterBagInterface $parameterBag,
+        MediaManager $mediaManager,
         ImageProvider $providerImage,
         RequestStack $requestStack,
     ): void {
+        $this->entityManager = $entityManager;
+        $this->parameterBag = $parameterBag;
+        $this->mediaManager = $mediaManager;
         $this->providerImage = $providerImage;
+
+
         $request = $requestStack->getCurrentRequest();
         if(!empty($request)){
             $smart_service_conf = $this->parameterBag->get('partitech_sonata_extra.smart_service');

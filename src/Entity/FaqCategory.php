@@ -7,6 +7,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Partitech\SonataExtra\Repository\FaqCategoryRepository;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: FaqCategoryRepository::class)]
 #[ORM\Table(name: 'sonata_extra__faq_category')]
@@ -19,6 +20,8 @@ class FaqCategory
     private $name;
 
     #[ORM\OneToMany(targetEntity: 'Partitech\SonataExtra\Entity\FaqQuestion', mappedBy: 'category')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private $questions;
 
     #[Gedmo\SortablePosition]

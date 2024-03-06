@@ -10,6 +10,7 @@ use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Contract\TagInterface;
 use Partitech\SonataExtra\Contract\UserInterface;
 use Partitech\SonataExtra\Enum\ArticleStatus;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\ArticleRevisionRepository')]
 #[ORM\Table(name: 'sonata_extra__article_revision')]
@@ -50,6 +51,8 @@ class ArticleRevision
     #[ORM\JoinTable(name: 'many_to_many__article_category_revision')]
     #[ORM\JoinColumn(name: 'article_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'category_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $category;
 
 
@@ -61,6 +64,8 @@ class ArticleRevision
     #[ORM\JoinTable(name: 'many_to_many__article_tag_revision')]
     #[ORM\JoinColumn(name: 'article_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $tags;
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]

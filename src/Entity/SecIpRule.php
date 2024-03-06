@@ -5,6 +5,7 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\SecIpRuleRepository;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SecIpRuleRepository::class)]
 #[ORM\Table(name: 'sonata_extra__sec_ip_rule')]

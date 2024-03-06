@@ -1,0 +1,26 @@
+{% extends get_global_template('list') %}
+
+{%- block tab_menu -%}
+    {% if action is defined %}
+        {{ knp_menu_render(admin.sidemenu(action), {
+            'currentClass': 'active',
+            'template': '@PartitechSonataExtra/Admin/article/tab_menu_template.html.twig'
+        }, 'twig') }}
+    {% endif %}
+
+{%- endblock -%}
+
+{% block sonata_page_content_header %}
+    {%  set template_list=admin.getTemplateRegistry().templates %}
+    {% if template_list.list_prepend_page_content_header_template is defined %}
+        {% include template_list.list_prepend_page_content_header_template with {'admin': admin} %}
+    {% endif %}
+
+    {{ parent() }}
+
+    {% if template_list.list_append_page_content_header_template is defined %}
+
+        {% include template_list.list_append_page_content_header_template with {'admin': admin} %}
+    {% endif %}
+
+{% endblock %}

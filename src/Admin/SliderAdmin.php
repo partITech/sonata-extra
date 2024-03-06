@@ -74,7 +74,9 @@ final class SliderAdmin extends AbstractAdmin
                     ],
                     'admin_code' => 'Partitech\SonataExtra\Admin\SliderSlidesAdmin',
                 ]
-            );
+            )
+            ->add('ordre')
+        ;
     }
 
     protected function configureShowFields(ShowMapper $show): void
