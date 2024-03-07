@@ -63,3 +63,86 @@ div.mosaic-inner-box img {
 .form-separator {
     border-bottom:dotted 1px black  !important;
 }
+
+.icon-block-slider {
+    background: url('/bundles/partitechsonataextra/assets/img/blocks/slider_icon.svg') no-repeat center center;
+    width: 25px; /* ou la largeur souhaitée */
+    height: 25px; /* ou la hauteur souhaitée */
+    display: block;
+    background-size: contain; /* pour que le SVG s'adapte à la taille de la classe */
+    margin: auto;
+    margin-top: -4px;
+}
+
+.icon-block-faq {
+    background: url('/bundles/partitechsonataextra/assets/img/blocks/faqs_icon.svg') no-repeat center center;
+    width: 25px; /* ou la largeur souhaitée */
+    height: 25px; /* ou la hauteur souhaitée */
+    display: block;
+    background-size: contain; /* pour que le SVG s'adapte à la taille de la classe */
+    margin: auto;
+    margin-top: -4px;
+}
+
+.icon-block-question {
+    background: url('/bundles/partitechsonataextra/assets/img/blocks/question_icon.svg') no-repeat center center;
+    width: 25px; /* ou la largeur souhaitée */
+    height: 25px; /* ou la hauteur souhaitée */
+    display: block;
+    background-size: contain; /* pour que le SVG s'adapte à la taille de la classe */
+    margin: auto;
+    margin-top: -4px;
+}
+
+.icon-block-menu {
+    background: url('/bundles/partitechsonataextra/assets/img/blocks/menu_icon.svg') no-repeat center center;
+    width: 25px; /* ou la largeur souhaitée */
+    height: 25px; /* ou la hauteur souhaitée */
+    display: block;
+    background-size: contain; /* pour que le SVG s'adapte à la taille de la classe */
+    margin: auto;
+    margin-top: -4px;
+}
+
+.icon-block-tree_view {
+    background: url('/bundles/partitechsonataextra/assets/img/blocks/tree_view_icon.svg') no-repeat center center;
+    width: 25px; /* ou la largeur souhaitée */
+    height: 25px; /* ou la hauteur souhaitée */
+    display: block;
+    background-size: contain; /* pour que le SVG s'adapte à la taille de la classe */
+    margin: auto;
+    margin-top: -4px;
+}
+
+
+.page-composer__container__child__edit .icon-block-slider {
+    margin: unset !important;
+}
+
+.page-composer__container__child__edit .page-composer__container__child__name{
+    padding-bottom: 5px;
+}
+
+.EasyMDEContainer button.table{
+    width: 15px !important;
+}
+
+.EasyMDEContainer .title-text {
+    align-items: center;
+    display: flex;
+    width: auto;
+}
+
+/* icon */
+.EasyMDEContainer .title-text::before {
+//margin-right: 5px;
+//margin-left: 5px;
+    padding-right:5px;
+}
+
+/* text */
+.EasyMDEContainer .title-text::after  {
+    content: attr(aria-label) ;
+    padding-left:5px;
+    font-weight: bold;
+}
