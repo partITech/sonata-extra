@@ -1,6 +1,6 @@
 {
     "name": "partitech/sonata-extra",
-    "version": "1.0.5",
+    "version": "1.0.6",
     "type": "symfony-bundle",
     "description": "Daily usefully tools helpers for Sonata",
     "license": "MIT",

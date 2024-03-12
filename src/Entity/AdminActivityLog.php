@@ -40,7 +40,7 @@ class AdminActivityLog
     #[Serializer\MaxDepth(1)]
     private Collection $entityChangeLogs;
 
-    #[ORM\Column(type: 'boolean', options: ['default' => 0])]
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private bool $approval;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]

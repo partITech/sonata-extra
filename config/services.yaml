@@ -159,3 +159,9 @@ services:
  #  Partitech\SonataExtra\EventSubscriber\SerializerSubscriber:
       #   tags:
   #     - { name: 'jms_serializer.event_subscriber' }
+
+
+
+  Partitech\SonataExtra\EventSubscriber\PreserveListParametersSubscriber:
+    tags:
+      - { name: 'kernel.event_subscriber' }
