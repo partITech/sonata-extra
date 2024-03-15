@@ -77,3 +77,4 @@ Facilitates importing content from WordPress with ease.
 
 ## Installation
 Please refer to our [installation guide](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-installation) for detailed instructions on how to install and configure the Partitech Sonata Extra Bundle.
+

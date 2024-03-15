@@ -6,6 +6,18 @@
     {% set currentSite =  object.site %}
 {% endif %}
 
+{% if admin.preserveFilters is defined and admin.preserveFilters == true %}
+    <div class="box-header" style="padding-left:0;">
+        <h1 class="box-title sonata-page-top-bar">
+            <div class="btn-group">
+                <a href="{{ admin.generateUrl('list', {'clear_filters': 'true'}) }}" class="btn btn-default" style="margin-left: 20px;">
+                    <i class="fa fa-filter"></i> Clear Filters
+                </a>
+            </div>
+        </h1>
+    </div>
+{% endif %}
+
 {# {% set action = admin.action %} #}
 <div class="box-header" style="padding-left:0;">
     <h1 class="box-title sonata-page-top-bar">

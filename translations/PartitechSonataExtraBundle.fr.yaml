@@ -216,3 +216,5 @@ sonata-extra:
     label_enabled: "Activer"
     label_disabled: "Désactiver"
     label_action: "Action"
+  crud:
+    reset_filter: "Effacer les filtres"

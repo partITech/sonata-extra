@@ -252,3 +252,32 @@ class YourAdmin extends AbstractAdmin
 {% endif %}
 
 ```
+
+
+### Activate the preserve filter option
+
+Once the list view is overriden in your admin, you can activate the preserve filters option.
+
+This will keep in session your current list layout for each CRUD list. A button to reset your filters wil bee displayed in the top navigation bar.
+
+![template_admin_show_groups_7.png](./doc-sonata-extra-images/template_admin_show_groups_7.png)
+
+
+- Override the list template
+```
+    public function configure(): void
+    {
+        $this->setTemplates([
+            'list' => '@PartitechSonataExtra/Admin/CRUD/list.html.twig',
+         ]);
+
+    }
+```
+
+- Activate the preserve filter option 
+```
+class YourAdmin extends AbstractAdmin
+{
+    var $preserveFilters = true;
+}
+```

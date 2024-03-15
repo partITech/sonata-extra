@@ -75,7 +75,8 @@ class ConfigureMenuListener
         $qb = $this->entityManager->createQueryBuilder();
         $qb->select('COUNT(log.id)')
             ->from('Partitech\SonataExtra\Entity\AdminActivityLog', 'log')
-            ->where('log.approval = 0');
+            ->where('log.approval = :approvalStatus')
+            ->setParameter('approvalStatus', false);
 
         return $qb->getQuery()->getSingleScalarResult();
     }

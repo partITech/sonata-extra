@@ -1,11 +1,11 @@
 $(document).ready(function() {
-    var updateOrderUrl = '/admin/menu-item/update-order'; // Change this to your endpoint
+    let updateOrderUrl = '/admin/menu-item/update-order'; // Change this to your endpoint
 
     $("#sonata-ba-list").sortable({
         items: ".sonata-ba-list-field-number:has(div)",
         handle: ".sonata-move",
         update: function(event, ui) {
-            var orderedIds = $(this).sortable('toArray', { attribute: 'data-id' });
+            let orderedIds = $(this).sortable('toArray', { attribute: 'data-id' });
 
             $.post(updateOrderUrl, { orderedIds: orderedIds }, function(response) {
                 if (response.success) {
@@ -15,5 +15,35 @@ $(document).ready(function() {
                 }
             });
         }
+    });
+
+    // default_filed_button_action.html.twig confirm action
+    $('a[data-confirm]').click(function(ev) {
+        let href = $(this).attr('href');
+        const data_confirm_modal = $('#dataConfirmModal');
+        if (!data_confirm_modal.length) {
+            $('body').append('' +
+                '<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true">' +
+                '<div class="modal-dialog modal-lg">' +
+                '<div class="modal-content">' +
+                '<div class="modal-header">' +
+                '<button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>' +
+                '<h4 class="modal-title"></h4>' +
+                '</div>' +
+                '' +
+                '<div class="modal-body">' +
+                '</div>' +
+                '<div class="modal-footer">' +
+                '<button class="btn" data-dismiss="modal" aria-hidden="true">Cancel</button>' +
+                '<a class="btn btn-primary" id="dataConfirmOK">OK</a>' +
+                '</div>' +
+                '</div>' +
+                '</div>' +
+                '</div>');
+        }
+        data_confirm_modal.find('.modal-body').text($(this).attr('data-confirm'));
+        $('#dataConfirmOK').attr('href', href);
+        data_confirm_modal.modal({show:true});
+        return false;
     });
 });
