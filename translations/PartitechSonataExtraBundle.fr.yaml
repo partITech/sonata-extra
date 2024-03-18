@@ -218,3 +218,4 @@ sonata-extra:
     label_action: "Action"
   crud:
     reset_filter: "Effacer les filtres"
+    refresh: "Rafraichir la page"
