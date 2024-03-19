@@ -62,6 +62,7 @@ When configuring field groups, use the following syntax to configure the title o
             'class' => 'btn-success',
             'label' => 'Facebook',
             'icon' => 'fa-plus-circle',
+            'confirm'=>'Are you sure ?' // optionnal parameter to invoke modal data-confirm
         ],
     ],
 ])

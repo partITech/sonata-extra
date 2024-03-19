@@ -78,6 +78,9 @@
                                                     href="{% if btn.url is defined %}{{ btn.url }}{% endif %}"
                                                     class="btn {% if btn.class is defined %}{{ btn.class }}{% else %}btn-primary{% endif %}"
                                                     {% if btn.target is defined %}target="{{ btn.target }}"{% endif %}
+                                                    {% if btn.confirm is defined and btn.confirm |length %}
+                                                        data-confirm="{{ btn.confirm|trans({}, show_group.translation_domain ?? admin.translationDomain) }}"
+                                                    {% endif %}
                                             >
                                                 {% if btn.label is defined %}
                                                     {{ btn.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}
