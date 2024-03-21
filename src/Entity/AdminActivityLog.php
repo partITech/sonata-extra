@@ -35,7 +35,7 @@ class AdminActivityLog
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private ?UserInterface $user;  // User entity relation, adjust accordingly
+    private  $user;  // User entity relation, adjust accordingly
 
     #[ORM\OneToMany(mappedBy: 'adminActivityLog', targetEntity: AdminActivityEntityChangeLog::class)]
     #[Serializer\Groups(['default'])]

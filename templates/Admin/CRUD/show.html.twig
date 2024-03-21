@@ -33,7 +33,7 @@
         {% block field_row %}
             {% for code in groups %}
                 {% set show_group = admin.showgroups[code] %}
- {# start implementation #}
+                {# start implementation #}
                 {# configure show_header true|false #}
                 {% if show_group.show_header is defined %}
                     {% if show_group.show_header == true %}
@@ -55,11 +55,11 @@
                 {% else %}
                     {% set show_header_border=true %}
                 {% endif %}
-{# end implementation #}
+                {# end implementation #}
 
 
                 <div class="{{ show_group.class|default('col-md-12') }} {{ no_padding|default(false) ? 'nopadding' }}">
-{# start implementation #}
+                    {# start implementation #}
                     <div class="{{ show_group.box_class }}" {% if show_header == false %} style="border-top: 0px"{% endif %}>
 
                         {% if show_header == true %}
@@ -98,42 +98,205 @@
                                     {% endif %}
 
 
+                                    {% if show_group.action_list is defined %}
+                                        {% set action_id='id_' ~ random() %}
+                                        <style>
+                                            .input-group-btn.open .dropdown-menu {
+                                                right: 0;
+                                                left: auto;
+                                            }
+                                            .dropdown-menu .btn-primary.btn-primary.btn-primary {
+                                                background-color: #007bff !important;
+                                                border-color: #007bff !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-primary.btn-primary:hover,
+                                            .dropdown-menu .btn-primary.btn-primary:focus,
+                                            .dropdown-menu .btn-primary.btn-primary:active {
+                                                background-color: #0069d9 !important;
+                                                border-color: #0062cc !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-secondary.btn-secondary.btn-secondary {
+                                                background-color: #6c757d !important;
+                                                border-color: #6c757d !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-secondary.btn-secondary:hover,
+                                            .dropdown-menu .btn-secondary.btn-secondary:focus,
+                                            .dropdown-menu .btn-secondary.btn-secondary:active {
+                                                background-color: #5a6268 !important;
+                                                border-color: #545b62 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-success.btn-success.btn-success {
+                                                background-color: #28a745 !important;
+                                                border-color: #28a745 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-success.btn-success:hover,
+                                            .dropdown-menu .btn-success.btn-success:focus,
+                                            .dropdown-menu .btn-success.btn-success:active {
+                                                background-color: #218838 !important;
+                                                border-color: #1e7e34 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-danger.btn-danger.btn-danger {
+                                                background-color: #dc3545 !important;
+                                                border-color: #dc3545 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-danger.btn-danger:hover,
+                                            .dropdown-menu .btn-danger.btn-danger:focus,
+                                            .dropdown-menu .btn-danger.btn-danger:active {
+                                                background-color: #c82333 !important;
+                                                border-color: #bd2130 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-warning.btn-warning.btn-warning {
+                                                background-color: #ffc107 !important;
+                                                border-color: #ffc107 !important;
+                                                color: #212529 !important;
+                                            }
+
+                                            .dropdown-menu .btn-warning.btn-warning:hover,
+                                            .dropdown-menu .btn-warning.btn-warning:focus,
+                                            .dropdown-menu .btn-warning.btn-warning:active {
+                                                background-color: #e0a800 !important;
+                                                border-color: #d39e00 !important;
+                                                color: #212529 !important;
+                                            }
+
+                                            .dropdown-menu .btn-info.btn-info.btn-info {
+                                                background-color: #17a2b8 !important;
+                                                border-color: #17a2b8 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-info.btn-info:hover,
+                                            .dropdown-menu .btn-info.btn-info:focus,
+                                            .dropdown-menu .btn-info.btn-info:active {
+                                                background-color: #138496 !important;
+                                                border-color: #117a8b !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-light.btn-light.btn-light {
+                                                background-color: #f8f9fa !important;
+                                                border-color: #f8f9fa !important;
+                                                color: #212529 !important;
+                                            }
+
+                                            .dropdown-menu .btn-light.btn-light:hover,
+                                            .dropdown-menu .btn-light.btn-light:focus,
+                                            .dropdown-menu .btn-light.btn-light:active {
+                                                background-color: #f1f3f5 !important;
+                                                border-color: #ececf6 !important;
+                                                color: #212529 !important;
+                                            }
+
+                                            .dropdown-menu .btn-dark.btn-dark.btn-dark {
+                                                background-color: #343a40 !important;
+                                                border-color: #343a40 !important;
+                                                color: #ffffff !important;
+                                            }
+
+                                            .dropdown-menu .btn-dark.btn-dark:hover,
+                                            .dropdown-menu .btn-dark.btn-dark:focus,
+                                            .dropdown-menu .btn-dark.btn-dark:active {
+                                                background-color: #23272b !important;
+                                                border-color: #1d2124 !important;
+                                                color: #ffffff !important;
+                                            }
+
+
+
+                                        </style>
+
+                                        <div class="input-group input-group-sm hidden-xs box-tools" style="width: 50px; float:right;margin-left: 4px;">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn {% if show_group.action_list.class is defined %}{{ show_group.action_list.class }}{% else %}btn-default{% endif %} dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height: 33px;">
+                                                    {% if show_group.action_list.icon is defined %}
+                                                        <i class="fa {{ show_group.action_list.icon }}"></i>
+                                                    {% endif %}
+                                                    {% if show_group.action_list.label is defined %}{{ show_group.action_list.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
+                                                    <span class="fa fa-caret-down"></span></button>
+                                                <ul class="dropdown-menu">
+                                                    {% for btn in show_group.action_list.list %}
+                                                        {% if btn.class is defined and btn.class=='divider' %}
+                                                            <li class="divider"></li>
+                                                        {% else %}
+                                                            <li>
+                                                                <a {% if btn.url is defined %}
+                                                                    href="{{ btn.url }}" {% endif %}
+                                                                        {% if btn.confirm is defined and btn.confirm |length %}
+                                                                            data-confirm="{{ btn.confirm|trans({}, show_group.translation_domain ?? admin.translationDomain) }}"
+                                                                        {% endif %}
+                                                                        {% if btn.class is defined %} class="btn {{ btn.class }} "{% endif %}
+                                                                        style="text-align: left;"
+                                                                >
+                                                                    {% if btn.icon is defined %}
+                                                                        <i class="fa {{ btn.icon }}"></i>
+                                                                    {% endif %}
+                                                                    {% if btn.label is defined %}
+                                                                        {{ btn.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}
+                                                                    {% endif %}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
+
+                                                </ul>
+                                            </div>
+
+
+                                        </div>
+                                    {% endif %}
+
                                     {% if show_group.search_list is defined %}
                                         {% set search_id='id_' ~ random() %}
-                                    <div class="input-group input-group-sm hidden-xs box-tools" style="width: 200px; float:right;margin-left: 2px;">
-                                        <div class="input-group-btn">
-                                            <button type="button" class="btn {% if show_group.search_list.class is defined %}{{ show_group.search_list.class }}{% else %}btn-default{% endif %} dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height: 33px;">
-                                                {% if show_group.search_list.icon is defined %}
-                                                    <i class="fa {{ show_group.search_list.icon }}"></i>
-                                                {% endif %}
-                                                {% if show_group.search_list.label is defined %}{{ show_group.search_list.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
-                                                <span class="fa fa-caret-down"></span></button>
-                                            <ul class="dropdown-menu">
-                                                {% for btn in show_group.search_list.list %}
-                                                    {% if btn.class is defined and btn.class=='divider' %}
-                                                        <li class="divider"></li>
-                                                    {% else %}
-                                                        <li>
-                                                            <a {% if btn.url is defined %}href="{{ btn.url }}" onclick="event.preventDefault(); if(document.getElementById('{{ search_id }}').value.length==0){return void(0);}window.location.href = this.href +document.getElementById('{{ search_id }}').value;"{% endif %} >
-                                                        {% if btn.label is defined %}{{ btn.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
-                                                            </a>
-                                                        </li>
+                                        <div class="input-group input-group-sm hidden-xs box-tools" style="width: 200px; float:right;margin-left: 2px;">
+                                            <div class="input-group-btn">
+                                                <button type="button" class="btn {% if show_group.search_list.class is defined %}{{ show_group.search_list.class }}{% else %}btn-default{% endif %} dropdown-toggle" data-toggle="dropdown" aria-expanded="false" style="height: 33px;">
+                                                    {% if show_group.search_list.icon is defined %}
+                                                        <i class="fa {{ show_group.search_list.icon }}"></i>
                                                     {% endif %}
-                                                {% endfor %}
+                                                    {% if show_group.search_list.label is defined %}{{ show_group.search_list.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
+                                                    <span class="fa fa-caret-down"></span></button>
+                                                <ul class="dropdown-menu">
+                                                    {% for btn in show_group.search_list.list %}
+                                                        {% if btn.class is defined and btn.class=='divider' %}
+                                                            <li class="divider"></li>
+                                                        {% else %}
+                                                            <li>
+                                                                <a {% if btn.url is defined %}href="{{ btn.url }}" onclick="event.preventDefault(); if(document.getElementById('{{ search_id }}').value.length==0){return void(0);}window.location.href = this.href +document.getElementById('{{ search_id }}').value;"{% endif %} >
+                                                                    {% if btn.label is defined %}{{ btn.label|trans({}, show_group.translation_domain ?? admin.translationDomain) }}{% endif %}
+                                                                </a>
+                                                            </li>
+                                                        {% endif %}
+                                                    {% endfor %}
 
-                                            </ul>
+                                                </ul>
+                                            </div>
+
+                                            <input id="{{ search_id }}" type="text" class="form-control {{ search_id }}" style="height: 34px;">
                                         </div>
-
-                                        <input id="{{ search_id }}" type="text" class="form-control {{ search_id }}" style="height: 34px;">
-                                    </div>
                                     {% endif %}
                                 </div>
 
 
 
                             </div>
-                    {% endif %}
-{# end implementation #}
+                        {% endif %}
+                        {# end implementation #}
                         <div class="box-body table-responsive no-padding">
                             <table class="table">
                                 <tbody>
