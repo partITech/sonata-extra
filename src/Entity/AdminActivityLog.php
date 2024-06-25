@@ -4,8 +4,11 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Contract\UserInterface;
+use JMS\Serializer\Annotation as Serializer;
+use phpDocumentor\Reflection\Types\Boolean;
 
 #[ORM\Index(columns: ['token'], name: 'token_idx')]
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\AdminActivityLogRepository')]
@@ -15,38 +18,40 @@ class AdminActivityLog
     #[ORM\Id, ORM\GeneratedValue, ORM\Column(type: 'integer')]
     private int $id;
 
-    #[ORM\Column(type: 'datetime')]
+    #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
     private \DateTimeInterface $date;
 
-    #[ORM\Column(type: 'string', length: 255)]
-    private string $actionType;  // Par exemple: "create", "update", "delete"
+    #[ORM\Column(type: Types::STRING, length: 255)]
+    private string $actionType;  // for example: "create", "update", "delete"
 
-    #[ORM\Column(type: 'string', length: 255)]
+    #[ORM\Column(type: Types::STRING, length: 255)]
     private string $resource;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $description;
 
-    #[ORM\Column(type: 'text', nullable: true)]
+    #[ORM\Column(type: Types::TEXT, nullable: true)]
     private ?string $data;
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private $user;  // User entity relation, adjust accordingly
+    private  $user;  // User entity relation, adjust accordingly
 
-    #[ORM\OneToMany(targetEntity: AdminActivityEntityChangeLog::class, mappedBy: 'adminActivityLog')]
+    #[ORM\OneToMany(mappedBy: 'adminActivityLog', targetEntity: AdminActivityEntityChangeLog::class)]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $entityChangeLogs;
 
-    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    #[ORM\Column(type: Types::BOOLEAN, options: ['default' => false])]
     private bool $approval;
 
-    #[ORM\Column(type: 'string', length: 255, nullable: true)]
+    #[ORM\Column(type: Types::STRING, length: 255, nullable: true)]
     private ?string $token;
 
     public function __construct()
     {
         $this->entityChangeLogs = new ArrayCollection();
-        $this->approval = 0;
+        $this->approval = false;
     }
 
     public function __toString(): string
@@ -161,12 +166,12 @@ class AdminActivityLog
         return $this;
     }
 
-    public function isApproved(): int
+    public function isApproved(): bool
     {
         return $this->approval;
     }
 
-    public function setApproval(int $approval): self
+    public function setApproval(bool $approval): self
     {
         $this->approval = $approval;
 

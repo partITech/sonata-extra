@@ -30,10 +30,6 @@
             
             if (!$siteUrl) {
                 $site = $this->siteManager->findOneBy(['isDefault'=> true]);
-                // if null we may be in the sonata:page:create-site
-                if(null === $site){
-                    return;
-                }
                 $siteUrl = 'https://'.$site->getHost().$site->getRelativePath();
             }
             

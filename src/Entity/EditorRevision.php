@@ -6,6 +6,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Contract\UserInterface;
 use Partitech\SonataExtra\Enum\ArticleStatus;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\EditorRevisionRepository')]
 #[ORM\Table(name: 'sonata_extra__editor_revision')]

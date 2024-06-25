@@ -1,0 +1,44 @@
+{% extends get_global_template('list') %}
+
+{%- block tab_menu -%}
+    {% if action is defined %}
+        {{ knp_menu_render(admin.sidemenu(action), {
+            'currentClass': 'active',
+            'template': '@PartitechSonataExtra/Admin/article/tab_menu_template.html.twig'
+        }, 'twig') }}
+    {% endif %}
+
+    {% if admin.preserveFilters is defined and admin.preserveFilters == true %}
+        <div class="box-header" style="padding-left:0;">
+            <h1 class="box-title sonata-page-top-bar">
+                <div class="btn-group">
+                    <a href="{{ app.request.uri }}" class="btn btn-default" style="margin-left: 20px;" title="{{ 'sonata-extra.crud.refresh'|trans({}, 'PartitechSonataExtraBundle') }}">
+                        <i class="fa fa-refresh"></i>
+                    </a>
+                    <a href="{{ admin.generateUrl('list', {'clear_filters': 'true'}) }}" class="btn btn-default" style="margin-left: 3px;">
+                        <i class="fa fa-filter"></i> {{ 'sonata-extra.crud.reset_filter'|trans({}, 'PartitechSonataExtraBundle') }}
+
+                    </a>
+
+                </div>
+            </h1>
+        </div>
+    {% endif %}
+
+
+{%- endblock -%}
+
+{% block sonata_page_content_header %}
+    {%  set template_list=admin.getTemplateRegistry().templates %}
+    {% if template_list.list_prepend_page_content_header_template is defined %}
+        {% include template_list.list_prepend_page_content_header_template with {'admin': admin} %}
+    {% endif %}
+
+    {{ parent() }}
+
+    {% if template_list.list_append_page_content_header_template is defined %}
+
+        {% include template_list.list_append_page_content_header_template with {'admin': admin} %}
+    {% endif %}
+
+{% endblock %}

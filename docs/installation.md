@@ -26,6 +26,7 @@ Partitech\SonataExtra\PartitechSonataExtraBundle::class => ['all' => true],
 
 ```
 
+
 ### Install assets for admin
 ```yaml
 sonata_admin:
@@ -72,4 +73,14 @@ You can force the redirection of the user to your default site domain/relative p
         admin:
             form_login:
                 success_handler: Partitech\SonataExtra\Handler\AuthenticationSuccessHandler
+```
+
+### add some routes
+
+Add routes `in config/routes/sonata_extra.yaml`
+
+```
+partitech_sonata_extra_bundle.routes:
+  resource: '@PartitechSonataExtraBundle/config/routes.yaml'
+
 ```

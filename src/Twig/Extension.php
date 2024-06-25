@@ -31,6 +31,7 @@ class Extension extends AbstractExtension
     {
         return [
             new TwigFilter('remove_br', [$this, 'removeBr']),
+            new TwigFilter('get_class', [$this, 'getClass']),
         ];
     }
 
@@ -74,5 +75,9 @@ class Extension extends AbstractExtension
     public function generateUrlLocale(string $routeName, array $routeVariables = [], int $referenceType = UrlGeneratorInterface::ABSOLUTE_URL): string
     {
         return $this->pageUrlGenerator->generate($routeName, $routeVariables, $referenceType);
+    }
+    public function getClass($object)
+    {
+        return get_class($object);
     }
 }

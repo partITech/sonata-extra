@@ -20,7 +20,7 @@ use League\CommonMark\MarkdownConverter;
 
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment\Environment;
-
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Index(columns: ['content'], name: 'content_fulltext_idx', flags: ['fulltext'])]
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\ArticleRepository')]
@@ -42,7 +42,7 @@ class Article
 
 
 
-    #[ORM\Column(type: 'text', nullable: true, options: ['charset' => 'utf8mb4'])]
+    #[ORM\Column(type: 'text', nullable: true, options: ['charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'])]
     #[Translatable]
     private ?string $content = "";
 
@@ -50,7 +50,7 @@ class Article
     #[Translatable]
     private string $title;
 
-    #[ORM\Column(type: 'text',  nullable: true, options: ['charset' => 'utf8mb4'])]
+    #[ORM\Column(type: 'text',  nullable: true, options: ['charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'])]
     #[Translatable]
     private ?string $excerpt;
 
@@ -73,18 +73,24 @@ class Article
     private string $type_editor = 'markdown';
 
     #[ORM\OneToMany(mappedBy: 'article', targetEntity: ArticleRevision::class, cascade: ['persist', 'remove'])]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $revisions;
 
     #[ORM\ManyToMany(targetEntity: CategoryInterface::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinTable(name: 'many_to_many__article_category')]
     #[ORM\JoinColumn(name: 'article_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'category_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $category;
 
     #[ORM\ManyToMany(targetEntity: TagInterface::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinTable(name: 'many_to_many__article_tag')]
     #[ORM\JoinColumn(name: 'article_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
     #[ORM\InverseJoinColumn(name: 'tag_id', referencedColumnName: 'id', onDelete: 'CASCADE')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $tags;
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]

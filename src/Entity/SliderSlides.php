@@ -8,6 +8,7 @@ use Doctrine\ORM\Mapping\Index;
 use Partitech\SonataExtra\Attribute\Translatable;
 use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Repository\SliderRepository;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SliderRepository::class)]
 #[ORM\Table(name: 'sonata_extra__slider_slides', indexes: [

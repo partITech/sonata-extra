@@ -58,10 +58,19 @@ class AuthenticationSuccessHandler extends DefaultAuthenticationSuccessHandler
         }
 
         $url = sprintf(
-            'http://%s%s/admin',
+            'http://%s%s',
             $defaultSite->getHost(),
             $defaultSite->getRelativePath()
         );
+
+        // we should add / before the admin path.
+        // if $defaultSite->getRelativePath() === '/'
+        // we should not.
+        if(substr($url, -1) !== '/'){
+            $url .= '/';
+        }
+
+        $url .= 'admin';
 
         return new RedirectResponse($url);
     }

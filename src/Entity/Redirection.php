@@ -4,6 +4,7 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\RedirectionRepository;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: RedirectionRepository::class)]
 #[ORM\Table(name: 'sonata_extra__redirection')]

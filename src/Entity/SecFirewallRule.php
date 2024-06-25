@@ -5,6 +5,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\SecFirewallRuleRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SecFirewallRuleRepository::class)]
 #[ORM\Table(name: 'sonata_extra__sec_firewall_rule')]

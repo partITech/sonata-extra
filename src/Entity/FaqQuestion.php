@@ -5,6 +5,7 @@ namespace Partitech\SonataExtra\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Partitech\SonataExtra\Repository\FaqQuestionRepository;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: FaqQuestionRepository::class)]
 #[ORM\Table(name: 'sonata_extra__faq_question')]

@@ -43,16 +43,16 @@ Use the `addCss`, `addJs`, `addJsInline`, and `addCssInline` methods to add asse
 public function execute(BlockContextInterface $blockContext, Response $response = null)
 {
     // Adding external CSS
-    $this->assetsHandler->addCss('https://unpkg.com/library@latest/dist/style.css');
+    $this->assetsHandler->addCss('https://unpkg.com/library@latest/dist/style.css', 'default');
 
     // Adding external JS with @bool defer parameter (default false)
-    $this->assetsHandler->addJs('https://unpkg.com/library@latest/dist/script.js', true);
+    $this->assetsHandler->addJs('https://unpkg.com/library@latest/dist/script.js', true, 'default');
 
     // Adding inline JS 
-    $this->assetsHandler->addJsInline('console.log(window)', true);
+    $this->assetsHandler->addJsInline('console.log(window)', true, 'default');
 
     // Adding inline CSS
-    $this->assetsHandler->addCssInline('.class{ }');
+    $this->assetsHandler->addCssInline('.class{ }', 'default');
 
     // ... rest of the execute method ...
 }
@@ -69,7 +69,7 @@ To render the assets in your Twig templates, use the following Twig functions pr
 {{ sonata_extra_get_blocks_js_inline('default', true)|raw }}
 ```
 
-- `'default'` index is used by default, but custom indexes can be specified when developing custom blocks.
+- `'default'` index is used by default if the value is not set, but custom indexes can be specified when developing custom blocks.
 - The `|raw` filter is used to ensure the proper rendering of HTML tags.
 - You can use compression parameter (bool default false) to render compressed `sonata_extra_get_blocks_css_inline` and `sonata_extra_get_blocks_js_inline`
   

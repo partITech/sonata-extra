@@ -1,0 +1,163 @@
+{% extends '@SonataAdmin/CRUD/base_show_field.html.twig' %}
+
+
+{% block field %}
+    {# https://github.com/dmhendricks/file-icon-vectors #}
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/file-icon-vectors@1.0.0/dist/file-icon-classic.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/file-icon-vectors@1.0.0/dist/file-icon-square-o.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/file-icon-vectors@1.0.0/dist/file-icon-vivid.min.css" />
+    <style>
+        /*.fiv-cla, .fiv-viv, .fiv-sqo { font-size: 3em; }*/
+        .bg-white{
+            background-color: #FFFFFF !important;
+        }
+        .info-box-icon{
+            height: 88px;
+            line-height: 88px;
+        }
+    </style>
+    {# usage
+        <span class="fiv-cla fiv-icon-pdf"></span>
+        <span class="fiv-cla fiv-icon-xls"></span>
+        <span class="fiv-viv fiv-icon-pdf"></span>
+        <span class="fiv-viv fiv-icon-xls"></span>
+        <span class="fiv-sqo fiv-icon-pdf"></span>
+        <span class="fiv-sqo fiv-icon-xls"></span>
+    #}
+
+
+
+
+    {% set fieldName=field_description.fieldName %}
+    {% set mediafieldName=field_description.options.media_field_name %}
+
+
+    {% if field_description.options.display_field_list is defined %}
+        {% set display_field_list = field_description.options.display_field_list %}
+    {% else %}
+        {% set display_field_list = [] %}
+    {% endif %}
+
+    {% if field_description.options.display_field_list_string is defined %}
+        {% set display_field_list_string = field_description.options.display_field_list_string %}
+    {% else %}
+        {% set display_field_list_string = '' %}
+    {% endif %}
+
+
+    {% if field_description.options.media_format is defined %}
+        {% set format = field_description.options.media_format %}
+    {% else %}
+        {% set format = 'default_small' %}
+    {% endif %}
+
+    {% set mediafieldName=field_description.options.media_field_name %}
+
+
+
+    {% for One2ManyEntity in attribute(object, fieldName) %}
+        {% set media = attribute(One2ManyEntity, mediafieldName)  %}
+
+        {% set replacements = {} %}
+        {% for display_field in field_description.options.display_field_list %}
+            {% set fieldValue = attribute(One2ManyEntity, display_field) %}
+            {% set replacements = replacements|merge({('%' ~ display_field ~ '%'): fieldValue}) %}
+        {% endfor %}
+        {% set formattedString = display_field_list_string|replace(replacements) %}
+
+
+        {% if media is defined and   media.providerReference is not empty %}
+            {% set provider = sonata_media.pool.getProvider(media.providerName) %}
+
+
+
+
+
+
+
+            {% if media.contentType starts with 'image/' %}
+                {% set mediaUrl = provider.generatePublicUrl(media, format) %}
+
+
+                <div class="col-md-12 col-sm-12 col-xs-12 ">
+                    <div class="info-box box box-default box-solid">
+                    <span class="info-box-icon bg-white">
+
+                        <a href="{{ provider.generatePublicUrl(media, 'reference') }}" download="{{ media.providerMetadata.filename }}" target="_blank">
+                            <img src="{{ mediaUrl }}" alt="{{ media.name }}" style="max-width: 90%; max-height: 100%;"/>
+                        </a>
+
+                    </span>
+                        <div class="info-box-content">
+                            {{ formattedString|raw }}
+                        </div>
+                        <div class="info-box-content">
+                            <div class="progress"><div class="progress-bar" style="width: 0%"></div></div>
+                            <span class="info-box-number">
+                            <a href="{{ provider.generatePublicUrl(media, 'reference') }}" download="{{ media.providerMetadata.filename }}" target="_blank">
+                                {{ media.providerMetadata.filename }}
+                            </a>
+                            </span>
+                        </div>
+
+                    </div>
+
+                </div>
+
+
+
+
+
+
+            {% else %}
+                {% set filename = media.providerMetadata.filename %}
+                {% set extension = filename|split('.')|last|lower %}
+
+                <div class="col-md-12 col-sm-12 col-xs-12 ">
+                    <div class="info-box box box-default box-solid">
+                    <span class="info-box-icon bg-white">
+                           <a href="{{ provider.generatePublicUrl(media, 'reference') }}" download="{{ filename }}"
+                              target="_blank">
+                                <span class="fiv-sqo fiv-icon-{{ extension }} align-center"></span>
+                            </a>
+                        </span>
+                        <div class="info-box-content">
+                            {{ formattedString|raw }}
+                        </div>
+                        <div class="info-box-content">
+                            <div class="progress"><div class="progress-bar" style="width: 0%"></div></div>
+                            <span class="info-box-number">
+                               <a href="{{ provider.generatePublicUrl(media, 'reference') }}" download="{{ filename }}"
+                                  target="_blank">{{ filename }}</a>
+                            </span>
+                        </div>
+
+
+                    </div>
+
+                </div>
+
+
+
+
+
+
+
+
+
+
+
+                {# Afficher une icône pour les documents non-image #}
+
+            {% endif %}
+
+        {% endif %}
+    {% endfor %}
+
+
+
+
+
+
+{% endblock %}
+

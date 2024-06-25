@@ -5,10 +5,12 @@ namespace Partitech\SonataExtra\Entity;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\Common\Collections\Criteria;
+use Doctrine\Common\Collections\Order;
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Attribute\Translatable;
 use Partitech\SonataExtra\Repository\SliderRepository;
 use Partitech\SonataExtra\Traits\EntityTranslationTrait;
+use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SliderRepository::class)]
 #[ORM\Table(name: 'sonata_extra__slider')]
@@ -29,7 +31,12 @@ class Slider
     #[Translatable]
     private ?string $description = null;
 
+    #[ORM\Column(type: 'integer', options: ['default' => 0])]
+    private int $ordre = 0;
+
     #[ORM\OneToMany(mappedBy: 'slider', targetEntity: SliderSlides::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[Serializer\Groups(['default'])]
+    #[Serializer\MaxDepth(1)]
     private Collection $slides;
 
     public function __construct()
@@ -74,7 +81,7 @@ class Slider
     public function getSlides(): ?Collection
     {
         $criteria = Criteria::create()
-            ->orderBy(['ordre' => Criteria::ASC]);
+            ->orderBy(['ordre' => Order::Ascending]);
 
         return $this->slides->matching($criteria);
     }
@@ -83,7 +90,7 @@ class Slider
     {
         $criteria = Criteria::create()
             ->where(Criteria::expr()->eq('active', true))
-            ->orderBy(['ordre' => Criteria::ASC]);
+            ->orderBy(['ordre' => Order::Ascending]);
 
         return $this->slides->matching($criteria);
     }
@@ -106,6 +113,18 @@ class Slider
                 $slide->setSlider(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getOrdre(): ?int
+    {
+        return $this->ordre;
+    }
+
+    public function setOrdre(int $ordre): self
+    {
+        $this->ordre = $ordre;
 
         return $this;
     }

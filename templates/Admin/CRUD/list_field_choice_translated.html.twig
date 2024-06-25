@@ -1,0 +1,9 @@
+{% extends '@SonataAdmin/CRUD/list_choice.html.twig' %}
+
+{% block field %}
+    {% set fieldName=field_description.fieldName %}
+    {% set value = attribute(object, fieldName) %}
+    {% set translation_domain = field_description.option('choice_translation_domain', field_description.option('catalogue')) %}
+    {{ value|trans({}, translation_domain) }}
+
+{% endblock %}

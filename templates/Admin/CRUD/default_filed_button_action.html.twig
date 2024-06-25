@@ -1,0 +1,9 @@
+<a href="{{ admin.generateObjectUrl(actions.route, object) }}"
+   class="btn btn-sm btn-default"
+        {% if actions.ask_confirmation is defined and actions.ask_confirmation == true %}
+            data-confirm="{{ actions.confirmation_message }}"
+        {% endif %}
+>
+    <i class="{{ actions.icon_class | default('') }} " aria-hidden="true"></i>
+    {{ actions.label | default('') | trans({}, 'default') }}
+</a>
