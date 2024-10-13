@@ -203,7 +203,7 @@ class PageAdminController extends AbstractController
             ->from($pageClass, 'p')
             ->where('p.site = :site')
             ->andWhere('p.translation_from_id = :translationFromId')
-            ->setParameter('site', $object->getSite())
+            ->setParameter('site', $clonedObject->getSite())
             ->setParameter('translationFromId', $object->getTranslationFromId());
         $page = $qb->getQuery()->getOneOrNullResult();
         if($page){
