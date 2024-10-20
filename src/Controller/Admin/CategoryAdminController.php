@@ -57,6 +57,8 @@ final class CategoryAdminController extends Controller
         $this->siteManager = $siteManager;
         $this->parameterBag = $parameterBag;
         $this->TranslationController = $TranslationController;
+
+        $this->updateCategoriesWithDefaultContext();
     }
 
     public static function getSubscribedServices(): array
@@ -69,11 +71,13 @@ final class CategoryAdminController extends Controller
 
     public function createTranslationAction($id, $from_site, $to_site, $fqcn): Response
     {
+
         return $this->TranslationController->createTranslationAction($id, $from_site, $to_site, $fqcn);
     }
 
     public function listAction(Request $request): Response
     {
+
         $this->assertObjectExists($request);
 
         $this->admin->checkAccess('list');
