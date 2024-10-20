@@ -19,7 +19,9 @@
         private $isLoaded = false;
         private SiteSelectorInterface $siteSelector;
         private $kernel;
-        
+        private RouterInterface $router;
+        private ContainerInterface $container;
+
         public function __construct(
             private EntityManagerInterface $entityManager,
             RouterInterface $router,

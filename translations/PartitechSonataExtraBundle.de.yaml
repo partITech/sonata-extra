@@ -1,0 +1,238 @@
+sonata-extra:
+  approve:
+    log_message : "Der Benutzer <b>[user]</b> hat [action] das Element [entity]"
+    approval_message : "Wartet auf Genehmigung."
+    approved_by_message : "<br> Genehmigt von <b>[user]</b> am [date]."
+    cancel_modification: "Sind Sie sicher, dass Sie diese Änderung abbrechen möchten?"
+    cancel_modification_btn: "Änderung abbrechen"
+    approve_create: "Sind Sie sicher, dass Sie diese Erstellung genehmigen möchten?"
+    approve_delete: "Sind Sie sicher, dass Sie diese Löschung genehmigen möchten?"
+    approve_update: "Sind Sie sicher, dass Sie diese Änderung genehmigen möchten?"
+    approve_create_btn: "Erstellung genehmigen"
+    approve_delete_btn: "Löschung genehmigen"
+    approve_update_btn: "Änderung genehmigen"
+    purge_all_btn: "Ausstehende Änderungen löschen"
+    confirm_purge_all: "Sind Sie sicher, dass Sie alle ausstehenden Änderungen löschen möchten?"
+
+    success_message:
+      create: "Die Erstellung muss genehmigt werden, um wirksam zu werden."
+      update: "Die Änderung muss genehmigt werden, um wirksam zu werden."
+      delete: "Die Löschung muss genehmigt werden, um wirksam zu werden."
+      all_applied: "Alle Änderungen wurden angewendet."
+      create_applied: "Die Erstellung wurde angewendet."
+      revert_successfully: "Die Änderung wurde erfolgreich rückgängig gemacht."
+      all_revert_applied: "Alle Änderungen wurden erfolgreich rückgängig gemacht."
+      purge: "Die genehmigten Änderungen wurden erfolgreich gelöscht."
+    error_message:
+      journal_not_found: 'Änderungsprotokoll nicht gefunden.'
+      journal_not_found_for_activity: 'Kein Änderungsprotokoll für diese Aktivität gefunden.'
+      entity_not_found: 'Entität nicht gefunden.'
+      token: "Ungültiges Token, bitte versuchen Sie es erneut."
+
+  redirect_admin:
+    import_btn: "CSV-Import Ihrer Weiterleitungen"
+    import_title: "CSV-Import Ihrer Weiterleitungen"
+    success:
+      import: "Import erfolgreich"
+
+  faq:
+    manage_question: "Fragen verwalten"
+
+  article_admin:
+    retour: "Zurück"
+    revisions: "Revisionen"
+    global_settings: "Globale Einstellungen"
+    publish_settings: "Veröffentlichungseinstellungen"
+    published_at: "Veröffentlicht am"
+    author: "Autor"
+    status: "Status"
+    published: "Veröffentlicht"
+    draft: "Entwurf"
+    title: "Titel"
+    contenu: "Inhalt"
+    content: "Inhalt"
+    id: "ID"
+    actions: "Aktionen"
+    edit: "Bearbeiten"
+    delete: "Löschen"
+    editor_gutenberg: "Editor: Gutenberg"
+    editor_ckeditor: "Editor: Ckeditor"
+    editor_textarea: "Editor: Textarea"
+    editor_markdown: "Editor: Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Textarea"
+    label_markdown: "Markdown"
+    msg_editor_change: "Der Editor wurde geändert"
+    seo_proposal: "SEO-Vorschlag"
+    seo_modal_title: "Optimale SEO-Einstellungen für diesen Inhalt berechnen"
+    seo_modal_excerpt: "Auszug (Excerpt)"
+    seo_modal_seo_title: "Meta-Titel"
+    seo_modal_seo_description: "Meta-Beschreibung"
+    seo_modal_seo_seokeywords: "Meta-Schlüsselwörter"
+    seo_modal_seo_slug: "Slug"
+    seo_modal_calculate_btn: "Berechnen"
+    seo_modal_use_btn: "Verwenden"
+    seo_modal_error: "Es scheint ein Problem mit dem SEO-Vorschlagsdienst zu geben.<br> Bitte starten Sie die Berechnung erneut."
+
+  editor_admin:
+    editor_gutenberg: "Editor: Gutenberg"
+    editor_ckeditor: "Editor: Ckeditor"
+    editor_textarea: "Editor: Textarea"
+    editor_markdown: "Editor: Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Textarea"
+    label_markdown: "Markdown"
+    msg_editor_change: "Der Editor wurde geändert"
+
+  page_admin:
+    tree_view:
+      create_translation_popin: "Wählen Sie die Ausgangssprache für die Übersetzung Ihrer Seite"
+      create: "Seite erstellen für die Website"
+      edit: "Seite bearbeiten für die Website"
+    compose:
+      preview_btn: "Seite anzeigen"
+
+  translation:
+    selector_title: "Seiten für die Website"
+    create_entity: "Datensatz für die Website erstellen"
+    create: "Übersetzung für die Website erstellen"
+    edit: "Übersetzung für die Website bearbeiten"
+    header_list_label: "Übersetzungen"
+
+  block_contact:
+    recaptcha: "Recaptcha V3 aktivieren"
+    recaptcha_site_key: "Recaptcha-Schlüssel"
+    recaptcha_site_secret: "Recaptcha-Geheimschlüssel"
+    title: "Titel"
+    first_name: "Vorname"
+    use_field_first_name: "Feld Vorname verwenden"
+    first_name_label: "Beschriftung des Feldes Vorname"
+    last_name: "Nachname"
+    use_field_last_name: "Feld Nachname verwenden"
+    last_name_label: "Beschriftung des Feldes Nachname"
+    company_name: "Unternehmen"
+    use_field_company_name: "Feld Unternehmen verwenden"
+    company_name_label: "Beschriftung des Feldes Unternehmen"
+    address: "Adresse"
+    use_field_address: "Feld Adresse verwenden"
+    address_label: "Beschriftung des Feldes Adresse"
+    email : "E-Mail"
+    use_field_email: "Feld E-Mail verwenden"
+    email_label: "Beschriftung des Feldes E-Mail"
+    phone: "Telefon"
+    use_field_phone: "Feld Telefon verwenden"
+    phone_label: "Beschriftung des Feldes Telefon"
+    use_field_additional_information: "Feld zusätzliche Informationen verwenden"
+    additional_information: "Zusätzliche Informationen"
+    additional_information_label: "Beschriftung des Feldes zusätzliche Informationen"
+    required_field: "Pflichtfeld?"
+    send_me_a_copy: "Anbieten, eine Kopie der Nachricht zu senden?"
+    send_me_a_copy_label: "Beschriftung der Frage zur Kopie der Nachricht"
+    send_me_a_copy_default_message: "Schicken Sie mir eine Kopie"
+    send_to_label: "Interne Kopie der Nachricht senden?"
+    send_to: "E-Mail des Empfängers angeben"
+    submit_label: "Beschriftung des Absende-Buttons"
+
+    mail_confirmation: "Vorlage für die Benutzerbestätigungsmail"
+    mail_subject: "Betreff der gesendeten E-Mail"
+    mail_admin_notification: "Vorlage für die Administratorbestätigungsmail"
+    mail_signature: "E-Mail-Signatur"
+
+    confirmation_message_label: "Bestätigungsnachricht"
+    confirmation_message: |
+      <div class="container">
+        <div class="contact_confirmation">
+          <h4 class="alert-heading">Danke, dass Sie uns kontaktiert haben!</h4>
+          <p>Ihre Nachricht wurde erfolgreich gesendet. Wir haben Ihre Anfrage erhalten und werden so schnell wie möglich antworten.</p>
+          <p class="mb-0">In der Zwischenzeit können Sie unsere Website für weitere Informationen durchsuchen.</p>
+        </div>
+      </div>
+    confirmation_template_label: "Bestätigungsvorlage"
+    confirmation_javascript_label: "JavaScript der Bestätigungsseite"
+
+    firstName_not_blank: "Der Vorname ist erforderlich."
+    lastName_not_blank: "Der Nachname ist erforderlich."
+    companyName_not_blank: "Der Firmenname ist erforderlich."
+    address_not_blank: "Die Adresse ist erforderlich."
+    email_not_blank: "Die E-Mail-Adresse ist erforderlich."
+    email_invalid: "Die E-Mail-Adresse ist ungültig."
+    phone_not_blank: "Die Telefonnummer ist erforderlich."
+    phone_invalid: "Die Telefonnummer ist ungültig."
+    additionalInformation_not_blank: "Das Feld für zusätzliche Informationen ist erforderlich."
+    submitLabel: "Absenden"
+
+    confirmation:
+      title: "Bestätigung Ihrer Kontaktanfrage"
+      heading: "Bestätigung Ihrer Kontaktanfrage"
+      greeting: "Hallo"
+      received: "Wir haben Ihre Kontaktanfrage mit den folgenden Informationen erhalten:"
+      firstName: "Vorname"
+      lastName: "Nachname"
+      email: "E-Mail"
+      phone: "Telefon"
+      message: "Nachricht"
+      confirmation: "Dies ist eine Bestätigung, dass wir Ihre Nachricht erhalten haben. Ein Mitglied unseres Teams wird sich in Kürze bei Ihnen melden."
+      thankYou: "Vielen Dank, dass Sie uns kontaktiert haben."
+      regards: "Mit freundlichen Grüßen"
+
+    admin-notification:
+      title: "Neue Kontaktanfrage"
+      heading: "Neue Kontaktanfrage"
+      introduction: "Sie haben eine neue Kontaktanfrage mit den folgenden Informationen erhalten:"
+      procedure: "Bitte bearbeiten Sie diese Anfrage gemäß unseren internen Richtlinien."
+
+  search:
+    submit_label: "Absenden"
+    label_submit_label: "Beschriftung des Absende-Buttons"
+    placeholder: "Platzhalter"
+    result_title: "Ergebnisse"
+    no_article_found_for_this_search: "Kein Artikel für diese Suche gefunden."
+
+  blog:
+    section_article_title: "Abschnitt"
+    section_category_list_title: "Abschnitt"
+    section_tag_list_title: "Abschnitt"
+    no_article_found_for_this_category: "Kein Artikel für diese Kategorie gefunden."
+    no_article_found_for_this_tag: "Kein Artikel für diesen Tag gefunden."
+    write_by: "Geschrieben von"
+    publish_date: "am"
+    read_more: "Weiterlesen"
+    categories: "Kategorie: "
+    tags: "Tags: "
+    btn_read_more: "Weiterlesen"
+    share_this_article: "Diesen Artikel teilen"
+    about_the_author: "Über den Autor"
+
+  category:
+    label_saved: "Kategorie erfolgreich gespeichert"
+    label_error: "Es gibt einen Fehler"
+    tree_catalog_title: "Kategorien bearbeiten"
+    label_delete: "Löschen"
+    label_modify: "Bearbeiten"
+    label_enabled: "Aktivieren"
+    label_disabled: "Deaktivieren"
+    label_action: "Aktion"
+
+  crud:
+    reset_filter: "Filter zurücksetzen"
+    refresh: "Seite aktualisieren"
+
+Id: "Id"
+Title: "Titel"
+Description: "Beschreibung"
+Slider List: "Slider-Liste"
+Security Firewall Rule: "Firewall-Sicherheitsregel"
+Security Stop Word: "Sicherheitsstoppwort"
+Security Ip Rule: "IP-Sicherheitsregel"
+Redirections: "Weiterleitungen"
+Tag Multilangue: "Tag Mehrsprachig"
+Category multilangue: "Kategorie Mehrsprachig"
+Editor: "Editor"
+Slider: "Slider"
+FAQs - Catégories: "FAQs - Kategorien"
+Contact: "Kontakt"
+Article: "Artikel"
+Activity Logs: "Aktivitätsprotokolle"
+Modifications en attentes: "Ausstehende Änderungen"

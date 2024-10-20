@@ -71,7 +71,7 @@ final class EditorBlockService extends AbstractBlockService implements EditableB
 
         $editor=$this->entityManager->getRepository(Editor::class)->findOneBy(['id'=>$editor]);
 
-        if(!empty($editor) && $editor->getSite()!=$site){
+        if($editor->getSite()!=$site){
             if(!empty($editor->translations[$site->getId()]['entity_id'])){
                 $editor=$this->entityManager->getRepository(Editor::class)->findOneBy(['id'=>$editor->translations[$site->getId()]['entity_id']]);
             }
@@ -79,7 +79,7 @@ final class EditorBlockService extends AbstractBlockService implements EditableB
 
         return $this->renderResponse($template, [
             'block' => $blockContext->getBlock(),
-            'content' => !empty($editor)?$editor->getHtmlContent():null,
+            'content' => $editor->getHtmlContent(),
             'class' => $class,
         ], $response);
     }

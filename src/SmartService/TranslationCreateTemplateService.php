@@ -17,6 +17,8 @@ class TranslationCreateTemplateService
     private EntityManagerInterface $entityManager;
     private Filesystem $filesystem;
     private $projectDir;
+    private LoggerInterface $logger;
+    private ContainerInterface $container;
 
     #[Required]
     public function autowireDependencies(

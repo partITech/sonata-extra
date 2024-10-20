@@ -10,7 +10,10 @@ use Sonata\PageBundle\Model\SiteManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
+use Doctrine\ORM\Mapping as ORM;
+use Doctrine\ORM\Event\PrePersistEventArgs;
 
+#[ORM\HasLifecycleCallbacks]
 trait AdminTranslationTrait
 {
     private SonataPageSiteRepository $siteRepository;
@@ -110,9 +113,16 @@ trait AdminTranslationTrait
         return $this->sites;
     }
 
-    public function getCurrentSelectedLocal(mixed $default = null): ?int
+    public function getCurrentSelectedLocal(mixed $default = false): ?int
     {
-        return $this->getRequest()->get('site', $default);
+        $request = $this->getRequest();
+        $site = $request->get('site', false);
+
+        if (null === $site) {
+            $site = $request->request->get('site_id', $default);
+        }
+
+        return $site ?? $default;
     }
 
     public function getCurrentSite(): ?SonataPageSite
@@ -140,15 +150,29 @@ trait AdminTranslationTrait
         return (string) $this->getLabel();
     }
 
-    protected function preCreateTrait(Request $request, object $object): ?Response
-    {
-        $object->setSite($this->admin->getCurrentSite());
+//    protected function preCreateTrait(Request $request, object $object): ?Response
+//    {
+//        $object->setSite($this->admin->getCurrentSite());
+//
+//        return null;
+//    }
+//
+//    #[ORM\PrePersist]
+//    protected function preCreate(Request $request, object $object): ?Response
+//    {
+//        dd('df');
+//        return $this->preCreateTrait($request, $object);
+//    }
 
-        return null;
-    }
-
-    protected function preCreate(Request $request, object $object): ?Response
+    #[ORM\PrePersist]
+    public function preCreate(PrePersistEventArgs $args): void
     {
-        return $this->preCreateTrait($request, $object);
+        dd($args);
+        $entity = $args->getObject();
+
+        // Vérifie que l'objet est bien de l'entité attendue
+
+        // Applique les modifications à l'entité avant la persistance
+        $entity->setSite($this->getCurrentSite());
     }
 }

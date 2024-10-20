@@ -28,6 +28,7 @@ readonly class TranslationEntityListener
 
         $locales = [];
         $entity = $args->getObject();
+
         $objectManager = $args->getObjectManager();
 
         if (!$this->isTranslation($entity) && !$this->isPage($entity)) {
@@ -151,6 +152,7 @@ readonly class TranslationEntityListener
 
     public function postPersist(PostPersistEventArgs $args): void
     {
+
         $entity = $args->getObject();
         $objectManager = $args->getObjectManager();
 

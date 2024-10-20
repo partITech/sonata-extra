@@ -49,6 +49,10 @@ class EditorAdmin extends AbstractAdmin
     private MediaManager $mediaManager;
     private ImageProviderInterface $providerImage;
     private ParameterBagInterface $parameterBag;
+    private string $userClass;
+    private string $categoryClass;
+    private string $tagClass;
+
 
     #[Required]
     public function required(

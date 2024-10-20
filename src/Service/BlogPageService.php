@@ -20,8 +20,12 @@ use Symfony\Contracts\Service\Attribute\Required;
 class BlogPageService implements PageServiceInterface
 {
     private TemplateManager $templateManager;
-
-    private $parameterBag;
+    private KernelInterface $kernel;
+    private MediaManagerInterface $mediaManager;
+    private EntityManagerInterface $entityManager;
+    private Pool $providerPool;
+    private ParameterBagInterface $parameterBag;
+    private string $configDir;
 
     #[Required]
     public function required(

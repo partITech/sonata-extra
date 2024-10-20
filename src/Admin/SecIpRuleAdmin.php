@@ -25,48 +25,44 @@ class SecIpRuleAdmin extends AbstractAdmin
 {
     private $cache;
 
-
     #[Required]
     public function required(
         CacheInterface $cache
     ): void {
-        $this->cache=$cache;
+        $this->cache = $cache;
     }
 
-
-
-    protected function configureFormFields(FormMapper $formMapper):void
+    protected function configureFormFields(FormMapper $form): void
     {
-        $formMapper->add('ip', TextType::class);
+        $form->add('ip', TextType::class);
     }
 
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper):void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $datagridMapper->add('ip');
+        $filter->add('ip');
     }
 
-    protected function configureListFields(ListMapper $listMapper):void
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper->addIdentifier('ip');
+        $list->addIdentifier('ip');
     }
 
-    protected function configureShowFields(ShowMapper $showMapper):void
+    protected function configureShowFields(ShowMapper $show): void
     {
-        $showMapper->add('ip');
+        $show->add('ip');
     }
 
-
-    public function postUpdate($object):void
+    public function postUpdate($object): void
     {
         $this->clearCache();
     }
 
-    public function postPersist($object):void
+    public function postPersist($object): void
     {
         $this->clearCache();
     }
 
-    public function postRemove($object):void
+    public function postRemove($object): void
     {
         $this->clearCache();
     }
@@ -75,5 +71,4 @@ class SecIpRuleAdmin extends AbstractAdmin
     {
         $this->cache->delete('ip_rules_cache');
     }
-
 }

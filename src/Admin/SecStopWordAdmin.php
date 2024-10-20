@@ -1,16 +1,27 @@
 <?php
+
+/*
+ * This file is part of the Symfony package.
+ *
+ * (c) Fabien Potencier <fabien@symfony.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
 use Partitech\SonataExtra\Entity\SecStopWord;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
-use Sonata\AdminBundle\Form\FormMapper;
-use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
+use Sonata\AdminBundle\Datagrid\ListMapper;
+use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Show\ShowMapper;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Contracts\Cache\CacheInterface;
 use Symfony\Contracts\Service\Attribute\Required;
+
 #[AsAdmin(
     manager_type: 'orm',
     group: 'Admin',
@@ -22,45 +33,46 @@ use Symfony\Contracts\Service\Attribute\Required;
 )]
 class SecStopWordAdmin extends AbstractAdmin
 {
+    private CacheInterface $cache;
 
     #[Required]
     public function required(
         CacheInterface $cache
     ): void {
-        $this->cache=$cache;
+        $this->cache = $cache;
     }
 
-    protected function configureFormFields(FormMapper $formMapper):void
+    protected function configureFormFields(FormMapper $form): void
     {
-        $formMapper->add('word', TextType::class);
+        $form->add('word', TextType::class);
     }
 
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper):void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
-        $datagridMapper->add('word');
+        $filter->add('word');
     }
 
-    protected function configureListFields(ListMapper $listMapper):void
+    protected function configureListFields(ListMapper $list): void
     {
-        $listMapper->addIdentifier('word');
+        $list->addIdentifier('word');
     }
 
-    protected function configureShowFields(ShowMapper $showMapper):void
+    protected function configureShowFields(ShowMapper $show): void
     {
-        $showMapper->add('word');
+        $show->add('word');
     }
 
-    public function postUpdate($object):void
-    {
-        $this->clearCache();
-    }
-
-    public function postPersist($object):void
+    public function postUpdate($object): void
     {
         $this->clearCache();
     }
 
-    public function postRemove($object):void
+    public function postPersist($object): void
+    {
+        $this->clearCache();
+    }
+
+    public function postRemove($object): void
     {
         $this->clearCache();
     }

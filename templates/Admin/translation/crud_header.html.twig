@@ -1,7 +1,7 @@
 {% set sites = admin.siteList %}
 {% set currentSite = admin.currentSite %}
 {% set currentSelectedLocalId = admin.currentSelectedLocal %}
-{% set request_site = app.request.query.get('site') %}
+{% set request_site = app.request.query.get('site') ?? app.request.request.get('site') %}
 {% if object is defined %}
     {% set currentSite =  object.site %}
 {% endif %}

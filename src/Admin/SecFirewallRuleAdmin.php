@@ -26,6 +26,8 @@ use Symfony\Contracts\Service\Attribute\Required;
 )]
 class SecFirewallRuleAdmin extends AbstractAdmin
 {
+    private CacheInterface $cache;
+
     #[Required]
     public function required(
         CacheInterface $cache
@@ -33,9 +35,9 @@ class SecFirewallRuleAdmin extends AbstractAdmin
         $this->cache=$cache;
     }
 
-    protected function configureFormFields(FormMapper $formMapper):void
+    protected function configureFormFields(FormMapper $form):void
     {
-        $formMapper
+        $form
             ->add('label')
 
 
@@ -70,21 +72,21 @@ class SecFirewallRuleAdmin extends AbstractAdmin
             ]);
     }
 
-    protected function configureDatagridFilters(DatagridMapper $datagridMapper):void
+    protected function configureDatagridFilters(DatagridMapper $filter):void
     {
-        $datagridMapper->add('type');
-        $datagridMapper->add('source');
-        $datagridMapper->add('parameters');
+        $filter->add('type');
+        $filter->add('source');
+        $filter->add('parameters');
     }
 
-    protected function configureListFields(ListMapper $listMapper):void
+    protected function configureListFields(ListMapper $list):void
     {
-        $listMapper->addIdentifier('label', null, [
+        $list->addIdentifier('label', null, [
             'route' => [
                 'name' => 'edit'
             ]
         ]);
-        $listMapper->add('type', 'choice', [
+        $list->add('type', 'choice', [
             'editable' => true,
             'choices' => [
                 'Stop Word' => 'stop_word',
@@ -94,7 +96,7 @@ class SecFirewallRuleAdmin extends AbstractAdmin
                 'IP DB' => 'ip_db',
             ]
         ]);
-        $listMapper->add('source',  'choice', [
+        $list->add('source',  'choice', [
             'editable' => true,
             'choices' => [
                 'GET' => 'get',
@@ -103,25 +105,25 @@ class SecFirewallRuleAdmin extends AbstractAdmin
                 'Header' => 'header',
             ]
         ]);
-        $listMapper->add('matchMode', 'choice', [
+        $list->add('matchMode', 'choice', [
             'editable' => true,
             'choices' => [
                 'Equal' => 'equal',
                 'Contain' => 'contain',
             ]
         ]);
-        $listMapper->add('parameters', null, [
+        $list->add('parameters', null, [
             'template' => '@PartitechSonataExtra/Admin/secFirewall/list_field_parameters.html.twig'
         ]);
     }
 
-    protected function configureShowFields(ShowMapper $showMapper):void
+    protected function configureShowFields(ShowMapper $show):void
     {
 
-        $showMapper->add('type');
-        $showMapper->add('source');
-        $showMapper->add('matchMode');
-        $showMapper->add('parameters');
+        $show->add('type');
+        $show->add('source');
+        $show->add('matchMode');
+        $show->add('parameters');
     }
 
     public function postUpdate($object):void

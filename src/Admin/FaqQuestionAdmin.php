@@ -29,9 +29,9 @@ class FaqQuestionAdmin extends AbstractAdmin
     }
     protected $parentAssociationMapping = 'category';
 
-    protected function configureFormFields(FormMapper $formMapper): void
+    protected function configureFormFields(FormMapper $form): void
     {
-        $formMapper
+        $form
             ->add('category', ModelType::class)
             ->add('active')
             ->add('question')

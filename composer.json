@@ -6,7 +6,7 @@
     "license": "MIT",
     "autoload": {
         "psr-4": {
-            "Partitech\\SonataExtra\\": "src"
+            "Partitech\\SonataExtra\\": "src/"
         }
     },
     "require": {
@@ -15,20 +15,20 @@
         "sonata-project/classification-bundle": "^4.7",
         "sonata-project/doctrine-orm-admin-bundle": "^4.10",
         "sonata-project/formatter-bundle": "^5.1",
-        "sonata-project/page-bundle": "5.x-dev",
-        "sonata-project/media-bundle": "^4.10.4",
-        "sonata-project/translation-bundle": "^3.1",
+        "sonata-project/page-bundle": "^5.0 || ^6.0",
+        "sonata-project/media-bundle": "^4.10 || ^4.14.1",
+
         "sonata-project/user-bundle": "*",
         "league/csv": "^9.11",
         "jms/serializer-bundle": "^5.3.1",
         "psr/http-factory": "^1.0",
         "symfony/templating" : "*",
         "guzzlehttp/guzzle": "^7.8",
-        "presta/sitemap-bundle": "^3.3",
+        "presta/sitemap-bundle": "^3.3 || ^4.1.1",
         "symfony/mime": "*",
         "ext-dom": "*",
         "ext-libxml": "*",
-        "partitech/sonata-menu-bundle": "*",
+        "partitech/sonata-menu-bundle": "7.x-dev",
         "ext-zip": "*",
         "google/recaptcha": "*"
     },

@@ -19,6 +19,9 @@ class RedirectionListener
     public function onKernelRequest(RequestEvent $event)
     {
         $request = $event->getRequest();
+        if (str_starts_with($request->getPathInfo(), '/_profiler') || str_starts_with($request->getPathInfo(), '/_wdt')) {
+            return;
+        }
         $repository = $this->entityManager->getRepository(Redirection::class);
         $redirection = $repository->findOneBy(['source' => $request->getPathInfo()]);
 

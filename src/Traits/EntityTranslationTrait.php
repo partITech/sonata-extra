@@ -5,8 +5,8 @@ namespace Partitech\SonataExtra\Traits;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Contract\SiteInterface;
-use Partitech\SonataExtra\Enum\ArticleStatus;
 
+#[ORM\HasLifecycleCallbacks]
 trait EntityTranslationTrait
 {
     #[ORM\Column(type: 'integer', nullable: true)]
@@ -23,9 +23,24 @@ trait EntityTranslationTrait
         
         // used in \Sonata\ClassificationBundle\Model\Category::__construct
         // cannot use parent::_construct as parent do not allways have constructor.
-        $this->children = new ArrayCollection();
+        //$this->children = new ArrayCollection();
         
     }
+
+    #[ORM\PrePersist]
+    public function onPrePersist(): void
+    {
+        $this->createdAt = new \DateTimeImmutable();
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+    #[ORM\PreUpdate]
+    public function onPreUpdate(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
+    }
+
+
     public function setId($id)
     {
         $this->id = $id;

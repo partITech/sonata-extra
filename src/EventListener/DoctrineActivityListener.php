@@ -117,6 +117,9 @@ class DoctrineActivityListener
             $adminLogId=$this->logActivity('create', $entity, $objectManager);
 
         }
+/*        if (method_exists($entity, 'prePersist')) {
+            $entity->prePersist();
+        }*/
     }
 
     /**
@@ -126,7 +129,6 @@ class DoctrineActivityListener
      */
     public function preUpdate(PreUpdateEventArgs $args): void
     {
-
         if ($this->needAproval()) {
             return;
         }
@@ -148,6 +150,11 @@ class DoctrineActivityListener
             $this->logChangeSet('update', $objectManager, $changeSet, $entity, $adminLogId);
 
         }
+
+/*        if (method_exists($entity, 'preUpdate')) {
+            $entity->preUpdate();
+        }*/
+
         /*if ($this->isAdmin()) {
             $adminLogId = $this->logActivity('update', $entity, $objectManager);
 

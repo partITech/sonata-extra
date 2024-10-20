@@ -16,7 +16,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -49,6 +49,7 @@ class PageAdminController extends AbstractController
         CmsManagerSelectorInterface $cmsSelector,
         PageServiceManagerInterface $pageServiceManager,
     ): void {
+
         $this->tokenStorage = $tokenStorage;
         $this->entityManager = $entityManager;
         $this->translator = $translator;
@@ -61,6 +62,7 @@ class PageAdminController extends AbstractController
         $this->smartServiceTranslation=$this->parameterBag->get('partitech_sonata_extra.smart_service.provider.translation');
         $this->cmsSelector = $cmsSelector;
         $this->pageServiceManager = $pageServiceManager;
+
     }
 
     #[Route('/admin/app/sonatapagepage/create-page-from-locale/{id}/{from_site}/{to_site}', name: 'sonata_extra_page_create_page_from_locale')]
@@ -92,6 +94,8 @@ class PageAdminController extends AbstractController
                 ->setParameter('translation_from_id', $translationId)
                 ->setParameter('site', $to_site);
             $parent_id = $qb->getQuery()->getOneOrNullResult();
+        }else{
+            $parent_id=null;
         }
 
         // get cibling site
@@ -206,6 +210,7 @@ class PageAdminController extends AbstractController
             ->setParameter('site', $clonedObject->getSite())
             ->setParameter('translationFromId', $object->getTranslationFromId());
         $page = $qb->getQuery()->getOneOrNullResult();
+
         if($page){
             if (PHP_SAPI !== 'cli') {
                 $editUrl = $admin->generateObjectUrl('edit', $page);

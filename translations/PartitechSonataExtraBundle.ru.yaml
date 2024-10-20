@@ -1,0 +1,237 @@
+sonata-extra:
+  approve:
+    log_message: "Пользователь <b>[user]</b> [action] элемент [entity]"
+    approval_message: "Ожидает утверждения."
+    approved_by_message: "<br> Утверждено <b>[user]</b> [date]."
+    cancel_modification: "Вы уверены, что хотите отменить это изменение?"
+    cancel_modification_btn: "Отменить изменение"
+    approve_create: "Вы уверены, что хотите утвердить это создание?"
+    approve_delete: "Вы уверены, что хотите утвердить это удаление?"
+    approve_update: "Вы уверены, что хотите утвердить это изменение?"
+    approve_create_btn: "Утвердить создание"
+    approve_delete_btn: "Утвердить удаление"
+    approve_update_btn: "Утвердить изменение"
+    purge_all_btn: "Очистить ожидающие изменения"
+    confirm_purge_all: "Вы уверены, что хотите очистить ожидающие изменения?"
+
+    success_message:
+      create: "Создание должно быть утверждено, чтобы вступить в силу."
+      update: "Обновление должно быть утверждено, чтобы вступить в силу."
+      delete: "Удаление должно быть утверждено, чтобы вступить в силу."
+      all_applied: "Все изменения были применены."
+      create_applied: "Создание было применено."
+      revert_successfully: "Изменение было успешно отменено."
+      all_revert_applied: "Все изменения успешно отменены."
+      purge: "Утвержденные изменения были успешно очищены."
+    error_message:
+      journal_not_found: 'Журнал изменений не найден.'
+      journal_not_found_for_activity: 'Журнал изменений для этой активности не найден.'
+      entity_not_found: 'Сущность не найдена.'
+      token: "Недействительный токен, повторите попытку."
+
+  redirect_admin:
+    import_btn: "Импортировать ваши редиректы в формате CSV"
+    import_title: "Импортировать ваши редиректы в формате CSV"
+    success:
+      import: "Импорт выполнен успешно"
+
+  faq:
+    manage_question: "Управление вопросами"
+
+  article_admin:
+    retour: "Назад"
+    revisions: "Ревизии"
+    global_settings: "Глобальные настройки"
+    publish_settings: "Настройки публикации"
+    published_at: "Опубликовано"
+    author: "Автор"
+    status: "Статус"
+    published: "Опубликовано"
+    draft: "Черновик"
+    title: "Заголовок"
+    contenu: "Содержание"
+    content: "Содержание"
+    id: "ID"
+    actions: "Действия"
+    edit: "Редактировать"
+    delete: "Удалить"
+    editor_gutenberg: "Редактор: Gutenberg"
+    editor_ckeditor: "Редактор: Ckeditor"
+    editor_textarea: "Редактор: Текстовое поле"
+    editor_markdown: "Редактор: Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Текстовое поле"
+    label_markdown: "Markdown"
+    msg_editor_change: "Редактор был изменен"
+    seo_proposal: "SEO предложение"
+    seo_modal_title: "Рассчитайте оптимальные SEO параметры для этого контента"
+    seo_modal_excerpt: "Резюме"
+    seo_modal_seo_title: "Meta заголовок"
+    seo_modal_seo_description: "Meta описание"
+    seo_modal_seo_seokeywords: "Meta ключевые слова"
+    seo_modal_seo_slug: "SLUG"
+    seo_modal_calculate_btn: "Рассчитать"
+    seo_modal_use_btn: "Использовать"
+    seo_modal_error: "Кажется, возникла проблема с SEO предложениями.<br> Пожалуйста, попробуйте снова."
+
+  editor_admin:
+    editor_gutenberg: "Редактор: Gutenberg"
+    editor_ckeditor: "Редактор: Ckeditor"
+    editor_textarea: "Редактор: Текстовое поле"
+    editor_markdown: "Редактор: Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Текстовое поле"
+    label_markdown: "Markdown"
+    msg_editor_change: "Редактор был изменен"
+
+  page_admin:
+    tree_view:
+      create_translation_popin: "Выберите исходный язык для перевода вашей страницы"
+      create: "Создание страницы для сайта "
+      edit: "Редактирование страницы для сайта"
+    compose:
+      preview_btn: "Предпросмотр страницы"
+
+  translation:
+    selector_title: "Страницы для сайта"
+    create_entity: "Создать запись для сайта"
+    create: "Создать перевод для сайта"
+    edit: "Редактировать перевод для сайта"
+    header_list_label: "Переводы"
+
+  block_contact:
+    recaptcha: "Включить reCAPTCHA V3"
+    recaptcha_site_key: "Ключ сайта reCAPTCHA"
+    recaptcha_site_secret: "Секретный ключ сайта reCAPTCHA"
+    title: "Заголовок"
+    first_name: "Имя"
+    use_field_first_name: "Использовать поле имени"
+    first_name_label: "Метка поля имени"
+    last_name: "Фамилия"
+    use_field_last_name: "Использовать поле фамилии"
+    last_name_label: "Метка поля фамилии"
+    company_name: "Компания"
+    use_field_company_name: "Использовать поле компании"
+    company_name_label: "Метка поля компании"
+    address: "Адрес"
+    use_field_address: "Использовать поле адреса"
+    address_label: "Метка поля адреса"
+    email: "Электронная почта"
+    use_field_email: "Использовать поле электронной почты"
+    email_label: "Метка поля электронной почты"
+    phone: "Телефон"
+    use_field_phone: "Использовать поле телефона"
+    phone_label: "Метка поля телефона"
+    use_field_additional_information: "Использовать поле дополнительной информации"
+    additional_information: "Дополнительная информация"
+    additional_information_label: "Метка поля дополнительной информации"
+    required_field: "Обязательное поле?"
+    send_me_a_copy: "Предложить отправку копии сообщения?"
+    send_me_a_copy_label: "Метка для предложения отправки копии сообщения"
+    send_me_a_copy_default_message: "Отправить мне копию"
+    send_to_label: "Отправить внутреннюю копию сообщения?"
+    send_to: "Укажите электронную почту получателя"
+    submit_label: "Метка кнопки отправки"
+
+    mail_confirmation: "Шаблон письма с подтверждением для пользователя"
+    mail_subject: "Тема отправленного письма"
+    mail_admin_notification: "Шаблон письма с подтверждением для администратора"
+    mail_signature: "Подпись электронной почты"
+
+    confirmation_message_label: "Сообщение с подтверждением"
+    confirmation_message: |
+      <div class="container">
+        <div class="contact_confirmation">
+          <h4 class="alert-heading">Спасибо, что связались с нами!</h4>
+          <p>Ваше сообщение было успешно отправлено. Мы получили ваш запрос и ответим вам в ближайшее время.</p>
+          <p class="mb-0">Между тем, не стесняйтесь ознакомиться с нашим сайтом для получения дополнительной информации.</p>
+        </div>
+      </div>
+    confirmation_template_label: "Шаблон подтверждения"
+    confirmation_javascript_label: "Javascript страницы подтверждения"
+
+    firstName_not_blank: "Имя обязательно."
+    lastName_not_blank: "Фамилия обязательна."
+    companyName_not_blank: "Название компании обязательно."
+    address_not_blank: "Адрес обязателен."
+    email_not_blank: "Электронная почта обязательна."
+    email_invalid: "Недействительный адрес электронной почты."
+    phone_not_blank: "Номер телефона обязателен."
+    phone_invalid: "Недействительный номер телефона."
+    additionalInformation_not_blank: "Поле дополнительной информации обязательно."
+    submitLabel: "Отправить"
+
+    confirmation:
+      title: "Подтверждение вашего запроса на контакт"
+      heading: "Подтверждение вашего запроса на контакт"
+      greeting: "Здравствуйте"
+      received: "Мы получили ваш запрос с следующей информацией:"
+      firstName: "Имя"
+      lastName: "Фамилия"
+      email: "Электронная почта"
+      phone: "Телефон"
+      message: "Сообщение"
+      confirmation: "Это подтверждение того, что мы получили ваше сообщение. Член нашей команды свяжется с вами в ближайшее время."
+      thankYou: "Спасибо за обращение к нам."
+      regards: "С уважением"
+
+    admin-notification:
+      title: "Новый запрос на контакт"
+      heading: "Новый запрос на контакт"
+      introduction: "Вы получили новый запрос с следующей информацией:"
+      procedure: "Пожалуйста, следуйте внутренним процедурам обработки этого запроса."
+
+  search:
+    submit_label: "Отправить"
+    label_submit_label: "Метка кнопки отправки"
+    placeholder: "Заполнитель"
+    result_title: "Результаты"
+    no_article_found_for_this_search: "Для этого поиска статьи не найдены."
+
+  blog:
+    section_article_title: "Раздел"
+    section_category_list_title: "Раздел"
+    section_tag_list_title: "Раздел"
+    no_article_found_for_this_category: "Статьи для этой категории не найдены."
+    no_article_found_for_this_tag: "Статьи для этого тега не найдены."
+    write_by: "Автор"
+    publish_date: "опубликовано"
+    read_more: "Читать далее"
+    categories: "Категория: "
+    tags: "Теги: "
+    btn_read_more: "Читать далее"
+    share_this_article: "Поделиться этой статьей"
+    about_the_author: "Об авторе"
+
+  category:
+    label_saved: "Категория успешно сохранена"
+    label_error: "Произошла ошибка"
+    tree_catalog_title: "Изменение категорий"
+    label_delete: "Удалить"
+    label_modify: "Изменить"
+    label_enabled: "Включено"
+    label_disabled: "Отключено"
+    label_action: "Действие"
+  crud:
+    reset_filter: "Сбросить фильтры"
+    refresh: "Обновить страницу"
+
+Id: "Идентификатор"
+Title: "Заголовок"
+Description: "Описание"
+Slider List: "Список слайдеров"
+Security Firewall Rule: "Правило безопасности брандмауэра"
+Security Stop Word: "Стоп-слово безопасности"
+Security Ip Rule: "Правило IP безопасности"
+Redirections: "Перенаправления"
+Tag Multilangue: "Многоязычный тег"
+Category multilangue: "Многоязычная категория"
+Editor: "Редактор"
+Slider: "Слайдер"
+FAQs - Catégories: "Часто задаваемые вопросы - Категории"
+Contact: "Контакт"
+Article: "Статья"
+Activity Logs: "Журналы активности"
+Modifications en attentes: "Ожидающие изменения"

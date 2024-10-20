@@ -1,13 +1,14 @@
 
 
-#controllers:
-#  resource:
-#    path: ../src/Controller/
-#    namespace: App\Controller
-#  type: attribute
-partitech_sonata_extra.routes:
-  type: annotation
-  resource: '../src/Controller'
+partitech_sonata_extra.controllers:
+  resource:
+    path: ../src/Controller/
+    namespace: Partitech\SonataExtra\Controller
+  type: attribute
+
+#partitech_sonata_extra.routes:
+#  type: annotation
+#  resource: '../src/'
 
 
 #admin_route_list:

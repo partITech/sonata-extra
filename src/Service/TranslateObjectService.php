@@ -18,6 +18,8 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Partitech\SonataExtra\SmartService\TranslationCreateTemplateService;
 
+use Doctrine\ORM\Mapping\ClassMetadata;
+
 class TranslateObjectService
 {
     use ControllerTranslationTrait;
@@ -32,6 +34,8 @@ class TranslateObjectService
     private $site;
     private $smart_service_conf;
     private $has__clone;
+    private bool $createTranslationTemplate;
+    private string $smartServiceTranslation;
 
     #[Required]
     public function autowireDependencies(
@@ -102,7 +106,7 @@ class TranslateObjectService
 
             foreach ($associations as $relations) {
                 $field_name = $relations['fieldName'];
-                if ('site' != $field_name && 'context' != $field_name && \Doctrine\ORM\Mapping\ClassMetadataInfo::ONE_TO_MANY == $relations['type']) {
+                if ('site' != $field_name && 'context' != $field_name && ClassMetadata::ONE_TO_MANY == $relations['type']) {
                     $relation_items = $this->entityPropertyGet($clonedObject, $field_name);
 
                     $newRelatedEntities = [];
@@ -122,7 +126,7 @@ class TranslateObjectService
 
             foreach ($associations as $relations) {
                 $field_name = $relations['fieldName'];
-                if ('site' != $field_name && 'context' != $field_name && \Doctrine\ORM\Mapping\ClassMetadataInfo::ONE_TO_MANY == $relations['type']) {
+                if ('site' != $field_name && 'context' != $field_name && ClassMetadata::ONE_TO_MANY == $relations['type']) {
                     $relation_items = $this->entityPropertyGet($clonedObject, $field_name);
                     $newRelatedEntities = [];
 
@@ -132,7 +136,7 @@ class TranslateObjectService
                     }
                     $clonedCollection = new ArrayCollection($newRelatedEntities);
                     $clonedObject = $this->entityPropertySet($clonedObject, $field_name, $clonedCollection);
-                } elseif ('site' != $field_name && 'context' != $field_name && \Doctrine\ORM\Mapping\ClassMetadataInfo::MANY_TO_ONE == $relations['type']) {
+                } elseif ('site' != $field_name && 'context' != $field_name && ClassMetadata::MANY_TO_ONE == $relations['type']) {
                     $clonedObject = $this->entityPropertySet($clonedObject, $field_name, null);
                 }
             }
@@ -182,7 +186,7 @@ class TranslateObjectService
 
         foreach ($associations as $relations) {
             $field_name = $relations['fieldName'];
-            if ('site' != $field_name && 'context' != $field_name && \Doctrine\ORM\Mapping\ClassMetadataInfo::ONE_TO_MANY == $relations['type']) {
+            if ('site' != $field_name && 'context' != $field_name && ClassMetadata::ONE_TO_MANY == $relations['type']) {
                 $relation_items = $this->entityPropertyGet($object, $field_name);
 
                 $newRelatedEntities = [];
@@ -252,7 +256,7 @@ class TranslateObjectService
         $associations = $metadata->getAssociationMappings();
         foreach ($associations as $relation) {
             $field = $relation['fieldName'];
-            if (\Doctrine\ORM\Mapping\ClassMetadataInfo::ONE_TO_MANY == $relation['type']) {
+            if (ClassMetadata::ONE_TO_MANY == $relation['type']) {
                 $relatedEntities = $this->entityPropertyGet($objectToAdd, $field);
                 foreach ($relatedEntities as $relatedEntity) {
                     $objectToAdd = $this->entityPropertyAdd($objectToAdd, $field, $relation['mappedBy'], $relatedEntity);  // Appel récursif
@@ -323,7 +327,7 @@ class TranslateObjectService
             $associations = $metadata->getAssociationMappings();
             foreach ($associations as $relations) {
                 $field_name = $relations['fieldName'];
-                if ('site' != $field_name && 'context' != $field_name && \Doctrine\ORM\Mapping\ClassMetadataInfo::MANY_TO_ONE == $relations['type']) {
+                if ('site' != $field_name && 'context' != $field_name && ClassMetadata::MANY_TO_ONE == $relations['type']) {
                     $clonedObject = $this->entityPropertySet($clonedObject, $field_name, null);
                 }
             }

@@ -1,0 +1,238 @@
+sonata-extra:
+  approve:
+    log_message : "L'utente <b>[user]</b> ha [action] l'elemento [entity]"
+    approval_message : "In attesa di convalida."
+    approved_by_message : "<br> Approvato da <b>[user]</b> il [date]."
+    cancel_modification: "Sei sicuro di voler annullare questa modifica?"
+    cancel_modification_btn: "Annulla la modifica"
+    approve_create: "Sei sicuro di voler approvare questa creazione?"
+    approve_delete: "Sei sicuro di voler approvare questa eliminazione?"
+    approve_update: "Sei sicuro di voler approvare questa modifica?"
+    approve_create_btn: "Approva la creazione"
+    approve_delete_btn: "Approva l'eliminazione"
+    approve_update_btn: "Approva la modifica"
+    purge_all_btn: "Pulisci le modifiche in sospeso"
+    confirm_purge_all: "Sei sicuro di voler eliminare tutte le modifiche in sospeso?"
+
+    success_message:
+      create: "La creazione deve essere approvata per essere effettiva."
+      update: "La modifica deve essere approvata per essere effettiva."
+      delete: "L'eliminazione deve essere approvata per essere effettiva."
+      all_applied: "Tutte le modifiche sono state applicate."
+      create_applied: "La creazione è stata applicata."
+      revert_successfully: "La modifica è stata annullata con successo."
+      all_revert_applied: "Tutte le modifiche sono state annullate con successo."
+      purge: "Le modifiche approvate sono state eliminate con successo."
+    error_message:
+      journal_not_found: 'Registro delle modifiche non trovato.'
+      journal_not_found_for_activity: 'Nessun registro delle modifiche trovato per questa attività.'
+      entity_not_found: 'Entità non trovata.'
+      token: "Token non valido, riprova."
+
+  redirect_admin:
+    import_btn: "Importa i tuoi reindirizzamenti in formato CSV"
+    import_title: "Importa i tuoi reindirizzamenti in formato CSV"
+    success:
+      import: "Importazione riuscita"
+
+  faq:
+    manage_question: "Gestisci le domande"
+
+  article_admin:
+    retour: "Ritorna"
+    revisions: "Revisioni"
+    global_settings: "Impostazioni globali"
+    publish_settings: "Impostazioni di pubblicazione"
+    published_at: "Pubblicato il"
+    author: "Autore"
+    status: "Stato"
+    published: "Pubblicato"
+    draft: "Bozza"
+    title: "Titolo"
+    contenu: "Contenuto"
+    content: "Contenuto"
+    id: "ID"
+    actions: "Azioni"
+    edit: "Modifica"
+    delete: "Elimina"
+    editor_gutenberg: "Editor: Gutenberg"
+    editor_ckeditor: "Editor: Ckeditor"
+    editor_textarea: "Editor: Textarea"
+    editor_markdown: "Editor: Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Textarea"
+    label_markdown: "Markdown"
+    msg_editor_change: "L'editor è stato cambiato"
+    seo_proposal: "Proposta SEO"
+    seo_modal_title: "Calcola i parametri SEO ottimali per questo contenuto"
+    seo_modal_excerpt: "Riassunto (excerpt)"
+    seo_modal_seo_title: "Meta title"
+    seo_modal_seo_description: "Meta description"
+    seo_modal_seo_seokeywords: "Meta keywords"
+    seo_modal_seo_slug: "SLUG"
+    seo_modal_calculate_btn: "Calcola"
+    seo_modal_use_btn: "Usa"
+    seo_modal_error: "Sembra che ci sia un problema con il servizio di suggerimenti SEO.<br> Per favore, riprova il calcolo."
+
+  editor_admin:
+    editor_gutenberg: "Editor: Gutenberg"
+    editor_ckeditor: "Editor: Ckeditor"
+    editor_textarea: "Editor: Textarea"
+    editor_markdown: "Editor: Markdown"
+    label_gutenberg: "Gutenberg"
+    label_ckeditor: "Ckeditor"
+    label_textarea: "Textarea"
+    label_markdown: "Markdown"
+    msg_editor_change: "L'editor è stato cambiato"
+
+  page_admin:
+    tree_view:
+      create_translation_popin: "Seleziona la lingua sorgente per la traduzione della tua pagina"
+      create: "Creazione della pagina per il sito"
+      edit: "Modifica della pagina per il sito"
+    compose:
+      preview_btn: "Anteprima della pagina"
+
+  translation:
+    selector_title: "Pagine per il sito"
+    create_entity: "Crea un record per il sito"
+    create: "Crea la traduzione per il sito"
+    edit: "Modifica la traduzione per il sito"
+    header_list_label: "Traduzioni"
+
+  block_contact:
+    recaptcha: "Attiva recaptcha V3"
+    recaptcha_site_key: "Chiave sito recaptcha"
+    recaptcha_site_secret: "Chiave segreta recaptcha"
+    title: "Titolo"
+    first_name: "Nome"
+    use_field_first_name: "Usa il campo nome"
+    first_name_label: "Etichetta del campo nome"
+    last_name: "Cognome"
+    use_field_last_name: "Usa il campo cognome"
+    last_name_label: "Etichetta del campo cognome"
+    company_name: "Azienda"
+    use_field_company_name: "Usa il campo azienda"
+    company_name_label: "Etichetta del campo azienda"
+    address: "Indirizzo"
+    use_field_address: "Usa il campo indirizzo"
+    address_label: "Etichetta del campo indirizzo"
+    email : "Email"
+    use_field_email: "Usa il campo email"
+    email_label: "Etichetta del campo email"
+    phone: "Telefono"
+    use_field_phone: "Usa il campo telefono"
+    phone_label: "Etichetta del campo telefono"
+    use_field_additional_information: "Usa il campo informazioni aggiuntive"
+    additional_information: "Informazioni aggiuntive"
+    additional_information_label: "Etichetta del campo informazioni aggiuntive"
+    required_field: "Campo richiesto?"
+    send_me_a_copy: "Offri la possibilità di inviare una copia del messaggio?"
+    send_me_a_copy_label: "Etichetta della domanda per inviare una copia del messaggio"
+    send_me_a_copy_default_message: "Inviami una copia"
+    send_to_label: "Invia una copia interna del messaggio?"
+    send_to: "Inserisci l'email di destinazione"
+    submit_label: "Etichetta del pulsante di invio"
+
+    mail_confirmation: "Template dell'email di conferma per l'utente"
+    mail_subject: "Oggetto dell'email inviata"
+    mail_admin_notification: "Template dell'email di conferma per l'amministratore"
+    mail_signature: "Firma dell'email"
+
+    confirmation_message_label: "Messaggio di conferma"
+    confirmation_message: |
+      <div class="container">
+        <div class="contact_confirmation">
+          <h4 class="alert-heading">Grazie per averci contattato!</h4>
+          <p>Il tuo messaggio è stato inviato con successo. Abbiamo ricevuto la tua richiesta e ti risponderemo al più presto.</p>
+          <p class="mb-0">Nel frattempo, non esitare a esplorare il nostro sito per maggiori informazioni.</p>
+        </div>
+      </div>
+    confirmation_template_label: "Template di conferma"
+    confirmation_javascript_label: "Javascript della pagina di conferma"
+
+    firstName_not_blank: "Il nome è obbligatorio."
+    lastName_not_blank: "Il cognome è obbligatorio."
+    companyName_not_blank: "Il nome dell'azienda è obbligatorio."
+    address_not_blank: "L'indirizzo è obbligatorio."
+    email_not_blank: "L'indirizzo email è obbligatorio."
+    email_invalid: "L'indirizzo email non è valido."
+    phone_not_blank: "Il numero di telefono è obbligatorio."
+    phone_invalid: "Il numero di telefono non è valido."
+    additionalInformation_not_blank: "Il campo delle informazioni aggiuntive è obbligatorio."
+    submitLabel: "Invia"
+
+    confirmation:
+      title: "Conferma della tua richiesta di contatto"
+      heading: "Conferma della tua richiesta di contatto"
+      greeting: "Ciao"
+      received: "Abbiamo ricevuto la tua richiesta di contatto con le seguenti informazioni:"
+      firstName: "Nome"
+      lastName: "Cognome"
+      email: "Email"
+      phone: "Telefono"
+      message: "Messaggio"
+      confirmation: "Questa è una conferma che abbiamo ricevuto il tuo messaggio. Un membro del nostro team ti contatterà a breve."
+      thankYou: "Grazie per averci contattato."
+      regards: "Cordiali saluti"
+
+    admin-notification:
+      title: "Nuova richiesta di contatto"
+      heading: "Nuova richiesta di contatto"
+      introduction: "Hai ricevuto una nuova richiesta di contatto con le seguenti informazioni:"
+      procedure: "Si prega di seguire questa richiesta in conformità con le nostre procedure interne."
+
+  search:
+    submit_label: "Invia"
+    label_submit_label: "Etichetta del pulsante di invio"
+    placeholder: "Segnaposto"
+    result_title: "Risultati"
+    no_article_found_for_this_search: "Nessun articolo trovato per questa ricerca."
+
+  blog:
+    section_article_title: "Sezione"
+    section_category_list_title: "Sezione"
+    section_tag_list_title: "Sezione"
+    no_article_found_for_this_category: "Nessun articolo trovato per questa categoria."
+    no_article_found_for_this_tag: "Nessun articolo trovato per questo tag."
+    write_by: "Scritto da"
+    publish_date: "il"
+    read_more: "Leggi di più"
+    categories: "Categoria: "
+    tags: "Tag: "
+    btn_read_more: "Leggi di più"
+    share_this_article: "Condividi questo articolo"
+    about_the_author: "A proposito dell'autore"
+
+  category:
+    label_saved: "Categoria salvata correttamente"
+    label_error: "C'è un errore"
+    tree_catalog_title: "Modifica delle categorie"
+    label_delete: "Elimina"
+    label_modify: "Modifica"
+    label_enabled: "Abilita"
+    label_disabled: "Disabilita"
+    label_action: "Azione"
+  crud:
+    reset_filter: "Reimposta filtri"
+    refresh: "Aggiorna pagina"
+
+
+Id: "Id"
+Title: "Titolo"
+Description: "Descrizione"
+Slider List: "Elenco dei slider"
+Security Firewall Rule: "Regola del firewall di sicurezza"
+Security Stop Word: "Parola di blocco di sicurezza"
+Security Ip Rule: "Regola IP di sicurezza"
+Redirections: "Reindirizzamenti"
+Tag Multilangue: "Tag Multilingue"
+Category multilangue: "Categoria multilingue"
+Editor: "Editor"
+Slider: "Slider"
+FAQs - Catégories: "FAQs - Categorie"
+Contact: "Contatto"
+Article: "Articolo"
+Activity Logs: "Registri delle attività"
+Modifications en attentes: "Modifiche in attesa"

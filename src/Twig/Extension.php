@@ -43,6 +43,7 @@ class Extension extends AbstractExtension
             new TwigFunction('sonata_extra_get_blocks_js', [$this, 'getBlocksJs']),
             new TwigFunction('sonata_extra_get_blocks_js_inline', [$this, 'getBlocksJsInline']),
             new TwigFunction('generate_url_locale', [$this, 'generateUrlLocale']),
+            new TwigFunction('dd', [$this, 'dd']),
         ];
     }
 
@@ -79,5 +80,10 @@ class Extension extends AbstractExtension
     public function getClass($object)
     {
         return get_class($object);
+    }
+
+    public function dd($item)
+    {
+        return dd($item);
     }
 }

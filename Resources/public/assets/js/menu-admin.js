@@ -18,10 +18,9 @@ $(document).ready(function() {
     });
 
     // default_filed_button_action.html.twig confirm action
-    $('a[data-confirm]').click(function(ev) {
+    $('a[data-confirm]').click(function() {
         let href = $(this).attr('href');
-        const data_confirm_modal = $('#dataConfirmModal');
-        if (!data_confirm_modal.length) {
+        if ($('#dataConfirmModal').length === 0) {
             $('body').append('' +
                 '<div id="dataConfirmModal" class="modal fade" role="dialog" aria-labelledby="dataConfirmLabel" aria-hidden="true">' +
                 '<div class="modal-dialog modal-lg">' +
@@ -41,6 +40,7 @@ $(document).ready(function() {
                 '</div>' +
                 '</div>');
         }
+        let data_confirm_modal = $('#dataConfirmModal');
         data_confirm_modal.find('.modal-body').text($(this).attr('data-confirm'));
         $('#dataConfirmOK').attr('href', href);
         data_confirm_modal.modal({show:true});

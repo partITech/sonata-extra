@@ -460,11 +460,11 @@ x-suphp-cgi="execute:!self"
 
 <pre class="wp-block-code"><code lang="bash" class="language-bash">&lt;VirtualHost *:80>
 ServerAdmin contact@localhost
-ServerName  test.test.dev
-DocumentRoot /var/www/test-test/trunk/test/front/www
+ServerName  spikly.melis.dev
+DocumentRoot /var/www/spikly-hyundai/trunk/melis/front/www
 DirectoryIndex index.php
 
-&lt;Directory /var/www/test-test/trunk/test/front/www>
+&lt;Directory /var/www/spikly-hyundai/trunk/melis/front/www>
 Options Indexes FollowSymLinks MultiViews
 AllowOverride All
 Order allow,deny
@@ -473,7 +473,7 @@ DirectoryIndex index.php
 &lt;/Directory>
 
 suPHP_Engine on
-suPHP_ConfigPath /var/www/test-testphp.ini
+suPHP_ConfigPath /var/www/spikly-hyundai/php.ini
 suPHP_AddHandler application/x-httpd-suphp-php-cgi-562
 AddHandler application/x-httpd-suphp-php-cgi-562 .php .php3 .php4 .php5
 

@@ -117,14 +117,14 @@ services:
     tags:
       - { name: sonata.admin, manager_type: orm, group: "Content", label: "Category multilangue" , default: true}
     calls:
-      - [setTranslationDomain, ['PartitechSonataExtra']]
+      - [setTranslationDomain, ['PartitechSonataExtraBundle']]
 
   Partitech\SonataExtra\Admin\TagAdmin:
     arguments: [~, '%sonata.classification.admin.tag.entity%', ~]
     tags:
       - { name: sonata.admin, manager_type: orm, group: "Content", label: "Tag Multilangue" , default: true}
     calls:
-      - [setTranslationDomain, ['PartitechSonataExtra']]
+      - [setTranslationDomain, ['PartitechSonataExtraBundle']]
 
 
   Sonata\PageBundle\Page\PageServiceManager: '@sonata.page.page_service_manager'
@@ -149,12 +149,13 @@ services:
     tags:
       - { name: kernel.event_subscriber }
 
-  Partitech\SonataExtra\EventListener\SecurityHeadersListener:
-    arguments:
-      $policies: '%partitech_sonata_extra.content_security_policy%'
-    tags:
-      - { name: kernel.event_listener, event: kernel.response }
 
+#  Partitech\SonataExtra\EventListener\SecurityHeadersListener:
+#    arguments:
+#      $policies: '%partitech_sonata_extra.content_security_policy%'
+#    tags:
+#      - { name: kernel.event_listener, event: kernel.response }
+#
 
  #  Partitech\SonataExtra\EventSubscriber\SerializerSubscriber:
       #   tags:

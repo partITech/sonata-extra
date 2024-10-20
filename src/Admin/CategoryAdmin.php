@@ -15,6 +15,7 @@ use Sonata\ClassificationBundle\Model\CategoryInterface;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
+use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Validator\Constraints\Valid;
 
 /**
@@ -76,8 +77,12 @@ final class CategoryAdmin extends AbstractAdmin
         }
 
         $position = $this->hasSubject() && null !== $this->getSubject()->getPosition() ? $this->getSubject()->getPosition() : 0;
-
+        //$site = $this->requestStack->getCurrentRequest()->query->get('site');
+        //$site = $this->getCurrentSelectedLocal();
         $form
+//            ->add('site', HiddenType::class, [
+//                'data' => $site,
+//            ])
             ->end()
             ->with('options', ['class' => 'col-md-6'])
                 ->add('enabled', CheckboxType::class, [

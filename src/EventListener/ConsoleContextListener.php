@@ -30,6 +30,10 @@
             
             if (!$siteUrl) {
                 $site = $this->siteManager->findOneBy(['isDefault'=> true]);
+                if(empty($site)){
+                    echo "\nDefault sonata page site is not yet configured\n";
+                    return;
+                }
                 $siteUrl = 'https://'.$site->getHost().$site->getRelativePath();
             }
             
@@ -46,10 +50,12 @@
             }
             
             $request = RequestFactory::createFromGlobals('host_with_path_by_locale');
+            $request->attributes->set('_controller','none');
 
             $kernel = $event->getCommand()->getApplication()->getKernel();
             $requestEvent = new RequestEvent($kernel, $request, HttpKernelInterface::MAIN_REQUEST);
             $this->eventDispatcher->dispatch($requestEvent, KernelEvents::REQUEST);
+
             $this->requestStack->push($request);
             
         }

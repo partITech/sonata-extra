@@ -26,6 +26,8 @@ class PageAdminExtension extends AbstractAdminExtension
     private MediaManager $mediaManager;
     private ImageProvider $providerImage;
     private ParameterBagInterface $parameterBag;
+    private array $sites = [];
+
 
     #[Required]
     public function autowireDependencies(

@@ -1,5 +1,0 @@
-<phpunit bootstrap="vendor/autoload.php"
-         colors="true"
-         cacheResultFile="var/cache/phpunit/result.cache">
-    <!-- Autres configurations -->
-</phpunit>

@@ -127,6 +127,7 @@ class Article
         $this->status = ArticleStatus::DRAFT->value;
         $this->tags = new ArrayCollection();
         $this->category = new ArrayCollection();
+        $this->slug = '';
     }
 
     public function __toString(): string
@@ -274,14 +275,15 @@ class Article
         return $this;
     }
 
-    public function getSlug(): string
+    public function getSlug(): ?string
     {
         return $this->slug;
     }
 
-    public function setSlug(string $slug): self
+    public function setSlug(?string $slug): self
     {
-        $this->slug = $slug;
+
+        $this->slug = !empty($slug)?$slug:"";
 
         return $this;
     }

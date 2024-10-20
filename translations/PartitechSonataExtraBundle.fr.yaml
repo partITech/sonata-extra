@@ -219,3 +219,22 @@ sonata-extra:
   crud:
     reset_filter: "Effacer les filtres"
     refresh: "Rafraichir la page"
+
+
+Id: "Id"
+Title: "Titre"
+Description: "Description"
+Slider List: "Liste des sliders"
+Security Firewall Rule: "Règle du pare-feu de sécurité"
+Security Stop Word: "Mot d'arrêt de sécurité"
+Security Ip Rule: "Règle d'IP de sécurité"
+Redirections: "Redirections"
+Tag Multilangue: "Tag Multilangue"
+Category multilangue: "Catégorie multilangue"
+Editor: "Éditeur"
+Slider: "Slider"
+FAQs - Catégories: "FAQs - Catégories"
+Contact: "Contact"
+Article: "Article"
+Activity Logs: "Journaux d'activité"
+Modifications en attentes: "Modifications en attente"
