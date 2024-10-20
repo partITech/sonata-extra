@@ -115,8 +115,9 @@ trait AdminTranslationTrait
 
     public function getCurrentSelectedLocal(mixed $default = false): ?int
     {
+
         $request = $this->getRequest();
-        $site = $request->get('site', false);
+        $site = $request->get('site', $default);
 
         if (null === $site) {
             $site = $request->request->get('site_id', $default);

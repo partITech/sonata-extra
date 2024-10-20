@@ -164,6 +164,8 @@ final class CategoryAdminController extends Controller
             }
         }
 
+        $this->updateCategoriesWithDefaultContext();
+
         // all root categories.
         $rootCategoriesSplitByContexts = $categoryManager->getRootCategoriesSplitByContexts(false);
 
@@ -413,5 +415,34 @@ final class CategoryAdminController extends Controller
         }
 
         $this->categories[$contextId] = $rootCategories;
+    }
+
+    private function updateCategoriesWithDefaultContext(): void
+    {
+
+        $this->categories_class = $this->parameterBag->get('partitech_sonata_extra.category.class');
+        $categoryNoContext = $this->entityManager->getRepository($this->categories_class)
+            ->createQueryBuilder('c')
+            ->where('c.context IS NULL') // Vérifie que le contexte est NULL
+            ->getQuery()
+            ->getResult();
+
+        if(!empty($categoryNoContext)){
+            $this->context_class = $this->parameterBag->get('sonata.classification.admin.context.entity');
+            $context = $this->entityManager->getRepository($this->context_class)
+                ->createQueryBuilder('c')
+                ->where('c.enabled = 1')
+                ->setMaxResults(1)
+                ->getQuery()
+                ->getSingleResult();
+
+            foreach($categoryNoContext as $category){
+                $category->setContext($context);
+                $this->entityManager->persist($category);
+            }
+            $this->entityManager->flush();
+
+
+        }
     }
 }

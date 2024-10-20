@@ -264,7 +264,8 @@ class ArticleAdmin extends AbstractAdmin
                         'property' => 'name',
                         'multiple' => true,
                         'btn_add' => 'Ajouter une nouvelle catégorie',
-                        'query' => $queryCategory
+                        'query' => $queryCategory,
+                        'required'=>false
                     ])
 
                     ->add('tags', ModelType::class, [
@@ -272,7 +273,8 @@ class ArticleAdmin extends AbstractAdmin
                         'property' => 'name',
                         'multiple' => true,
                         'btn_add' => 'Ajouter un nouveau tag',
-                        'query' => $querytag
+                        'query' => $querytag,
+                        'required'=>false
                     ])
 
                 ->end()
