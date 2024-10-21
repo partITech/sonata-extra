@@ -15,6 +15,7 @@ use Symfony\Contracts\HttpClient\Exception\ServerExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\TransportExceptionInterface;
 use Psr\Log\LoggerInterface;
 use Symfony\Contracts\Service\Attribute\Required;
+use ZipArchive;
 
 #[AsCommand(
     name: 'sonata:extra:install-gutenberg',
@@ -22,13 +23,11 @@ use Symfony\Contracts\Service\Attribute\Required;
 )]
 class InstallGutenbergCommand extends Command
 {
-
     private LoggerInterface $logger;
 
     #[Required]
-    public function autowireDependencies(
-        LoggerInterface $logger,
-    ): void {
+    public function autowireDependencies(LoggerInterface $logger): void
+    {
         $this->logger = $logger;
     }
 
@@ -40,8 +39,7 @@ class InstallGutenbergCommand extends Command
                 'f',
                 InputOption::VALUE_NONE,
                 'Force download and installation of Gutenberg editor even if already installed.'
-            )
-        ;
+            );
     }
 
     /**
@@ -54,9 +52,9 @@ class InstallGutenbergCommand extends Command
         $io = new SymfonyStyle($input, $output);
         $force = $input->getOption('force');
 
-        $destinationDir = __DIR__.'/../../Resources/public/';
-        $destination = $destinationDir.'gutenberg.zip';
-        $extractedPath = $destinationDir.'gutenberg';
+        $destinationDir = __DIR__ . '/../../Resources/public/';
+        $destination = $destinationDir . 'gutenberg.zip';
+        $extractedPath = $destinationDir . 'gutenberg';
 
         if (!is_dir($destinationDir)) {
             mkdir($destinationDir, 0777, true);
@@ -88,7 +86,7 @@ class InstallGutenbergCommand extends Command
         $io->success('Gutenberg editor downloaded successfully.');
 
         $io->note('Extracting Gutenberg editor...');
-        $zip = new \ZipArchive();
+        $zip = new ZipArchive();
         $zip->open($destination);
         $zip->extractTo($extractedPath);
         $zip->close();

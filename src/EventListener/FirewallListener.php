@@ -2,7 +2,6 @@
 namespace Partitech\SonataExtra\EventListener;
 
 use JetBrains\PhpStorm\NoReturn;
-use Psr\Cache\InvalidArgumentException;
 use Symfony\Component\HttpKernel\Event\RequestEvent;
 use Doctrine\ORM\EntityManagerInterface;
 use Partitech\SonataExtra\Entity\SecFirewallRule;
@@ -196,7 +195,7 @@ class FirewallListener
         });
     }
 
-    private function isUserAdmin()
+    private function isUserAdmin(): bool
     {
         $user = $this->security->getUser();
         if ($user) {
@@ -206,7 +205,7 @@ class FirewallListener
         return false;
     }
 
-    private function extractValuesRecursively($data, &$values)
+    private function extractValuesRecursively($data, &$values): void
     {
         if (is_array($data)) {
             foreach ($data as $key => $value) {

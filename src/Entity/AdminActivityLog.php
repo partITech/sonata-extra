@@ -2,6 +2,7 @@
 
 namespace Partitech\SonataExtra\Entity;
 
+use DateTimeInterface;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
@@ -10,7 +11,7 @@ use Partitech\SonataExtra\Contract\UserInterface;
 use JMS\Serializer\Annotation as Serializer;
 use phpDocumentor\Reflection\Types\Boolean;
 
-#[ORM\Index(columns: ['token'], name: 'token_idx')]
+#[ORM\Index(name: 'token_idx', columns: ['token'])]
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\AdminActivityLogRepository')]
 #[ORM\Table(name: 'sonata_extra__admin_activity_log')]
 class AdminActivityLog
@@ -19,7 +20,7 @@ class AdminActivityLog
     private int $id;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]
-    private \DateTimeInterface $date;
+    private DateTimeInterface $date;
 
     #[ORM\Column(type: Types::STRING, length: 255)]
     private string $actionType;  // for example: "create", "update", "delete"
@@ -35,9 +36,9 @@ class AdminActivityLog
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private  $user;  // User entity relation, adjust accordingly
+    private mixed $user;  // User entity relation, adjust accordingly
 
-    #[ORM\OneToMany(mappedBy: 'adminActivityLog', targetEntity: AdminActivityEntityChangeLog::class)]
+    #[ORM\OneToMany(targetEntity: AdminActivityEntityChangeLog::class, mappedBy: 'adminActivityLog')]
     #[Serializer\Groups(['default'])]
     #[Serializer\MaxDepth(1)]
     private Collection $entityChangeLogs;
@@ -64,12 +65,12 @@ class AdminActivityLog
         return $this->id;
     }
 
-    public function getDate(): ?\DateTimeInterface
+    public function getDate(): ?DateTimeInterface
     {
         return $this->date;
     }
 
-    public function setDate(\DateTimeInterface $date): self
+    public function setDate(DateTimeInterface $date): self
     {
         $this->date = $date;
 
@@ -124,7 +125,7 @@ class AdminActivityLog
         return $this;
     }
 
-    public function getUser()
+    public function getUser(): ?UserInterface
     {
         return $this->user;
     }
@@ -137,7 +138,7 @@ class AdminActivityLog
     }
 
     /**
-     * @return Collection|AdminActivityEntityChangeLog[]
+     * @return Collection
      */
     public function getEntityChangeLogs(): Collection
     {

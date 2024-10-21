@@ -24,11 +24,8 @@ use Symfony\Component\Validator\Constraints\Valid;
 final class CategoryAdmin extends AbstractAdmin
 {
     use AdminTranslationTrait;
-
     protected $classnameLabel = 'Category';
-
     protected $baseRouteName = 'admin_sonata_extra_category';
-
     protected $baseRoutePattern = 'sonata_extra_category';
 
     public function configureRoutes(RouteCollectionInterface $collection): void
@@ -36,7 +33,6 @@ final class CategoryAdmin extends AbstractAdmin
         $this->configureTraitRoutes($collection);
         $collection->add('tree', 'tree');
         $collection->add('toggle', $this->getRouterIdParameter().'/toggle');
-        // dd($collection);
     }
 
     protected function configure(): void
@@ -77,12 +73,7 @@ final class CategoryAdmin extends AbstractAdmin
         }
 
         $position = $this->hasSubject() && null !== $this->getSubject()->getPosition() ? $this->getSubject()->getPosition() : 0;
-        //$site = $this->requestStack->getCurrentRequest()->query->get('site');
-        //$site = $this->getCurrentSelectedLocal();
         $form
-//            ->add('site', HiddenType::class, [
-//                'data' => $site,
-//            ])
             ->end()
             ->with('options', ['class' => 'col-md-6'])
                 ->add('enabled', CheckboxType::class, [
@@ -117,10 +108,10 @@ final class CategoryAdmin extends AbstractAdmin
         ->add('seo_og_image', ModelListType::class, [
             'label' => 'Open Graph Image',
             'required' => false,
-            'btn_add' => 'Select Image', // Option pour ajouter une image
-            'btn_list' => true,          // Option pour lister les images
-            'btn_delete' => true,        // Option pour supprimer l'image
-            'btn_catalogue' => 'SonataMediaBundle', // Catalogue pour les boutons
+            'btn_add' => 'Select Image', // add image option
+            'btn_list' => true,          // list images option
+            'btn_delete' => true,        // delete image option
+            'btn_catalogue' => 'SonataMediaBundle', // Catalog button
         ])
             ->end()
         ->end();

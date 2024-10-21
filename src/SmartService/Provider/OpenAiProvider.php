@@ -2,8 +2,10 @@
 namespace Partitech\SonataExtra\SmartService\Provider;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Psr\Cache\InvalidArgumentException;
 use Sonata\MediaBundle\Entity\MediaManager;
 use Sonata\MediaBundle\Provider\ImageProvider;
+use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Cache\ItemInterface;
@@ -17,15 +19,16 @@ use Partitech\SonataExtra\SmartService\TranslationCreateTemplateService;
 
 class OpenAiProvider implements SmartServiceProviderInterface
 {
-    private const CACHE_TTL = 86400;  // 1 day
-    private $client;
+    private const int CACHE_TTL = 86400;  // 1 day
+    private mixed $client;
     private string $apiKey;
     private string $model;
     private string $max_token_per_request;
     private bool $createTemplate = false;
-
-
-    private $oldCompletionApi=['babbage-002', 'davinci-002','text-davinci-003', 'text-davinci-002', 'davinci', 'curie', 'babbage', 'ada'];
+    private ContainerInterface $container;
+    private InputInterface $input;
+    private mixed $createTranslationTemplate;
+    private array $oldCompletionApi=['babbage-002', 'davinci-002','text-davinci-003', 'text-davinci-002', 'davinci', 'curie', 'babbage', 'ada'];
     private ?LoggerInterface $logger = null;
 
 
@@ -33,6 +36,8 @@ class OpenAiProvider implements SmartServiceProviderInterface
     {
         $this->logger = $logger;
     }
+
+
     public function setContainer(ContainerInterface $container): void
     {
         $this->container = $container;
@@ -43,9 +48,10 @@ class OpenAiProvider implements SmartServiceProviderInterface
         $this->input = $input;
     }
 
-    public function setConfig($config)
+
+    public function setConfig($config): void
     {
-        $this->api_conf=$config;
+
 
         $this->apiKey = $config['api_key'];
         $this->model = $config['model'];
@@ -55,8 +61,6 @@ class OpenAiProvider implements SmartServiceProviderInterface
         //test if we are in sonata:extra:translation-create-template
         // if true, we create a set of file to help user to translate content manually (ie. with chat GPT account instead of API).
         $this->createTranslationTemplate=!empty($_SERVER['argv'][1]) && $_SERVER['argv'][1]=='sonata:extra:translation-create-template'??true;
-
-
     }
 
 
@@ -78,8 +82,6 @@ class OpenAiProvider implements SmartServiceProviderInterface
 
         $endpoint = $this->getEndpoint();
         $payload = $this->getPayloadArray($_translate_array, $targetLanguage);
-
-        //$this->clearCache();
 
         $cachedRequest=$this->getCacheRequest($payload);
 
@@ -166,13 +168,14 @@ class OpenAiProvider implements SmartServiceProviderInterface
         return $this->removeDoubleQuotes($this->extractTranslation($result));
     }
 
-    public function translateHtml($html, $targetLanguage){
+    public function translateHtml($html, $targetLanguage): string
+    {
 
         $CodeExtractor=new CodeExtractor;
         $cleanedHtml=$CodeExtractor->extractCodeBlocks( $html);
 
         $fragments = $CodeExtractor->splitHtml($cleanedHtml, 3500);
-
+        $translatedFragments = [];
         foreach ($fragments as $fragment) {
             try {
                 $endpoint = $this->getEndpoint();
@@ -199,8 +202,7 @@ class OpenAiProvider implements SmartServiceProviderInterface
 
         $translated_fragments=implode('', $translatedFragments);
 
-        $cleanedHtml=$CodeExtractor->replaceCodeBlocks($translated_fragments);
-        return $cleanedHtml;
+        return $CodeExtractor->replaceCodeBlocks($translated_fragments);
     }
 
     private function getEndpoint(): string
@@ -342,13 +344,14 @@ class OpenAiProvider implements SmartServiceProviderInterface
 
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     private function getCacheRequest($prompt)
     {
         $cache = new FilesystemAdapter();
         $cacheKey = $this->getCacheKey($prompt);
-        $cacheValue = $cache->getItem($cacheKey)->get();
-
-        return $cacheValue;
+        return $cache->getItem($cacheKey)->get();
     }
 
     private function getCacheKey($prompt): string
@@ -370,7 +373,7 @@ class OpenAiProvider implements SmartServiceProviderInterface
         $cache->clear();
     }
 
-    public function createTemplateFromArray(string $serviceName,string $id, array $arrayOfText, $site)
+    public function createTemplateFromArray(string $serviceName,string $id, array $arrayOfText, $site): void
     {
         $createTemplateService = $this->container->get("sonata.extra.translation.create.template.service");
         $directoryPath=$createTemplateService->getTemplateTranslationPath($serviceName);
@@ -403,7 +406,7 @@ class OpenAiProvider implements SmartServiceProviderInterface
         }
 
     }
-    public function getSeoProposal($content, $locale)
+    public function getSeoProposal($content, $locale): array
     {
         $CodeExtractor=new CodeExtractor;
         $cleanedHtml=$CodeExtractor->extractCodeBlocks($content);
@@ -427,9 +430,7 @@ class OpenAiProvider implements SmartServiceProviderInterface
         $this->logger->critical('Result :');
         $this->logger->critical($body);
 
-        $data=$this->extractSeoData($result);
-
-        return $data;
+        return $this->extractSeoData($result);
     }
 
     private function getPayloadSeo($content, $locale): array
@@ -463,7 +464,8 @@ class OpenAiProvider implements SmartServiceProviderInterface
 
     }
 
-    function extractSeoData($apiResponse) {
+    function extractSeoData($apiResponse): array
+    {
 
         $responseData=$this->extractTranslation($apiResponse);
 

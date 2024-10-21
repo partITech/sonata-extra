@@ -4,6 +4,7 @@ namespace Partitech\SonataExtra\Admin;
 
 use Knp\Menu\ItemInterface as MenuItemInterface;
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Entity\FaqCategory;
 use Partitech\SonataExtra\Entity\FaqQuestion;
 use Runroom\SortableBehaviorBundle\Admin\SortableAdminTrait;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
@@ -22,7 +23,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
     manager_type: 'orm',
     group: 'Admin',
     label: 'FAQs - Catégories',
-    model_class: \Partitech\SonataExtra\Entity\FaqCategory::class,
+    model_class: FaqCategory::class,
     calls: [
         ['addChild', ['Partitech\SonataExtra\Admin\FaqQuestionAdmin', 'category']],
         ['setTranslationDomain', ['PartitechSonataExtraBundle']]
@@ -38,51 +39,37 @@ class FaqCategoryAdmin extends AbstractAdmin
     {
         $form
             ->add('name', null, ['label' => 'Nom'])
-            ->add('active')
-        ;
+            ->add('active');
     }
 
     protected function configureDatagridFilters(DatagridMapper $filter): void
     {
         $filter->add('name', null, ['label' => 'Nom']);
         $filter->add('question', ModelFilter::class, [
-        'label' => 'Question',
-        'field_type' => ModelAutocompleteType::class,
-        'field_options' => [
-            'property' => 'question',
-            'class' => FaqQuestion::class,
-        ],
-        'association_mapping' => ['fieldName' => 'category'],
-    ]);
+            'label' => 'Question',
+            'field_type' => ModelAutocompleteType::class,
+            'field_options' => [
+                'property' => 'question',
+                'class' => FaqQuestion::class,
+            ],
+            'association_mapping' => ['fieldName' => 'category'],
+        ]);
 
-        /*$filter->add('questions', ModelFilter::class, [
-                'label' => 'Question via ModelFilter',
-
-                'mapped' => false,
-                'field_options' => [
-                    'class' => FaqQuestion::class,
-                    'choice_label' => 'question',
-                ],
-            ]);*/
         $filter->add('questionsFilter', CallbackFilter::class, [
-                'label' => 'Question via CallbackFilter',
-                /* 'show_filter' => false, */
-                'field_type' => TextType::class,
-                'callback' => function ($queryBuilder, $alias, $field, $value) {
-                    $textValue = $value->getValue();
-                    if (!$textValue) {
-                        return;
-                    }
-
+            'label' => 'Question via CallbackFilter',
+            /* 'show_filter' => false, */
+            'field_type' => TextType::class,
+            'callback' => function ($queryBuilder, $alias, $field, $value) {
+                $textValue = $value->getValue();
+                if ($textValue) {
                     $queryBuilder
                         ->leftJoin(sprintf('%s.questions', $alias), 'q')
                         ->andWhere('q.question LIKE :question')
-                        ->setParameter('question', '%'.$textValue.'%');
+                        ->setParameter('question', '%' . $textValue . '%');
 
-                    return true;
-                },
-            ])
-        ;
+                }
+            },
+        ]);
     }
 
     protected function configureListFields(ListMapper $list): void
@@ -115,8 +102,7 @@ class FaqCategoryAdmin extends AbstractAdmin
                 ],
                 'header_class' => 'col-md-2', // Bootstrap class for the column width
                 'row_align' => 'center', // Align the content in the center
-            ])
-        ;
+            ]);
     }
 
     public function getExportFormats(): array
@@ -124,6 +110,9 @@ class FaqCategoryAdmin extends AbstractAdmin
         return ['json', 'xml', 'csv', 'xls'];
     }
 
+    /**
+     * @throws \JsonException
+     */
     protected function configureTabMenu(MenuItemInterface $menu, string $action, AdminInterface $childAdmin = null): void
     {
         if (!$childAdmin && !in_array($action, ['edit', 'show'])) {
@@ -142,13 +131,13 @@ class FaqCategoryAdmin extends AbstractAdmin
 
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
-        // Génère la route vers un child /fr/admin/partitech/sonataextra/faqcategory/1/faqquestion/list
+        // Create child's route ex: /fr/admin/partitech/sonataextra/faqcategory/1/faqquestion/list
         $collection->add(
             'view-questions',
-            $this->getRouterIdParameter().'/'. // récupère l'id de la route parente pour faire le lien sur le child
+            $this->getRouterIdParameter() . '/' . // récupère l'id de la route parente pour faire le lien sur le child
             $this->getChild(\Partitech\SonataExtra\Admin\FaqQuestionAdmin::class)
-                 ->generateBaseRoutePattern(true) // génere le petit nom 'faqquestion' de l'url
-            .'/list'
+                ->generateBaseRoutePattern(true) // génere le petit nom 'faqquestion' de l'url
+            . '/list'
         );
 
         $this->sortableAdminTraitConfigureRoutes($collection);
@@ -160,8 +149,7 @@ class FaqCategoryAdmin extends AbstractAdmin
         parent::configureShowFields($show);
 
         $show->add('active')
-             ->add('name')
-             ->add('questions')
-        ;
+            ->add('name')
+            ->add('questions');
     }
 }

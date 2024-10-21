@@ -10,10 +10,10 @@ use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 /**
  * @extends ServiceEntityRepository<SliderSlides>
  *
- * @method SliderSlide|null find($id, $lockMode = null, $lockVersion = null)
- * @method SliderSlide|null findOneBy(array $criteria, array $orderBy = null)
- * @method SliderSlide[]    findAll()
- * @method SliderSlide[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method SliderSlides|null find($id, $lockMode = null, $lockVersion = null)
+ * @method SliderSlides|null findOneBy(array $criteria, array $orderBy = null)
+ * @method SliderSlides[]    findAll()
+ * @method SliderSlides[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 #[AutoconfigureTag(name: 'doctrine.repository_service')]
 class SliderSlidesRepository extends ServiceEntityRepository

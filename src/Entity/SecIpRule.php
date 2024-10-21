@@ -1,11 +1,8 @@
 <?php
-// src/Entity/SecIpRule.php
-
 namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\SecIpRuleRepository;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SecIpRuleRepository::class)]
 #[ORM\Table(name: 'sonata_extra__sec_ip_rule')]
@@ -17,7 +14,7 @@ class SecIpRule
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $ip;
+    private string $ip;
 
     // Getters and Setters
     public function getId(): ?int

@@ -59,10 +59,10 @@ class TagAdmin extends AbstractAdmin
             ->add('seo_og_image', ModelListType::class, [
                 'label' => 'Open Graph Image',
                 'required' => false,
-                'btn_add' => 'Select Image', // Option pour ajouter une image
-                'btn_list' => true,          // Option pour lister les images
-                'btn_delete' => true,        // Option pour supprimer l'image
-                'btn_catalogue' => 'SonataMediaBundle', // Catalogue pour les boutons
+                'btn_add' => 'Select Image', // Add image option
+                'btn_list' => true,          // List images option
+                'btn_delete' => true,        // delete image option
+                'btn_catalogue' => 'SonataMediaBundle', //Button catalog
             ])
             ->end()
             ->end();

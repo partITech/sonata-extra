@@ -33,6 +33,7 @@ class PagesSync
      */
     public function sync(): void
     {
+        $pages = 1;
         $site = $this->siteManager->findOneBy(['isDefault' => true]);
         try {
             $pages = $this->getPages();

@@ -13,10 +13,9 @@ class MarkdownType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        // ...
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         parent::buildView($view, $form, $options);
         $view->vars['markdown_assets'] = [
@@ -34,12 +33,12 @@ class MarkdownType extends AbstractType
         $view->vars['template'] = '@PartitechSonataExtra/Form/markdown_field.html.twig';
     }
 
-    public function getParent()
+    public function getParent(): string
     {
         return TextareaType::class;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
         ]);

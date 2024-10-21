@@ -6,38 +6,40 @@ use App\Entity\SonataClassificationContext;
 use App\Entity\SonataMediaMedia;
 use App\Repository\SonataClassificationContextRepository;
 use Psr\Log\LoggerInterface;
+use Sonata\MediaBundle\Model\MediaInterface;
 use Sonata\MediaBundle\Model\MediaManagerInterface;
 use Sonata\MediaBundle\Provider\Pool;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\HttpFoundation\File\File;
+use Throwable;
 use Twig\Environment;
 use Twig\Error\LoaderError;
 use Twig\Error\SyntaxError;
 
 class Media
 {
-    public const MEDIA_EXTENSIONS = [
+    public const array MEDIA_EXTENSIONS = [
         'jpg',
         'jpeg',
         'png',
         'gif',
     ];
 
-    public const MEDIA_MIME_TYPES = [
+    public const array MEDIA_MIME_TYPES = [
         'image/jpeg', // pour jpg et jpeg
         'image/png',
         'image/gif',
     ];
 
     public function __construct(
-        private readonly ParameterBagInterface $parameterBag,
+        private readonly ParameterBagInterface                 $parameterBag,
         private readonly SonataClassificationContextRepository $contextRepository,
-        private readonly MediaManagerInterface $mediaManager,
-        private readonly Filesystem $filesystem,
-        private readonly LoggerInterface $logger,
-        private readonly Pool $providerPool,
-        private Environment $twig,
+        private readonly MediaManagerInterface                 $mediaManager,
+        private readonly Filesystem                            $filesystem,
+        private readonly LoggerInterface                       $logger,
+        private readonly Pool                                  $providerPool,
+        private readonly Environment                           $twig,
     ) {
     }
     
@@ -90,7 +92,7 @@ class Media
             $media_sizes = getimagesize($file);
             $media->setWidth($media_sizes[0]);
             $media->setHeight($media_sizes[1]);
-        } catch (\Exception $e) {
+        } catch (Throwable $e) {
             // avoid error.
             // Unfortunately sometimes it fails.
             // But not the global process.
@@ -133,7 +135,7 @@ class Media
         return 'sonata.media.provider.file';
     }
 
-    public function getPublicLink(\Sonata\MediaBundle\Model\MediaInterface $media): ?string
+    public function getPublicLink(MediaInterface $media): ?string
     {
         $provider = $this->providerPool->getProvider($media->getProviderName());
         $format = $provider->getFormatName($media, 'reference');
@@ -145,7 +147,7 @@ class Media
      * @throws SyntaxError
      * @throws LoaderError
      */
-    public function renderMediaHtml(\Sonata\MediaBundle\Model\MediaInterface $media): string
+    public function renderMediaHtml(MediaInterface $media): string
     {
         $template = "
                 {{

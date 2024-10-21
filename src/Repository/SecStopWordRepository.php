@@ -17,6 +17,4 @@ class SecStopWordRepository extends ServiceEntityRepository
     {
         parent::__construct($registry, SecStopWord::class);
     }
-
-    // Custom methods can be added here
 }

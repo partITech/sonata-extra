@@ -7,12 +7,12 @@ use Doctrine\Persistence\ManagerRegistry;
 use Partitech\SonataExtra\Entity\EditorRevision;
 
 /**
- * @extends ServiceEntityRepository<ArticleRevision>
+ * @extends ServiceEntityRepository<EditorRevision>
  *
- * @method ArticleRevision|null find($id, $lockMode = null, $lockVersion = null)
- * @method ArticleRevision|null findOneBy(array $criteria, array $orderBy = null)
- * @method ArticleRevision[]    findAll()
- * @method ArticleRevision[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
+ * @method EditorRevision|null find($id, $lockMode = null, $lockVersion = null)
+ * @method EditorRevision|null findOneBy(array $criteria, array $orderBy = null)
+ * @method EditorRevision[]    findAll()
+ * @method EditorRevision[]    findBy(array $criteria, array $orderBy = null, $limit = null, $offset = null)
  */
 class EditorRevisionRepository extends ServiceEntityRepository
 {

@@ -1,7 +1,5 @@
 <?php
 
-// src/Block/HelloWorldBlockService.php
-
 namespace Partitech\SonataExtra\Block;
 
 use App\Entity\SonataClassificationCategory as Category;
@@ -34,21 +32,22 @@ use Twig\Environment;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class BlogArticleCategoryBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private CmsManagerSelectorInterface $cmsSelector;
-    private $categoryManager;
+    private CategoryManagerInterface $categoryManager;
     private PaginatorInterface $paginator;
 
     #[Required]
     public function autowireDependencies(
-        Environment $twig,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        Environment                 $twig,
+        EntityManagerInterface      $entityManager,
+        ParameterBagInterface       $parameterBag,
         CmsManagerSelectorInterface $cmsSelector,
-        CategoryManagerInterface $categoryManager,
-        PaginatorInterface $paginator
-    ): void {
+        CategoryManagerInterface    $categoryManager,
+        PaginatorInterface          $paginator
+    ): void
+    {
         parent::__construct($twig);
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
@@ -83,17 +82,17 @@ final class BlogArticleCategoryBlockService extends AbstractBlockService impleme
         // Deduplicate the IDs
         $selectedCategoriesIds = array_unique($selectedCategoriesIds);
 
-        if(!empty($selectedCategoriesIds)){
+        if (!empty($selectedCategoriesIds)) {
             $articlesQuery = $this->entityManager->createQueryBuilder()
                 ->select('a')
                 ->from(Article::class, 'a')
                 ->leftJoin('a.category', 'c')
                 ->where('c.id IN (:categories)')
-                ->andWhere('a.site ='.$site->getId())
+                ->andWhere('a.site =' . $site->getId())
                 ->setParameter('categories', $selectedCategoriesIds)
                 ->orderBy('a.publishedAt', 'desc')
                 ->getQuery();
-        }else{
+        } else {
             $articlesQuery = $this->entityManager->createQueryBuilder()
                 ->select('a')
                 ->from(Article::class, 'a')
@@ -116,7 +115,7 @@ final class BlogArticleCategoryBlockService extends AbstractBlockService impleme
             'pagination' => $pagination,
             'title' => $title,
             'class' => $class,
-            'page'=> $page,
+            'page' => $page,
         ], $response);
     }
 
@@ -125,7 +124,7 @@ final class BlogArticleCategoryBlockService extends AbstractBlockService impleme
         $this->configureEditForm($form, $block);
     }
 
-    public function configureEditForm(FormMapper $formMapper, BlockInterface $block): void
+    public function configureEditForm(FormMapper $form, BlockInterface $block): void
     {
         $categories = $this->entityManager->getRepository(Category::class)->findAll();
 
@@ -134,7 +133,7 @@ final class BlogArticleCategoryBlockService extends AbstractBlockService impleme
             $categoriesChoices[$category->getName()] = $category->getId(); // Assurez-vous que la méthode getName et getId existe dans votre entité Category
         }
 
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
                 ['title', TextType::class, [
                     'label' => 'Title',
@@ -188,16 +187,22 @@ final class BlogArticleCategoryBlockService extends AbstractBlockService impleme
 
     public function getMetadata(): MetadataInterface
     {
-        return new Metadata('Blog : article de category', null, null, 'SonataBlockBundle', [
-            'class' => 'fa fa-newspaper-o',
-        ]);
+        return new Metadata(
+            title: 'Blog : article de category',
+            description: null,
+            image: null,
+            domain:'SonataBlockBundle',
+            options: [
+                'class' => 'fa fa-newspaper-o',
+            ]
+        );
     }
 
-    public function getCategoryIdsWithChildren($category, EntityManagerInterface $entityManager)
+    public function getCategoryIdsWithChildren($category, EntityManagerInterface $entityManager): array
     {
         $categoryIds = [$category->getId()];
 
-        // Récupère les enfants de manière récursive
+        // get recursively children
         foreach ($category->getChildren() as $child) {
             $categoryIds = array_merge($categoryIds, $this->getCategoryIdsWithChildren($child, $entityManager));
         }

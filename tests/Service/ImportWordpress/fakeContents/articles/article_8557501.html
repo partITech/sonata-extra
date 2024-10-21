@@ -112,7 +112,7 @@ php bin/console make:sonata:admin
 namespace App\Controller;
 
 #use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Sonata\AdminBundle\Controller\CRUDController;
 
 class ParametresController extends CRUDController
@@ -278,7 +278,7 @@ class ParametresRepository extends ServiceEntityRepository
 
 namespace App\Controller;
 
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Sonata\AdminBundle\Controller\CRUDController;
 use App\Entity\Parametres;
 

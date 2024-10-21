@@ -13,6 +13,7 @@ namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
 use Partitech\SonataExtra\Entity\SecStopWord;
+use Psr\Cache\InvalidArgumentException;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -62,22 +63,34 @@ class SecStopWordAdmin extends AbstractAdmin
         $show->add('word');
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function postUpdate($object): void
     {
         $this->clearCache();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function postPersist($object): void
     {
         $this->clearCache();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function postRemove($object): void
     {
         $this->clearCache();
     }
 
-    private function clearCache()
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function clearCache(): void
     {
         $this->cache->delete('stop_words_cache');
     }

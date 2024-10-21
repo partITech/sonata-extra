@@ -4,7 +4,6 @@
     
     use Sonata\PageBundle\Model\SiteManagerInterface;
     use Sonata\PageBundle\Request\RequestFactory;
-    use Sonata\PageBundle\Site\SiteSelectorInterface;
     use Symfony\Component\EventDispatcher\EventSubscriberInterface;
     use Symfony\Component\HttpFoundation\RequestStack;
     use Symfony\Component\Console\Event\ConsoleCommandEvent;
@@ -17,10 +16,9 @@
     {
         
         public function __construct(
-            private RequestStack $requestStack,
-            private SiteSelectorInterface $siteSelector,
-            private SiteManagerInterface $siteManager,
-            private EventDispatcherInterface $eventDispatcher
+            private readonly RequestStack         $requestStack,
+            private readonly SiteManagerInterface $siteManager,
+            private readonly EventDispatcherInterface $eventDispatcher
         )
         {}
         

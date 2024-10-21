@@ -2,6 +2,7 @@
 
 namespace Partitech\SonataExtra\Twig;
 
+use JetBrains\PhpStorm\NoReturn;
 use Partitech\SonataExtra\Routing\PageUrlGenerator;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
@@ -27,23 +28,23 @@ class Extension extends AbstractExtension
         $this->assetsHandler=$assetsHandler;
 
     }
-    public function getFilters()
+    public function getFilters(): array
     {
         return [
-            new TwigFilter('remove_br', [$this, 'removeBr']),
-            new TwigFilter('get_class', [$this, 'getClass']),
+            new TwigFilter('remove_br', $this->removeBr(...)),
+            new TwigFilter('get_class', $this->getClass(...)),
         ];
     }
 
-    public function getFunctions()
+    public function getFunctions(): array
     {
         return [
-            new TwigFunction('sonata_extra_get_blocks_css', [$this, 'getBlocksCss']),
-            new TwigFunction('sonata_extra_get_blocks_css_inline', [$this, 'getBlocksCssInline']),
-            new TwigFunction('sonata_extra_get_blocks_js', [$this, 'getBlocksJs']),
-            new TwigFunction('sonata_extra_get_blocks_js_inline', [$this, 'getBlocksJsInline']),
-            new TwigFunction('generate_url_locale', [$this, 'generateUrlLocale']),
-            new TwigFunction('dd', [$this, 'dd']),
+            new TwigFunction('sonata_extra_get_blocks_css', $this->getBlocksCss(...)),
+            new TwigFunction('sonata_extra_get_blocks_css_inline', $this->getBlocksCssInline(...)),
+            new TwigFunction('sonata_extra_get_blocks_js', $this->getBlocksJs(...)),
+            new TwigFunction('sonata_extra_get_blocks_js_inline', $this->getBlocksJsInline(...)),
+            new TwigFunction('generate_url_locale', $this->generateUrlLocale(...)),
+            new TwigFunction('dd', $this->dd(...)),
         ];
     }
 
@@ -77,7 +78,7 @@ class Extension extends AbstractExtension
     {
         return $this->pageUrlGenerator->generate($routeName, $routeVariables, $referenceType);
     }
-    public function getClass($object)
+    public function getClass($object): string
     {
         return get_class($object);
     }

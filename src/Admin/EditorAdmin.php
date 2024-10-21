@@ -5,6 +5,8 @@ namespace Partitech\SonataExtra\Admin;
 use FOS\CKEditorBundle\Form\Type\CKEditorType;
 use Knp\Menu\ItemInterface;
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Controller\Admin\EditorController;
+use Partitech\SonataExtra\Entity\Editor;
 use Partitech\SonataExtra\Enum\EditorStatus;
 use Partitech\SonataExtra\Form\Type\GutenbergType;
 use Partitech\SonataExtra\Form\Type\MarkdownType;
@@ -32,10 +34,10 @@ use Symfony\Contracts\Service\Attribute\Required;
 #[AsAdmin(
     manager_type: 'orm',
     label: 'Editor',
-    model_class: \Partitech\SonataExtra\Entity\Editor::class,
-    controller: \Partitech\SonataExtra\Controller\Admin\EditorController::class,
+    model_class: Editor::class,
+    controller: EditorController::class,
     calls: [
-        ['addChild', [\Partitech\SonataExtra\Admin\EditorRevisionAdmin::class, 'editor']],
+        ['addChild', [EditorRevisionAdmin::class, 'editor']],
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
 )]
@@ -142,10 +144,11 @@ class EditorAdmin extends AbstractAdmin
             'default'
         );
 
+        $media = $this->mediaManager->findOneBy([
+            'id' => $this->getSubject()->getFeaturedImage()->getId(),
+        ]);
+
         if ($this->hasSubject() && null !== $this->getSubject()->getFeaturedImage()) {
-            $media = $this->mediaManager->findOneBy([
-                'id' => $this->getSubject()->getFeaturedImage()->getId(),
-            ]);
             $mediaUrl = $this->providerImage->generatePublicUrl($media, 'default_small');
         } else {
             $mediaUrl = null;
@@ -162,7 +165,7 @@ class EditorAdmin extends AbstractAdmin
 
         $form
 
-            ->tab('Informations Générales') // Nom de l'onglet
+            ->tab('Informations Générales') // Pane's name
                 ->with('Titre et Url', ['class' => 'col-md-8'])
 
                     ->add('featured_image', ModelListType::class, [
@@ -198,8 +201,8 @@ class EditorAdmin extends AbstractAdmin
                 ->end()
 
             ->end()
-            ->tab('Contenu') // Nom de l'onglet
-                ->with('Content', ['class' => 'col-md-12']); // Nom de la section
+            ->tab('Contenu') //Pane's name
+                ->with('Content', ['class' => 'col-md-12']); // section's name
         if ('gutenberg' == $editor) {
             $form->add('content', GutenbergType::class, [
                 'label' => 'Content',

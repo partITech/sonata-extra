@@ -36,7 +36,6 @@ class Route
 
         $roles = [];
         foreach ($this->methods as $method) {
-            // return sprintf('ROLE_%s_%%s', str_replace('.', '_', strtoupper($admin->getCode())));
             $roles[] = sprintf('ROLE_%s_%s_%s', strtoupper($parts[1]), strtoupper($parts[2]), strtoupper($method));
         }
 

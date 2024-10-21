@@ -2,6 +2,7 @@
 
 namespace Partitech\SonataExtra\Traits;
 
+use App\Entity\SonataPageSite;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Contract\SiteInterface;
@@ -13,18 +14,13 @@ trait EntityTranslationTrait
     private ?int $translation_from_id = null;
 
     #[ORM\ManyToOne(targetEntity: SiteInterface::class, inversedBy: 'site')]
-    private $site;
+    private ?SonataPageSite $site=null;
 
     public ?array $translations = [];
 
     public function __construct()
     {
         $this->baseRouteName = [];
-        
-        // used in \Sonata\ClassificationBundle\Model\Category::__construct
-        // cannot use parent::_construct as parent do not allways have constructor.
-        //$this->children = new ArrayCollection();
-        
     }
 
     #[ORM\PrePersist]
@@ -41,9 +37,11 @@ trait EntityTranslationTrait
     }
 
 
-    public function setId($id)
+    public function setId($id): self
     {
         $this->id = $id;
+
+        return $this;
     }
 
     public function getTranslationFromId(): ?int
@@ -68,7 +66,7 @@ trait EntityTranslationTrait
         return $this->translations;
     }
 
-    public function getSite()
+    public function getSite(): ?SonataPageSite
     {
         return $this->site;
     }

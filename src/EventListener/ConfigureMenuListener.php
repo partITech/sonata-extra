@@ -12,9 +12,9 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 class ConfigureMenuListener
 {
-    private $entityManager;
-    private $requestStack;
-    private $security;
+    private EntityManagerInterface $entityManager;
+    private RequestStack $requestStack;
+    private Security $security;
     private ParameterBagInterface $parameterBag;
     private TranslatorInterface $translator;
 
@@ -33,7 +33,7 @@ class ConfigureMenuListener
         $this->translator = $translator;
     }
 
-    public function onMenuConfigure(ConfigureMenuEvent $event)
+    public function onMenuConfigure(ConfigureMenuEvent $event): void
     {
         if (!$this->security->isGranted('ROLE_APPROVE')) {
             return;

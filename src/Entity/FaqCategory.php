@@ -17,12 +17,12 @@ class FaqCategory
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $name;
+    private string $name;
 
-    #[ORM\OneToMany(targetEntity: 'Partitech\SonataExtra\Entity\FaqQuestion', mappedBy: 'category')]
+    #[ORM\OneToMany(targetEntity: FaqQuestion::class, mappedBy: 'category')]
     #[Serializer\Groups(['default'])]
     #[Serializer\MaxDepth(1)]
-    private $questions;
+    private Collection $questions;
 
     #[Gedmo\SortablePosition]
     #[ORM\Column(nullable: true)]
@@ -71,7 +71,7 @@ class FaqCategory
     }
 
     /**
-     * @return Collection|FaqQuestion[]
+     * @return Collection
      */
     public function getQuestions(): Collection
     {

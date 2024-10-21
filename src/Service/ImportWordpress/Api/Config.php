@@ -4,7 +4,7 @@
     
     class Config
     {
-        public const PER_PAGE = 100;
+        public const int PER_PAGE = 100;
         private ?string $url   = null;
         private ?string $user  = null;
         private ?string $token = null;

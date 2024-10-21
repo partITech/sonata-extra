@@ -7,7 +7,7 @@
     
     class Event
     {
-        private const STEPS = [
+        private const array STEPS = [
             'medias' => [
                 'init' => 'Import medias',
                 'percent_start' => 0,
@@ -33,15 +33,15 @@
                 'percent_start' => 90,
             ]
         ];
-        public const MEDIAS_STEP = 'medias';
-        public const USERS_STEP      = 'users';
-        public const CATEGORIES_STEP = 'categories';
-        public const TAGS_STEP  = 'tags';
-        public const POSTS_STEP = 'posts';
-        public const PAGES_STEP = 'pages';
+        public const string MEDIAS_STEP = 'medias';
+        public const string USERS_STEP      = 'users';
+        public const string CATEGORIES_STEP = 'categories';
+        public const string TAGS_STEP  = 'tags';
+        public const string POSTS_STEP = 'posts';
+        public const string PAGES_STEP = 'pages';
         private int $count = 0;
         private int $iteration = 0;
-        public const STEP_PERCENT = 20;
+        public const int STEP_PERCENT = 20;
         
         private string $currentStep = 'media';
         

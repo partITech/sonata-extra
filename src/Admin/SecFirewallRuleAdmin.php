@@ -1,9 +1,11 @@
 <?php
+
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
 
 use Partitech\SonataExtra\Entity\SecFirewallRule;
+use Psr\Cache\InvalidArgumentException;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -29,18 +31,15 @@ class SecFirewallRuleAdmin extends AbstractAdmin
     private CacheInterface $cache;
 
     #[Required]
-    public function required(
-        CacheInterface $cache
-    ): void {
-        $this->cache=$cache;
+    public function required(CacheInterface $cache): void
+    {
+        $this->cache = $cache;
     }
 
-    protected function configureFormFields(FormMapper $form):void
+    protected function configureFormFields(FormMapper $form): void
     {
         $form
             ->add('label')
-
-
             ->add('type', ChoiceType::class, [
                 'choices' => [
                     'Stop Word' => 'stop_word',
@@ -72,14 +71,14 @@ class SecFirewallRuleAdmin extends AbstractAdmin
             ]);
     }
 
-    protected function configureDatagridFilters(DatagridMapper $filter):void
+    protected function configureDatagridFilters(DatagridMapper $filter): void
     {
         $filter->add('type');
         $filter->add('source');
         $filter->add('parameters');
     }
 
-    protected function configureListFields(ListMapper $list):void
+    protected function configureListFields(ListMapper $list): void
     {
         $list->addIdentifier('label', null, [
             'route' => [
@@ -96,12 +95,11 @@ class SecFirewallRuleAdmin extends AbstractAdmin
                 'IP DB' => 'ip_db',
             ]
         ]);
-        $list->add('source',  'choice', [
+        $list->add('source', 'choice', [
             'editable' => true,
             'choices' => [
                 'GET' => 'get',
                 'POST' => 'post',
-                'Header' => 'header',
                 'Header' => 'header',
             ]
         ]);
@@ -117,7 +115,7 @@ class SecFirewallRuleAdmin extends AbstractAdmin
         ]);
     }
 
-    protected function configureShowFields(ShowMapper $show):void
+    protected function configureShowFields(ShowMapper $show): void
     {
 
         $show->add('type');
@@ -126,22 +124,34 @@ class SecFirewallRuleAdmin extends AbstractAdmin
         $show->add('parameters');
     }
 
-    public function postUpdate($object):void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function postUpdate($object): void
     {
         $this->clearCache();
     }
 
-    public function postPersist($object):void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function postPersist($object): void
     {
         $this->clearCache();
     }
 
-    public function postRemove($object):void
+    /**
+     * @throws InvalidArgumentException
+     */
+    public function postRemove($object): void
     {
         $this->clearCache();
     }
 
-    private function clearCache()
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function clearCache(): void
     {
         $this->cache->delete('firewall_rules_cache');
     }

@@ -3,9 +3,6 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\SecFirewallRuleRepository;
-use Doctrine\Common\Collections\ArrayCollection;
-use Doctrine\Common\Collections\Collection;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SecFirewallRuleRepository::class)]
 #[ORM\Table(name: 'sonata_extra__sec_firewall_rule')]
@@ -17,21 +14,21 @@ class SecFirewallRule
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $label;
+    private string $label;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $type; // 'stop_word', 'ip', 'user_agent', 'stop_word_db', 'ip_db'
+    private string $type; // 'stop_word', 'ip', 'user_agent', 'stop_word_db', 'ip_db'
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $source; //  'get', 'post', 'header'
+    private string $source; //  'get', 'post', 'header'
 
     #[ORM\Column(type: 'json', nullable: true)]
-    private $parameters = [];
+    private array $parameters = [];
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $matchMode;
+    private string $matchMode;
 
-
+    private string $rule;
     public function __toString(){
         return $this->getLabel();
     }
@@ -40,7 +37,6 @@ class SecFirewallRule
     {
     }
 
-    // Getters and Setters
     public function getId(): ?int
     {
         return $this->id;
@@ -75,7 +71,7 @@ class SecFirewallRule
     /**
      * @return mixed
      */
-    public function getSource()
+    public function getSource(): mixed
     {
         return $this->source;
     }
@@ -83,7 +79,7 @@ class SecFirewallRule
     /**
      * @param mixed $source
      */
-    public function setSource($source): void
+    public function setSource(mixed $source): void
     {
         $this->source = $source;
     }
@@ -100,9 +96,9 @@ class SecFirewallRule
 
 
     /**
-     * @return mixed
+     * @return string
      */
-    public function getMatchMode()
+    public function getMatchMode(): string
     {
         return $this->matchMode;
     }
@@ -110,22 +106,22 @@ class SecFirewallRule
     /**
      * @param mixed $matchMode
      */
-    public function setMatchMode($matchMode): void
+    public function setMatchMode(string $matchMode): void
     {
         $this->matchMode = $matchMode;
     }
     /**
-     * @return mixed
+     * @return string
      */
-    public function getLabel()
+    public function getLabel(): string
     {
         return $this->label;
     }
 
     /**
-     * @param mixed $label
+     * @param string $label
      */
-    public function setLabel($label): void
+    public function setLabel(string $label): void
     {
         $this->label = $label;
     }

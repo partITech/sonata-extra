@@ -5,7 +5,6 @@ namespace Partitech\SonataExtra\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
 use Partitech\SonataExtra\Repository\FaqQuestionRepository;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: FaqQuestionRepository::class)]
 #[ORM\Table(name: 'sonata_extra__faq_question')]
@@ -15,17 +14,17 @@ class FaqQuestion
     private $id;
 
     #[ORM\Column(type: 'text')]
-    private $question;
+    private string $question;
 
     #[ORM\Column(type: 'text')]
-    private $answer;
+    private string $answer;
 
     #[Gedmo\SortablePosition]
     #[ORM\Column(nullable: true)]
     private ?int $position = null;
 
     #[ORM\ManyToOne(targetEntity: FaqCategory::class, inversedBy: 'questions')]
-    private $category;
+    private ?FaqCategory $category;
 
     #[ORM\Column(type: 'boolean', options: ['default' => false])]
     private ?bool $active = false;

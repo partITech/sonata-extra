@@ -5,15 +5,15 @@ namespace Partitech\SonataExtra\Controller\Admin;
 use Cocur\Slugify\SlugifyInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Partitech\SonataExtra\SmartService\SmartServiceProviderFactoryInterface;
+use Partitech\SonataExtra\Traits\ControllerTranslationTrait;
 use Sonata\AdminBundle\Admin\Pool;
 use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
-use Sonata\PageBundle\Model\PageInterface;
+use Sonata\PageBundle\Entity\PageManager;
 use Sonata\PageBundle\Page\PageServiceManagerInterface;
 use Sonata\PageBundle\Page\TemplateManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -22,10 +22,9 @@ use Symfony\Contracts\Service\Attribute\Required;
 use Symfony\Contracts\Translation\TranslatorInterface;
 
 
-
 class PageAdminController extends AbstractController
 {
-    use \Partitech\SonataExtra\Traits\ControllerTranslationTrait;
+    use ControllerTranslationTrait;
 
     private TokenStorageInterface $tokenStorage;
     private EntityManagerInterface $entityManager;
@@ -34,6 +33,13 @@ class PageAdminController extends AbstractController
     private ParameterBagInterface $parameterBag;
     private SmartServiceProviderFactoryInterface $smartServiceProviderFactory;
     private PageManager $PageManager;
+    private TemplateManagerInterface $templateManager;
+    private SlugifyInterface $slugify;
+    private RequestStack $requestStack;
+    private CmsManagerSelectorInterface $cmsSelector;
+    private PageServiceManagerInterface $pageServiceManager;
+
+    private mixed $smartServiceTranslation;
 
     #[Required]
     public function autowireDependencies(
@@ -44,12 +50,12 @@ class PageAdminController extends AbstractController
         ParameterBagInterface                $parameterBag,
         SmartServiceProviderFactoryInterface $smartServiceProviderFactory,
         SlugifyInterface                     $slugify,
-        TemplateManagerInterface            $templateManager,
-        RequestStack                        $requestStack,
-        CmsManagerSelectorInterface $cmsSelector,
-        PageServiceManagerInterface $pageServiceManager,
-    ): void {
-
+        TemplateManagerInterface             $templateManager,
+        RequestStack                         $requestStack,
+        CmsManagerSelectorInterface          $cmsSelector,
+        PageServiceManagerInterface          $pageServiceManager,
+    ): void
+    {
         $this->tokenStorage = $tokenStorage;
         $this->entityManager = $entityManager;
         $this->translator = $translator;
@@ -59,7 +65,7 @@ class PageAdminController extends AbstractController
         $this->smartServiceProviderFactory = $smartServiceProviderFactory;
         $this->slugify = $slugify;
         $this->requestStack = $requestStack;
-        $this->smartServiceTranslation=$this->parameterBag->get('partitech_sonata_extra.smart_service.provider.translation');
+        $this->smartServiceTranslation = $this->parameterBag->get('partitech_sonata_extra.smart_service.provider.translation');
         $this->cmsSelector = $cmsSelector;
         $this->pageServiceManager = $pageServiceManager;
 
@@ -68,13 +74,12 @@ class PageAdminController extends AbstractController
     #[Route('/admin/app/sonatapagepage/create-page-from-locale/{id}/{from_site}/{to_site}', name: 'sonata_extra_page_create_page_from_locale')]
     public function createPageFromLocaleAction($id, $from_site, $to_site): Response|bool
     {
-
         $smart_service_conf = $this->parameterBag->get('partitech_sonata_extra.smart_service');
         $blockClass = $this->parameterBag->get('sonata.page.block.class');
         $admin = $this->adminPool->getAdminByAdminCode('sonata.page.admin.page');
         $object = $admin->getObject($id);
-        $translations=$object->getTranslations();
-        if(!empty($translations[$from_site]) && !empty($translations[$from_site]['entity_id'])){
+        $translations = $object->getTranslations();
+        if (!empty($translations[$from_site]) && !empty($translations[$from_site]['entity_id'])) {
             $object = $admin->getObject($translations[$from_site]['entity_id']);
         }
 
@@ -94,8 +99,8 @@ class PageAdminController extends AbstractController
                 ->setParameter('translation_from_id', $translationId)
                 ->setParameter('site', $to_site);
             $parent_id = $qb->getQuery()->getOneOrNullResult();
-        }else{
-            $parent_id=null;
+        } else {
+            $parent_id = null;
         }
 
         // get cibling site
@@ -111,7 +116,7 @@ class PageAdminController extends AbstractController
             throw $this->createNotFoundException(sprintf('Unable to find the object with id: %s', $id));
         }
 
-        if($object->getRouteName()!='page_slug'){
+        if ($object->getRouteName() != 'page_slug') {
             return true;
         }
 
@@ -119,61 +124,58 @@ class PageAdminController extends AbstractController
         $clonedObject = new $className();
 
 
-
         if (true === $smart_service_conf['translate_on_create_page']) {
             $translationProvider = $this->smartServiceProviderFactory->create($this->smartServiceTranslation);
             $targetLanguage = $site->getLocale();
 
             $translate_array = [];
-            if(!empty(trim($object->getName()))){
+            if (!empty(trim($object->getName()))) {
                 $translate_array['page_name'] = trim($object->getName());
             }
-            if(!empty(trim($object->getName()))){
+            if (!empty(trim($object->getName()))) {
                 $translate_array['title'] = trim($object->getName());
             }
-            if(!empty(trim($object->getMetaKeyword()))){
+            if (!empty(trim($object->getMetaKeyword()))) {
                 $translate_array['metaKeyword'] = trim($object->getMetaKeyword());
             }
 
-            if(!empty(trim($object->getMetaDescription()))){
+            if (!empty(trim($object->getMetaDescription()))) {
                 $translate_array['metaDescription'] = trim($object->getMetaDescription());
             }
 
-            if(!empty(trim($object->getOgTitle()))){
+            if (!empty(trim($object->getOgTitle()))) {
                 $translate_array['ogTitle'] = trim($object->getOgTitle());
             }
 
-            if(!empty(trim($object->getOgDescription()))){
+            if (!empty(trim($object->getOgDescription()))) {
                 $translate_array['ogDescription'] = trim($object->getOgDescription());
             }
 
-
             $translation = $translationProvider->translateArray($translate_array, $targetLanguage);
 
-
-            if(!empty(trim($object->getName()))){
+            if (!empty(trim($object->getName()))) {
                 $clonedObject->setName($translation['page_name']['translated']);
             }
-            if(!empty(trim($object->getName()))){
+            if (!empty(trim($object->getName()))) {
                 $clonedObject->setTitle($translation['title']['translated']);
             }
-            if(!empty(trim($object->getMetaKeyword()))){
+            if (!empty(trim($object->getMetaKeyword()))) {
                 $clonedObject->setMetaKeyword($translation['metaKeyword']['translated']);
             }
 
-            if(!empty(trim($object->getMetaDescription()))){
+            if (!empty(trim($object->getMetaDescription()))) {
                 $clonedObject->setMetaDescription($translation['metaDescription']['translated']);
             }
 
-            if(!empty(trim($object->getOgTitle()))){
+            if (!empty(trim($object->getOgTitle()))) {
                 $clonedObject->setOgTitle($translation['ogTitle']['translated']);
             }
 
-            if(!empty(trim($object->getOgDescription()))){
+            if (!empty(trim($object->getOgDescription()))) {
                 $clonedObject->setOgDescription($translation['ogDescription']['translated']);
             }
 
-        }else{
+        } else {
             $clonedObject->setName($object->getName());
             $clonedObject->setTitle($object->getName());
             $clonedObject->setMetaKeyword($object->getMetaKeyword());
@@ -192,7 +194,6 @@ class PageAdminController extends AbstractController
         $clonedObject->setRequestMethod($object->getRequestMethod());
         $clonedObject->setEdited(false);
         $clonedObject->setCreatedAt(new \DateTime('now'));
-        //$clonedObject->setId(null);
         $clonedObject->setUrl(null);
         $clonedObject->setSlug(null);
         $clonedObject->setSite($site);
@@ -211,11 +212,11 @@ class PageAdminController extends AbstractController
             ->setParameter('translationFromId', $object->getTranslationFromId());
         $page = $qb->getQuery()->getOneOrNullResult();
 
-        if($page){
+        if ($page) {
             if (PHP_SAPI !== 'cli') {
                 $editUrl = $admin->generateObjectUrl('edit', $page);
                 return $this->redirect($editUrl . '?site=' . $site->getId());
-            }else{
+            } else {
                 return true;
             }
         }
@@ -224,14 +225,14 @@ class PageAdminController extends AbstractController
         $this->entityManager->persist($clonedObject);
         $this->entityManager->flush();
 
-        $clonedObject=$this->setUrl($clonedObject);
+        $clonedObject = $this->setUrl($clonedObject);
         $this->entityManager->persist($clonedObject);
         $this->entityManager->flush();
 
 
         foreach ($object->getBlocks() as $block) {
             $clonedBlock = new $blockClass;
-            if(empty($block->hasParent())){
+            if (empty($block->hasParent())) {
                 $clonedBlock->setName($block->getName());
                 $clonedBlock->setType($block->getType());
                 $clonedBlock->setSettings($block->getSettings());
@@ -242,9 +243,9 @@ class PageAdminController extends AbstractController
                 $this->entityManager->persist($clonedObject);
                 foreach ($block->getChildren() as $childBlock) {
                     $clonedChildBlock = new $blockClass;
-                    if(empty($childBlock->getName())){
+                    if (empty($childBlock->getName())) {
                         $clonedChildBlock->setName("");
-                    }else{
+                    } else {
                         $clonedChildBlock->setName($childBlock->getName());
                     }
 
@@ -270,11 +271,10 @@ class PageAdminController extends AbstractController
         $this->entityManager->flush();
 
 
-
         if (PHP_SAPI !== 'cli') {
             $editUrl = $admin->generateObjectUrl('edit', $clonedObject);
             return $this->redirect($editUrl . '?site=' . $site->getId());
-        }else{
+        } else {
             return true;
         }
     }
@@ -304,18 +304,18 @@ class PageAdminController extends AbstractController
                 if ('/' === $parentUrl) {
                     $base = '/';
                 } elseif (!str_ends_with($parentUrl ?? '', '/')) {
-                    $base = $parentUrl.'/';
+                    $base = $parentUrl . '/';
                 } else {
                     $base = $parentUrl;
                 }
 
                 $url = $entity->getCustomUrl() ?? $slug;
-                $entity->setUrl('/'.ltrim($base.$url, '/'));
+                $entity->setUrl('/' . ltrim($base . $url, '/'));
             } else {
                 $entity->setSlug(null);
 
                 $url = $entity->getCustomUrl() ?? '';
-                $entity->setUrl('/'.ltrim($url, '/'));
+                $entity->setUrl('/' . ltrim($url, '/'));
             }
         }
         return $entity;
@@ -327,8 +327,7 @@ class PageAdminController extends AbstractController
     {
         $this->smart_service_conf = $this->parameterBag->get('partitech_sonata_extra.smart_service');
 
-        if(true===$this->smart_service_conf['seo_proposal_on_page'])
-        {
+        if (true === $this->smart_service_conf['seo_proposal_on_page']) {
             $admin = $this->adminPool->getAdminByAdminCode('sonata.page.admin.page');
             $object = $admin->getObject($id);
             if (!$object) {
@@ -344,11 +343,11 @@ class PageAdminController extends AbstractController
 
             $cms = $this->cmsSelector->retrieve();
             $cms->setCurrentPage($object);
-            $current_render=$this->pageServiceManager->execute($object, $request);
-            $content=$current_render->getContent();
+            $current_render = $this->pageServiceManager->execute($object, $request);
+            $content = $current_render->getContent();
 
 
-            $seo_proposal_provider=$this->smart_service_conf['seo_provider'];
+            $seo_proposal_provider = $this->smart_service_conf['seo_provider'];
             $seoProposalProviderFactory = $this->smartServiceProviderFactory->create($seo_proposal_provider);
             $proposal = $seoProposalProviderFactory->getSeoProposal($content, $object->getSite()->getLocale());
             return new JsonResponse($proposal);
@@ -361,8 +360,7 @@ class PageAdminController extends AbstractController
     {
         $realtime_preview = $this->parameterBag->get('partitech_sonata_extra.page.realtime_preview');
 
-        if(true===$realtime_preview)
-        {
+        if (true === $realtime_preview) {
             $admin = $this->adminPool->getAdminByAdminCode('sonata.page.admin.page');
             $object = $admin->getObject($id);
             if (!$object) {
@@ -371,15 +369,15 @@ class PageAdminController extends AbstractController
 
             $templateCode = $object->getTemplateCode();
             if (null === $templateCode) {
-                return false;
+                return new Response();
             }
 
             $request = $this->requestStack->getCurrentRequest();
 
             $cms = $this->cmsSelector->retrieve();
             $cms->setCurrentPage($object);
-            $current_render=$this->pageServiceManager->execute($object, $request);
-            $content=$current_render->getContent();
+            $current_render = $this->pageServiceManager->execute($object, $request);
+            $content = $current_render->getContent();
 
             return new Response($content);
         }

@@ -2,6 +2,7 @@
 
 namespace Partitech\SonataExtra\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
@@ -27,7 +28,7 @@ class ArticleRevision
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private $author;
+    private UserInterface $author;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $content = null;
@@ -45,7 +46,7 @@ class ArticleRevision
     private ?\DateTimeInterface $revisionDate = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $publishedAt = null;
+    private ?DateTime $publishedAt = null;
 
     #[ORM\ManyToMany(targetEntity: CategoryInterface::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinTable(name: 'many_to_many__article_category_revision')]
@@ -54,11 +55,6 @@ class ArticleRevision
     #[Serializer\Groups(['default'])]
     #[Serializer\MaxDepth(1)]
     private Collection $category;
-
-
-
-
-
 
     #[ORM\ManyToMany(targetEntity: TagInterface::class, cascade: ['persist', 'remove'])]
     #[ORM\JoinTable(name: 'many_to_many__article_tag_revision')]
@@ -70,7 +66,7 @@ class ArticleRevision
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'featured_image__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $featured_image;
+    private ?MediaInterface $featured_image=null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $seo_title = null;
@@ -89,7 +85,7 @@ class ArticleRevision
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'seo_og_image__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $seo_og_image;
+    private ?MediaInterface $seo_og_image=null;
 
     public function __construct()
     {
@@ -156,7 +152,7 @@ class ArticleRevision
         return $this;
     }
 
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
         return $this->author;
     }
@@ -168,24 +164,24 @@ class ArticleRevision
         return $this;
     }
 
-    public function getStatus(): string  // nouveau getter
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): self  // nouveau setter
+    public function setStatus(string $status): self
     {
         $this->status = $status;
 
         return $this;
     }
 
-    public function getPublishedAt(): ?\DateTime
+    public function getPublishedAt(): ?DateTime
     {
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(?\DateTime $publishedAt): self
+    public function setPublishedAt(?DateTime $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
 
@@ -239,19 +235,19 @@ class ArticleRevision
         return $this;
     }
 
-    public function removeCatgory($category): self
+    public function removeCategory($category): self
     {
         $this->category->removeElement($category);
 
         return $this;
     }
 
-    public function getFeaturedImage()
+    public function getFeaturedImage(): ?MediaInterface
     {
         return $this->featured_image;
     }
 
-    public function setFeaturedImage($featured_image): self
+    public function setFeaturedImage(?MediaInterface $featured_image): self
     {
         $this->featured_image = $featured_image;
 
@@ -318,12 +314,12 @@ class ArticleRevision
         return $this;
     }
 
-    public function getSeoOgImage()
+    public function getSeoOgImage(): ?MediaInterface
     {
         return $this->seo_og_image;
     }
 
-    public function setSeoOgImage($seo_og_image): self
+    public function setSeoOgImage(?MediaInterface $seo_og_image): self
     {
         $this->seo_og_image = $seo_og_image;
 

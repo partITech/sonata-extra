@@ -2,45 +2,24 @@
 
 namespace Partitech\SonataExtra\Service;
 
-use Doctrine\ORM\EntityManagerInterface;
-use Sonata\MediaBundle\Model\MediaManagerInterface;
-use Sonata\MediaBundle\Provider\Pool;
+
 use Sonata\PageBundle\Model\PageInterface;
 use Sonata\PageBundle\Page\Service\PageServiceInterface;
 use Sonata\PageBundle\Page\TemplateManager;
 use Symfony\Component\DependencyInjection\Attribute\Autoconfigure;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
-#[AsService]
 #[Autoconfigure(tags: ['sonata.page'])]
 class BlogPageService implements PageServiceInterface
 {
     private TemplateManager $templateManager;
-    private KernelInterface $kernel;
-    private MediaManagerInterface $mediaManager;
-    private EntityManagerInterface $entityManager;
-    private Pool $providerPool;
-    private ParameterBagInterface $parameterBag;
-    private string $configDir;
 
     #[Required]
     public function required(
-        KernelInterface $kernel,
-        MediaManagerInterface $mediaManager,
-        EntityManagerInterface $entityManager,
-        Pool $providerPool,
-        ParameterBagInterface $parameterBag,
         TemplateManager $templateManager
     ): void {
-        $this->configDir = $kernel->getProjectDir().'/config';
-        $this->mediaManager = $mediaManager;
-        $this->entityManager = $entityManager;
-        $this->providerPool = $providerPool;
-        $this->parameterBag = $parameterBag;
         $this->templateManager = $templateManager;
     }
 

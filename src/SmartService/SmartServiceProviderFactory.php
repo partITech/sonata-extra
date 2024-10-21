@@ -10,6 +10,8 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 class SmartServiceProviderFactory implements SmartServiceProviderFactoryInterface
 {
     private ParameterBagInterface $params;
+    private ContainerInterface $container;
+    private LoggerInterface $logger;
 
     #[Required]
     public function autowireDependencies(
@@ -22,6 +24,9 @@ class SmartServiceProviderFactory implements SmartServiceProviderFactoryInterfac
         $this->container = $container;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function create(string $providerName = null): SmartServiceProviderInterface
     {
         $config = $this->params->get('partitech_sonata_extra.smart_service');
@@ -32,7 +37,6 @@ class SmartServiceProviderFactory implements SmartServiceProviderFactoryInterfac
             if (!empty($config['providers'][$providerName]['class'])) {
                 $provider = new $config['providers'][$providerName]['class']();
                 $provider->setConfig($config['providers'][$providerName]);
-                //$this->logger->info('test');
                 $provider->setLogger($this->logger);
                 $provider->setContainer($this->container);
 

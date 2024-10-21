@@ -5,6 +5,8 @@ namespace Partitech\SonataExtra\Admin;
 use Doctrine\Common\Collections\ArrayCollection;
 use FOS\CKEditorBundle\Form\Type\CKEditorType;
 use Knp\Menu\ItemInterface;
+use Partitech\SonataExtra\Controller\Admin\ArticleController;
+use Partitech\SonataExtra\Entity\Article;
 use Partitech\SonataExtra\Enum\ArticleStatus;
 use Partitech\SonataExtra\Form\Type\GutenbergType;
 use Partitech\SonataExtra\Form\Type\MarkdownType;
@@ -28,21 +30,17 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Routing\RouterInterface;
-// use Partitech\SonataExtra\Form\Type\CollectionTagsType;
 use Symfony\Contracts\Service\Attribute\Required;
 use Doctrine\ORM\EntityManagerInterface;
-use Sonata\DoctrineORMAdminBundle\Datagrid\ProxyQuery;
-
-
 use Partitech\SonataExtra\Attribute\AsAdmin;
 
 #[AsAdmin(
     manager_type: 'orm',
     label: 'Article',
-    model_class: \Partitech\SonataExtra\Entity\Article::class,
-    controller: \Partitech\SonataExtra\Controller\Admin\ArticleController::class,
+    model_class: Article::class,
+    controller: ArticleController::class,
     calls: [
-        ['addChild', [\Partitech\SonataExtra\Admin\ArticleRevisionAdmin::class, 'article']],
+        ['addChild', [ArticleRevisionAdmin::class, 'article']],
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
 )]
@@ -61,7 +59,8 @@ class ArticleAdmin extends AbstractAdmin
     private string $userClass;
     private string $categoryClass;
     private string $tagClass;
-    private string $seoProposal;
+    private bool $seoProposal;
+
     #[Required]
     public function required(
         GutenbergPatternsService $GutenbergPatternsService,
@@ -87,7 +86,8 @@ class ArticleAdmin extends AbstractAdmin
 
     }
 
-    public function getSeoProposalEnabled(){
+    public function getSeoProposalEnabled(): bool
+    {
         return $this->seoProposal;
     }
     function configureDefaultSortValues(array &$sortValues):void
@@ -265,7 +265,8 @@ class ArticleAdmin extends AbstractAdmin
                         'multiple' => true,
                         'btn_add' => 'Ajouter une nouvelle catégorie',
                         'query' => $queryCategory,
-                        'required'=>false
+                        'required'=>false,
+                        'sonata_field_description' => false
                     ])
 
                     ->add('tags', ModelType::class, [
@@ -274,7 +275,8 @@ class ArticleAdmin extends AbstractAdmin
                         'multiple' => true,
                         'btn_add' => 'Ajouter un nouveau tag',
                         'query' => $querytag,
-                        'required'=>false
+                        'required'=>false,
+                        'sonata_field_description' => false
                     ])
 
                 ->end()

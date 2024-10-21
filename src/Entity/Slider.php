@@ -17,7 +17,6 @@ use JMS\Serializer\Annotation as Serializer;
 class Slider
 {
     use EntityTranslationTrait;
-
     #[ORM\Id]
     #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     #[ORM\Column(type: 'integer')]
@@ -34,7 +33,7 @@ class Slider
     #[ORM\Column(type: 'integer', options: ['default' => 0])]
     private int $ordre = 0;
 
-    #[ORM\OneToMany(mappedBy: 'slider', targetEntity: SliderSlides::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
+    #[ORM\OneToMany(targetEntity: SliderSlides::class, mappedBy: 'slider', cascade: ['persist', 'remove'], fetch: 'EAGER')]
     #[Serializer\Groups(['default'])]
     #[Serializer\MaxDepth(1)]
     private Collection $slides;

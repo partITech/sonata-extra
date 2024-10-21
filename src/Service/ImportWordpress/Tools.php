@@ -15,17 +15,13 @@
             
             $images = $dom->getElementsByTagName('img');
             foreach ($images as $image) {
-                // Vérifier si l'image a un attribut srcset
                 if ($image->hasAttribute('srcset')) {
                     $currentSrc = $image->getAttribute('src');
                     if(isset($urlIndex[$currentSrc])){
                         $replacementFragment = $dom->createDocumentFragment();
                         @$replacementFragment->appendXML($urlIndex[$currentSrc]['twig']);
-                        // Remplacer l'image par la chaîne de remplacement
                         $image->parentNode->replaceChild($replacementFragment->cloneNode(TRUE), $image);
                     }
-                    
-                    
                 }
             }
             $htmlContent = $dom->saveHTML();

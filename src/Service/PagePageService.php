@@ -16,23 +16,13 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class PagePageService implements PageServiceInterface
 {
-    private $parameterBag;
     private TemplateManager $templateManager;
 
     #[Required]
     public function required(
-        KernelInterface $kernel,
-        MediaManagerInterface $mediaManager,
-        EntityManagerInterface $entityManager,
-        Pool $providerPool,
-        ParameterBagInterface $parameterBag,
         TemplateManager $templateManager
-    ): void {
-        $this->configDir = $kernel->getProjectDir().'/config';
-        $this->mediaManager = $mediaManager;
-        $this->entityManager = $entityManager;
-        $this->providerPool = $providerPool;
-        $this->parameterBag = $parameterBag;
+    ): void
+    {
         $this->templateManager = $templateManager;
     }
 
@@ -43,8 +33,6 @@ class PagePageService implements PageServiceInterface
 
     public function execute(PageInterface $page, Request $request, array $parameters = [], Response $response = null): Response
     {
-        // add custom processing (load data, update SEO values, update http headers, perform security checks, ...)
-
         return $this->templateManager->renderResponse($page->getTemplateCode(), $parameters, $response);
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Partitech\SonataExtra\Controller\Admin;
 
+use Partitech\SonataExtra\Admin\ArticleAdmin;
 use Partitech\SonataExtra\Repository\ArticleRepository;
 use Partitech\SonataExtra\Repository\ArticleRevisionRepository;
 use Sonata\AdminBundle\Admin\Pool;
@@ -16,12 +17,12 @@ class ArticleRevisionsController extends CRUDController
     private ArticleRevisionRepository $articleRevisionRepository;
 
     private Pool $pool;
+    private ArticleRepository $articleRepository;
 
     #[Required]
     public function autowireDependencies(
         ArticleRevisionRepository $articleRevisionRepository,
         ArticleRepository $articleRepository,
-        TranslatorInterface $translator,
         Pool $pool
     ): void {
         $this->articleRevisionRepository = $articleRevisionRepository;
@@ -29,13 +30,13 @@ class ArticleRevisionsController extends CRUDController
         $this->pool = $pool;
     }
 
-    public function applyRevisionAction(Request $request, $id = null, $childId = null): RedirectResponse
+    public function applyRevisionAction($id = null, $childId = null): RedirectResponse
     {
         $admin = $this->admin;
 
         $articleRevision = $admin->getObject($childId);
 
-        $articleAdmin = $this->pool->getAdminByAdminCode(\Partitech\SonataExtra\Admin\ArticleAdmin::class);
+        $articleAdmin = $this->pool->getAdminByAdminCode(ArticleAdmin::class);
         $article = $articleAdmin->getObject($id);
 
         if (!$article || !$articleRevision) {
@@ -44,7 +45,7 @@ class ArticleRevisionsController extends CRUDController
             return new RedirectResponse($this->admin->generateUrl('list'));
         }
 
-        // Mettre à jour le contenu de l'article avec la révision
+        // Update article content with revision
         $article->setContent($articleRevision->getContent());
         $article->setTitle($articleRevision->getTitle());
         $article->setAuthor($articleRevision->getAuthor());

@@ -3,6 +3,8 @@
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Controller\Admin\ArticleRevisionsController;
+use Partitech\SonataExtra\Entity\ArticleRevision;
 use Partitech\SonataExtra\Enum\ArticleStatus;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridInterface;
@@ -14,8 +16,8 @@ use Sonata\AdminBundle\Route\RouteCollectionInterface;
 #[AsAdmin(
     manager_type: 'orm',
     label: 'Article Revision',
-    model_class: \Partitech\SonataExtra\Entity\ArticleRevision::class,
-    controller: \Partitech\SonataExtra\Controller\Admin\ArticleRevisionsController::class,
+    model_class: ArticleRevision::class,
+    controller: ArticleRevisionsController::class,
     calls: [
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
@@ -23,7 +25,7 @@ use Sonata\AdminBundle\Route\RouteCollectionInterface;
 class ArticleRevisionAdmin extends AbstractAdmin
 {
     protected $baseRoutePattern = 'article-revision';
-    protected $exportFormats = [];
+    protected array $exportFormats = [];
 
     protected function configureDefaultSortValues(array &$sortValues): void
     {
@@ -105,8 +107,6 @@ class ArticleRevisionAdmin extends AbstractAdmin
             ])
             ->add('category', null, ['label' => 'Categories'])
             ->add('tags', null, ['label' => 'Tags'])
-            // ->add('content')
-
             ->add('seo_title')
             ->add('seo_keywords')
             ->add('seo_description')

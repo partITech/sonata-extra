@@ -12,7 +12,8 @@ class WebMVideoParser implements InlineParserInterface {
 
     }
 
-    public function parse(InlineParserContext $inlineContext): bool {
+    public function parse(InlineParserContext $inlineContext): bool
+    {
         $cursor = $inlineContext->getCursor();
         $previousState = $cursor->saveState();
 
@@ -30,7 +31,6 @@ class WebMVideoParser implements InlineParserInterface {
         </figure>
         ', htmlspecialchars($url, ENT_QUOTES, 'UTF-8'));
         $inlineContext->getContainer()->appendChild(new HtmlInline($videoHtml));
-
 
         return true;
     }

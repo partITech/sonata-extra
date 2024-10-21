@@ -24,8 +24,9 @@ class pageFixRouteCommand extends Command
     #[Required]
     public function autowireDependencies(
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag
-    ): void {
+        ParameterBagInterface  $parameterBag
+    ): void
+    {
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
     }
@@ -38,8 +39,7 @@ class pageFixRouteCommand extends Command
                 'h',
                 InputOption::VALUE_NONE,
                 'There is no extra parameters for this command.'
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int

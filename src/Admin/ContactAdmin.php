@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Entity\Contact;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -15,7 +16,7 @@ use Sonata\AdminBundle\Show\ShowMapper;
     manager_type: 'orm',
     group: 'Admin',
     label: 'Contact',
-    model_class: \Partitech\SonataExtra\Entity\Contact::class,
+    model_class: Contact::class,
     calls: [
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]

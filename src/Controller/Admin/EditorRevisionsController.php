@@ -2,6 +2,7 @@
 
 namespace Partitech\SonataExtra\Controller\Admin;
 
+use Partitech\SonataExtra\Admin\EditorAdmin;
 use Partitech\SonataExtra\Repository\EditorRepository;
 use Partitech\SonataExtra\Repository\EditorRevisionRepository;
 use Sonata\AdminBundle\Admin\Pool;
@@ -17,11 +18,13 @@ class EditorRevisionsController extends CRUDController
 
     private Pool $pool;
 
+    private EditorRepository $editorRepository;
+    private EditorRevisionRepository $editorRevisionRepository;
+
     #[Required]
     public function autowireDependencies(
         EditorRevisionRepository $editorRevisionRepository,
         EditorRepository $editorRepository,
-        TranslatorInterface $translator,
         Pool $pool
     ): void {
         $this->editorRevisionRepository = $editorRevisionRepository;
@@ -35,7 +38,7 @@ class EditorRevisionsController extends CRUDController
 
         $editorRevision = $admin->getObject($childId);
 
-        $editorAdmin = $this->pool->getAdminByAdminCode(\Partitech\SonataExtra\Admin\EditorAdmin::class);
+        $editorAdmin = $this->pool->getAdminByAdminCode(EditorAdmin::class);
         $editor = $editorAdmin->getObject($id);
 
         if (!$editor || !$editorRevision) {
@@ -44,7 +47,7 @@ class EditorRevisionsController extends CRUDController
             return new RedirectResponse($this->admin->generateUrl('list'));
         }
 
-        // Mettre à jour le contenu de l'editor avec la révision
+        // Update editor content with revision
         $editor->setContent($editorRevision->getContent());
         $editor->setTitle($editorRevision->getTitle());
         $editor->setAuthor($editorRevision->getAuthor());

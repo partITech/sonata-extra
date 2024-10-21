@@ -26,21 +26,24 @@ class ArticleFixClassificationCommand extends Command
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private Pool $adminPool;
-    private LocaleService $LocaleService;
+    private LocaleService $localeService;
+
+    private TranslateObjectService $translateObjectService;
 
     #[Required]
     public function autowireDependencies(
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        ParameterBagInterface  $parameterBag,
         TranslateObjectService $TranslateObjectService,
-        Pool $adminPool,
-        LocaleService $LocaleService
-    ): void {
+        Pool                   $adminPool,
+        LocaleService          $LocaleService
+    ): void
+    {
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
-        $this->TranslateObjectService = $TranslateObjectService;
+        $this->translateObjectService = $TranslateObjectService;
         $this->adminPool = $adminPool;
-        $this->LocaleService = $LocaleService;
+        $this->localeService = $LocaleService;
     }
 
     protected function configure(): void
@@ -51,63 +54,30 @@ class ArticleFixClassificationCommand extends Command
                 'h',
                 InputOption::VALUE_NONE,
                 'Display this help message.'
-            )
-            /*->addOption(
-                'site',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specify the site ID(s) for which to translate content.'
-            )
-            ->addOption(
-                'reference-site',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specify the reference site ID for translation.'
-            )
-            ->addOption(
-                'fqcn',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specify the entity to translage. '
-            )*/
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-
-
-
         $help = $input->getOption('help');
-        //$site = $input->getOption('site');
-        //$fqcn = $input->getOption('fqcn');
-        //$referenceSite = $input->getOption('reference-site');
+
         if ($help) {
             $io->success('Usage: bin/console sonata:extra:translate-content --site=1,2,3 --reference-site=1  --fqcn=Partitech\SonataExtra\Entity\Article');
             return Command::SUCCESS;
         }
 
-        $siteClass = $this->parameterBag->get('sonata.page.site.class');
-        $siteRepository = $this->entityManager->getRepository($siteClass);
-        $sites = $siteRepository->findAll();
-        $site_list = [];
-        foreach ($sites as $s) {
-            $site_list[$s->getId()] = $s->getLocale();
-        }
-
-
-        $fqcnRepository=$this->entityManager->getRepository(Article::class);
+        $fqcnRepository = $this->entityManager->getRepository(Article::class);
         $fqcnList = $fqcnRepository->findAll();
 
 
         $progressBar = new ProgressBar($output, 100);
-        $format="\n\t\t<fg=white;bg=cyan> %status:-45s%</>\n\n";
-        $format.="\t\t[%bar%] %percent:3s%%\n\n";
-        $format.="\t\t%current_item%\n";
+        $format = "\n\t\t<fg=white;bg=cyan> %status:-45s%</>\n\n";
+        $format .= "\t\t[%bar%] %percent:3s%%\n\n";
+        $format .= "\t\t%current_item%\n";
 
-        $format.="\t\t\n";
+        $format .= "\t\t\n";
         $progressBar->setFormat($format);
         $progressBar->setBarCharacter('<fg=green>⚬</>');
         $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
@@ -117,16 +87,16 @@ class ArticleFixClassificationCommand extends Command
         $progressBar->setMessage('Initialisation', 'status');
         $progressBar->start();
 
-        $jobs=0;
-        $total_job=count($fqcnList);
+        $jobs = 0;
+        $total_job = count($fqcnList);
         foreach ($fqcnList as $item) {
             $jobs++;
-            $progressBar->setMessage('<fg=green>'.$jobs.' / '.$total_job.' tasks</> ', 'status');
-            $progressBar->setMessage('<fg=green>#'.$item->getId().' : '.$item.'</>', 'current_item');
-            $progress_percent=round((100/$total_job)*$jobs);
+            $progressBar->setMessage('<fg=green>' . $jobs . ' / ' . $total_job . ' tasks</> ', 'status');
+            $progressBar->setMessage('<fg=green>#' . $item->getId() . ' : ' . $item . '</>', 'current_item');
+            $progress_percent = round((100 / $total_job) * $jobs);
             $progressBar->setProgress($progress_percent);
             $progressBar->display();
-            $entity=$this->LocaleService->fixEntityCategoryTag($item);
+            $entity = $this->localeService->fixEntityCategoryTag($item);
             $this->entityManager->persist($entity);
             $this->entityManager->flush();
         }

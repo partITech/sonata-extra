@@ -2,11 +2,12 @@
 
 namespace Partitech\SonataExtra\Entity;
 
+use DateTime;
+use DateTimeInterface;
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Contract\UserInterface;
 use Partitech\SonataExtra\Enum\ArticleStatus;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\EditorRevisionRepository')]
 #[ORM\Table(name: 'sonata_extra__editor_revision')]
@@ -20,7 +21,7 @@ class EditorRevision
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private $author;
+    private UserInterface $author;
 
     #[ORM\Column(type: 'text', nullable: true)]
     private ?string $content = null;
@@ -35,14 +36,14 @@ class EditorRevision
     private ?Editor $editor = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTimeInterface $revisionDate = null;
+    private ?DateTimeInterface $revisionDate = null;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $publishedAt = null;
+    private ?DateTime $publishedAt = null;
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'featured_image__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $featured_image;
+    private ?MediaInterface $featured_image=null;
 
     public function __construct()
     {
@@ -95,19 +96,19 @@ class EditorRevision
         return $this;
     }
 
-    public function getRevisionDate(): ?\DateTimeInterface
+    public function getRevisionDate(): ?DateTimeInterface
     {
         return $this->revisionDate;
     }
 
-    public function setRevisionDate(?\DateTimeInterface $revisionDate): self
+    public function setRevisionDate(?DateTimeInterface $revisionDate): self
     {
         $this->revisionDate = $revisionDate;
 
         return $this;
     }
 
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
         return $this->author;
     }
@@ -119,31 +120,31 @@ class EditorRevision
         return $this;
     }
 
-    public function getStatus(): string  // nouveau getter
+    public function getStatus(): string
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): self  // nouveau setter
+    public function setStatus(string $status): self
     {
         $this->status = $status;
 
         return $this;
     }
 
-    public function getPublishedAt(): ?\DateTime
+    public function getPublishedAt(): ?DateTime
     {
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(?\DateTime $publishedAt): self
+    public function setPublishedAt(?DateTime $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
 
         return $this;
     }
 
-    public function getFeaturedImage()
+    public function getFeaturedImage(): ?MediaInterface
     {
         return $this->featured_image;
     }

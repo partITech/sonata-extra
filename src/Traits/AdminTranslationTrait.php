@@ -4,11 +4,11 @@ namespace Partitech\SonataExtra\Traits;
 
 use App\Entity\SonataPageSite;
 use App\Repository\SonataPageSiteRepository;
+use JetBrains\PhpStorm\NoReturn;
+use Partitech\SonataExtra\Controller\Admin\TranslationController;
 use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
 use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Sonata\PageBundle\Model\SiteManagerInterface;
-use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Response;
 use Symfony\Contracts\Service\Attribute\Required;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Event\PrePersistEventArgs;
@@ -40,7 +40,7 @@ trait AdminTranslationTrait
         $this->sites = $this->siteManager->findAll();
 
         if ('sonata.admin.controller.crud' == $this->getBaseControllerName()) {
-            $this->setBaseControllerName(\Partitech\SonataExtra\Controller\Admin\TranslationController::class);
+            $this->setBaseControllerName(TranslationController::class);
         }
 
         $this->setTemplates([
@@ -151,29 +151,11 @@ trait AdminTranslationTrait
         return (string) $this->getLabel();
     }
 
-//    protected function preCreateTrait(Request $request, object $object): ?Response
-//    {
-//        $object->setSite($this->admin->getCurrentSite());
-//
-//        return null;
-//    }
-//
-//    #[ORM\PrePersist]
-//    protected function preCreate(Request $request, object $object): ?Response
-//    {
-//        dd('df');
-//        return $this->preCreateTrait($request, $object);
-//    }
-
+    #[NoReturn]
     #[ORM\PrePersist]
     public function preCreate(PrePersistEventArgs $args): void
     {
-        dd($args);
         $entity = $args->getObject();
-
-        // Vérifie que l'objet est bien de l'entité attendue
-
-        // Applique les modifications à l'entité avant la persistance
         $entity->setSite($this->getCurrentSite());
     }
 }

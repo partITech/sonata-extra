@@ -10,67 +10,71 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 class AssetsHandler
 {
-    private $css = [];
-    private $cssInline = [];
-    private $js = [];
-    private $jsInline = [];
-    private $packages;
-    private $cache;
-    private $parameterBag;
+    private array $css = [];
+    private array $cssInline = [];
+    private array $js = [];
+    private array $jsInline = [];
+    private CacheInterface $cache;
+    private ParameterBagInterface $parameterBag;
     #[Required]
     public function autowireDependencies(
-        Packages $packages,
         CacheInterface $cache,
         ParameterBagInterface $parameterBag
     ):void{
-        $this->packages = $packages;
         $this->cache = $cache;
         $this->parameterBag = $parameterBag;
     }
 
-    // Méthodes pour ajouter des ressources
-    public function addCss($path, $index = 'default')
+    public function addCss($path, $index = 'default'): self
     {
         $this->css[$index][] = $path;
+
+        return $this;
     }
 
-    public function addCssInline($content, $index = 'default')
+    public function addCssInline($content, $index = 'default'): self
     {
         $this->cssInline[$index][] = $content;
+
+        return $this;
     }
 
-    public function addJs($path, $defer = false, $index = 'default')
+    public function addJs($path, $defer = false, $index = 'default'): self
     {
         $this->js[$index][] = ['path' => $path, 'defer' => $defer];
+
+        return $this;
     }
 
-    public function addJsInline($content, $index = 'default')
+    public function addJsInline($content, $index = 'default'): self
     {
         $this->jsInline[$index][] = $content;
+
+        return $this;
     }
 
     // Méthodes pour obtenir les ressources
-    public function getCss($index)
+    public function getCss($index): array
     {
         return $this->css[$index] ?? [];
     }
 
-    public function getCssInline($index)
+    public function getCssInline($index): array
     {
         return $this->cssInline[$index] ?? [];
     }
 
-    public function getJs($index)
+    public function getJs($index): array
     {
         return $this->js[$index] ?? [];
     }
 
-    public function getJsInline($index)
+    public function getJsInline($index): array
     {
         return $this->jsInline[$index] ?? [];
     }
 
-    public function getBlocksCss($index)
+    public function getBlocksCss($index): string
     {
 
         $output = '';
@@ -81,14 +85,12 @@ class AssetsHandler
         return $output;
     }
 
-    public function getBlocksCssInline($index, $compress = false)
+    public function getBlocksCssInline($index, $compress = false): string
     {
         $output = '';
         foreach ($this->cssInline[$index] ?? [] as $cssInline) {
             $output .= sprintf('<style>%s</style>', $cssInline);
         }
-
-
 
         if ($compress) {
             $cacheKey = md5($output);
@@ -106,7 +108,7 @@ class AssetsHandler
         return $output;
     }
 
-    public function getBlocksJs($index)
+    public function getBlocksJs($index): string
     {
         $output = '';
         foreach ($this->js[$index] ?? [] as $js) {
@@ -115,7 +117,7 @@ class AssetsHandler
         return $output;
     }
 
-    public function getBlocksJsInline($index, $compress=false)
+    public function getBlocksJsInline($index, $compress=false): string
     {
 
         $output = '';
@@ -148,14 +150,14 @@ class AssetsHandler
         return $environment === 'prod';
     }
 
-    private function getFromCache(string $cacheKey)
+    private function getFromCache(string $cacheKey): mixed
     {
         return $this->cache->get($cacheKey, function ($item) {
             return null;
         });
     }
 
-    private function saveToCache(string $cacheKey, string $content)
+    private function saveToCache(string $cacheKey, string $content): void
     {
         $this->cache->get($cacheKey, function ($item) use ($content) {
             $item->expiresAfter(3600*24); // TTL  1 hour *24

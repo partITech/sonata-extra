@@ -2,7 +2,6 @@
 
 namespace Partitech\SonataExtra\Block;
 
-use App\Entity\SonataClassificationCategory as Category;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Sonata\BlockBundle\Block\BlockContextInterface;
@@ -31,21 +30,22 @@ use Twig\Environment;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class BlogListCategoriesBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private CmsManagerSelectorInterface $cmsSelector;
-    private $categoryManager;
+    private CategoryManagerInterface $categoryManager;
     private PaginatorInterface $paginator;
 
     #[Required]
     public function autowireDependencies(
-        Environment $twig,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        Environment                 $twig,
+        EntityManagerInterface      $entityManager,
+        ParameterBagInterface       $parameterBag,
         CmsManagerSelectorInterface $cmsSelector,
-        CategoryManagerInterface $categoryManager,
-        PaginatorInterface $paginator
-    ): void {
+        CategoryManagerInterface    $categoryManager,
+        PaginatorInterface          $paginator
+    ): void
+    {
         parent::__construct($twig);
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
@@ -70,7 +70,7 @@ final class BlogListCategoriesBlockService extends AbstractBlockService implemen
         $categories = $settings['categories'];
 
         $selectedCategories = [];
-        if(!empty($categories)){
+        if (!empty($categories)) {
             foreach ($categories as $categoryId) {
                 $category = $this->entityManager->getRepository($category_class)->find($categoryId);
                 if ($category) {
@@ -81,7 +81,7 @@ final class BlogListCategoriesBlockService extends AbstractBlockService implemen
                             ->select('c')
                             ->from($category_class, 'c')
                             ->where('c.id IN (:ids)')
-                            ->andWhere('c.site ='.$site->getId())
+                            ->andWhere('c.site =' . $site->getId())
                             ->setParameter('ids', $childCategoriesIds)
                             ->setMaxResults($max_item)
                             ->getQuery()
@@ -92,17 +92,15 @@ final class BlogListCategoriesBlockService extends AbstractBlockService implemen
                 }
             }
 
-        }else{
+        } else {
             $selectedCategories = $this->entityManager->createQueryBuilder()
                 ->select('c')
                 ->from($category_class, 'c')
-                ->Where('c.site ='.$site->getId())
+                ->Where('c.site =' . $site->getId())
                 ->setMaxResults($max_item)
                 ->getQuery()
                 ->getResult();
         }
-
-        //$selectedCategories = array_unique($selectedCategories, SORT_REGULAR);
 
         return $this->renderResponse($template, [
             'block' => $blockContext->getBlock(),
@@ -118,7 +116,7 @@ final class BlogListCategoriesBlockService extends AbstractBlockService implemen
         $this->configureEditForm($form, $block);
     }
 
-    public function configureEditForm(FormMapper $formMapper, BlockInterface $block): void
+    public function configureEditForm(FormMapper $form, BlockInterface $block): void
     {
         $category_class = $this->parameterBag->get('partitech_sonata_extra.category.class');
         $categories = $this->entityManager->getRepository($category_class)->findAll();
@@ -128,7 +126,7 @@ final class BlogListCategoriesBlockService extends AbstractBlockService implemen
             $categoriesChoices[$category->getName()] = $category->getId(); // Assurez-vous que la méthode getName et getId existe dans votre entité Category
         }
 
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
                 ['title', TextType::class, [
                     'label' => 'Title',
@@ -187,7 +185,7 @@ final class BlogListCategoriesBlockService extends AbstractBlockService implemen
         ]);
     }
 
-    public function getCategoryIdsWithChildren($category, EntityManagerInterface $entityManager)
+    public function getCategoryIdsWithChildren($category, EntityManagerInterface $entityManager): array
     {
         $categoryIds = [$category->getId()];
         foreach ($category->getChildren() as $child) {

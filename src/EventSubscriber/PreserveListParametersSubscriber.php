@@ -1,4 +1,5 @@
 <?php
+
 namespace Partitech\SonataExtra\EventSubscriber;
 
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
@@ -11,7 +12,7 @@ use Sonata\AdminBundle\Admin\Pool;
 class PreserveListParametersSubscriber implements EventSubscriberInterface
 {
 
-    private const SESSION_KEY = 'admin.list.parameters';
+    private const string SESSION_KEY = 'admin.list.parameters';
     private RequestStack $requestStack;
     private Pool $adminPool;
 
@@ -39,7 +40,7 @@ class PreserveListParametersSubscriber implements EventSubscriberInterface
             $session = $this->requestStack->getSession();
             $sessionKey = self::SESSION_KEY . '.' . $adminCode;
 
-            if(!empty($admin->preserveFilters)){
+            if (!empty($admin->preserveFilters)) {
 
                 if ($request->query->get('clear_filters') === 'true') {
                     $session->remove($sessionKey);
@@ -61,6 +62,4 @@ class PreserveListParametersSubscriber implements EventSubscriberInterface
 
         }
     }
-
-
 }

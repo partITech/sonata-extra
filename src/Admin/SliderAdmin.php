@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Entity\Slider;
 use Partitech\SonataExtra\Traits\AdminTranslationTrait;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
@@ -12,6 +13,7 @@ use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Sonata\AdminBundle\Show\ShowMapper;
+use Sonata\Form\Type\CollectionType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 
@@ -19,7 +21,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
     manager_type: 'orm',
     group: 'Admin',
     label: 'Slider',
-    model_class: \Partitech\SonataExtra\Entity\Slider::class,
+    model_class: Slider::class,
     calls: [
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
@@ -58,7 +60,7 @@ final class SliderAdmin extends AbstractAdmin
             // ->add('id')
             ->add('title', TextType::class, ['label' => 'Titre'])
             ->add('description', TextareaType::class, ['label' => 'Description'])
-            ->add('slides', \Sonata\Form\Type\CollectionType::class,
+            ->add('slides', CollectionType::class,
                 [
                     'required' => false,
                     'by_reference' => false,

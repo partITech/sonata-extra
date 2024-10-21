@@ -3,7 +3,6 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\SecStopWordRepository;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SecStopWordRepository::class)]
 #[ORM\Table(name: 'sonata_extra__sec_stop_word')]
@@ -15,9 +14,8 @@ class SecStopWord
     private $id;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $word;
+    private string $word;
 
-    // Getters and Setters
     public function getId(): ?int
     {
         return $this->id;

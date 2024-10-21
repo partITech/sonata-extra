@@ -8,7 +8,7 @@ use Partitech\SonataExtra\Entity\Slider;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 
 /**
- * @extends ServiceEntityRepository<menu>
+ * @extends ServiceEntityRepository<Slider>
  *
  * @method Slider|null find($id, $lockMode = null, $lockVersion = null)
  * @method Slider|null findOneBy(array $criteria, array $orderBy = null)

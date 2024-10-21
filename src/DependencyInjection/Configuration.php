@@ -43,7 +43,7 @@ class Configuration implements ConfigurationInterface
             ->arrayNode('providers')
                         ->useAttributeAsKey('name')
                             ->arrayPrototype()
-                        ->variablePrototype()->end()  // Autorise des paramètres arbitraires
+                        ->variablePrototype()->end()  // Allow arbitrary parameters
                         ->end()
                     ->end()
                 ->end()

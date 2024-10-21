@@ -3,7 +3,6 @@
 namespace Partitech\SonataExtra\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Partitech\SonataExtra\Entity\Article;
 use Partitech\SonataExtra\Service\LocaleService;
 use Partitech\SonataExtra\Service\TranslateObjectService;
 use Sonata\AdminBundle\Admin\Pool;
@@ -26,21 +25,22 @@ class MenuFixTranslationUrlCommand extends Command
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private Pool $adminPool;
-    private LocaleService $LocaleService;
+    private LocaleService $localeService;
+    private TranslateObjectService $translateObjectService;
 
     #[Required]
     public function autowireDependencies(
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        TranslateObjectService $TranslateObjectService,
-        Pool $adminPool,
-        LocaleService $LocaleService
+        ParameterBagInterface  $parameterBag,
+        TranslateObjectService $translateObjectService,
+        Pool                   $adminPool,
+        LocaleService          $LocaleService
     ): void {
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
-        $this->TranslateObjectService = $TranslateObjectService;
+        $this->translateObjectService = $translateObjectService;
         $this->adminPool = $adminPool;
-        $this->LocaleService = $LocaleService;
+        $this->localeService = $LocaleService;
     }
 
     protected function configure(): void
@@ -57,33 +57,16 @@ class MenuFixTranslationUrlCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Specify the menu id to fix'
-            )
-            /*->addOption(
-                'reference-site',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specify the reference site ID for translation.'
-            )
-            ->addOption(
-                'fqcn',
-                null,
-                InputOption::VALUE_REQUIRED,
-                'Specify the entity to translage. '
-            )*/
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $io = new SymfonyStyle($input, $output);
 
-
-
-
         $help = $input->getOption('help');
         $menuId = $input->getOption('menu');
-        //$fqcn = $input->getOption('fqcn');
-        //$referenceSite = $input->getOption('reference-site');
+
         if ($help) {
             $io->success('Usage: bin/console sonata:extra:fix-menu-url --menu=2');
             return Command::SUCCESS;
@@ -94,11 +77,8 @@ class MenuFixTranslationUrlCommand extends Command
 
         $menu = $menuRepository->findOneBy(['id'=>$menuId]);
 
-
         if(!empty($menu)){
             $menuItems=$menu->getMenuItems();
-
-
         }else{
             return Command::SUCCESS;
         }
@@ -130,7 +110,7 @@ class MenuFixTranslationUrlCommand extends Command
             $progressBar->setProgress($progress_percent);
             $progressBar->display();
 
-            $this->LocaleService->fixMenuItemUrl($MenuItem);
+            $this->localeService->fixMenuItemUrl($MenuItem);
         }
 
         $progressBar->finish();

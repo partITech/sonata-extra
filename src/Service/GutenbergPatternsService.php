@@ -11,19 +11,20 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class GutenbergPatternsService
 {
-    private $configDir;
-    private $mediaManager;
-    private $entityManager;
-    private $providerPool;
+    private string $configDir;
+    private MediaManagerInterface $mediaManager;
+    private EntityManagerInterface $entityManager;
+    private Pool $providerPool;
 
     #[Required]
     public function required(
-        KernelInterface $kernel,
-        MediaManagerInterface $mediaManager,
+        KernelInterface        $kernel,
+        MediaManagerInterface  $mediaManager,
         EntityManagerInterface $entityManager,
-        Pool $providerPool
-    ): void {
-        $this->configDir = $kernel->getProjectDir().'/config';
+        Pool                   $providerPool
+    ): void
+    {
+        $this->configDir = $kernel->getProjectDir() . '/config';
         $this->mediaManager = $mediaManager;
         $this->entityManager = $entityManager;
         $this->providerPool = $providerPool;
@@ -32,7 +33,7 @@ class GutenbergPatternsService
     public function parseDirectory($directory): array
     {
         $finder = new Finder();
-        $finder->files()->in($this->configDir.'/patterns/'.$directory)->name('*')->sortByName();
+        $finder->files()->in($this->configDir . '/patterns/' . $directory)->name('*')->sortByName();
 
         $filesArray = [];
         foreach ($finder as $file) {
@@ -45,7 +46,7 @@ class GutenbergPatternsService
         return $filesArray;
     }
 
-    public function getPatterns($directories)
+    public function getPatterns($directories): array
     {
         $patterns = [];
         foreach ($directories as $d) {
@@ -58,7 +59,7 @@ class GutenbergPatternsService
         return $patterns;
     }
 
-    public function parsePattern($f)
+    public function parsePattern($f): array
     {
         $patternFileContent = file_get_contents($f['path']);
 
@@ -92,27 +93,20 @@ class GutenbergPatternsService
         $content = preg_replace('/<\?php(.*?)\?>/s', '', $patternFileContent);
 
         // Build the final pattern data array
-        $patternData = [
+        return [
             'title' => $metadata['title'] ?? '',
             'name' => $metadata['title'] ?? '',
             'description' => $metadata['description'] ?? '',
             'categories' => $metadata['categories'] ?? '',
             'content' => $content,
         ];
-
-        return $patternData;
     }
 
-    public function getMediaPatterns($context, $categoryName = false)
+    public function getMediaPatterns($context, $categoryName = false): array
     {
         if (!empty($categoryName)) {
             $categoryRepository = $this->entityManager->getRepository('SonataClassificationBundle:Category');
             $category = $categoryRepository->findOneBy(['name' => $categoryName]);
-
-            /* $queryBuilder = $this->mediaManager->getEntityManager()->createQueryBuilder();
-             $queryBuilder->select('m')
-                 ->from('App\Entity\SonataMediaMedia', 'm')
-                 ->orderBy('m.createdAt', 'DESC');*/
 
             $mediaItems = $this->mediaManager->findBy([
                 'context' => $context,
@@ -151,6 +145,6 @@ class GutenbergPatternsService
             'name' => $media->getName(),
             'description' => $media->getDescription(),
             'content' => $patternContent,
-            ];
+        ];
     }
 }

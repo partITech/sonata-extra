@@ -13,7 +13,6 @@ class CodeExtractor
         $html = $this->extractMdCodeBlocks($html);
         $html = $this->extractImagePlaceholders($html);
 
-        // Extraction des blocs de code
         $html = preg_replace_callback(
             '/<pre.*?>.*?<\/pre>/s',
             function ($matches) {
@@ -26,17 +25,19 @@ class CodeExtractor
             $html
         );
 
-        // Minification du reste du HTML
         return $this->minifyHtml($html);
     }
 
-    public function getCodeBlocks(){
+    public function getCodeBlocks(): array
+    {
         return $this->codeBlocks;
     }
 
-    public function setCodeBlocks($codeBlocks):void
+    public function setCodeBlocks($codeBlocks): self
     {
-        $this->codeBlocks=$codeBlocks;
+        $this->codeBlocks = $codeBlocks;
+
+        return $this;
     }
 
     private function extractFigureBlocks(string $html): string
@@ -95,7 +96,6 @@ class CodeExtractor
 
     private function minifyHtml(string $html): string
     {
-        // Réduction des espaces blancs dans le HTML
         if ($this->isHtml($html)) {
             return preg_replace('/\s+/', ' ', $html);
         }
@@ -124,7 +124,8 @@ class CodeExtractor
         return false;
     }
 
-    public function splitHtml($text, $maxLength) {
+    public function splitHtml(string $text, int $maxLength): array
+    {
         if($this->isHtml($text)){
             $dom = new \DOMDocument;
             @$dom->loadHTML(mb_convert_encoding($text, 'HTML-ENTITIES', 'UTF-8'), LIBXML_HTML_NOIMPLIED | LIBXML_HTML_NODEFDTD);

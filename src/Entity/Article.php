@@ -3,16 +3,19 @@
 namespace Partitech\SonataExtra\Entity;
 
 use App\Entity\SonataMediaMedia;
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Gedmo\Mapping\Annotation as Gedmo;
+use League\CommonMark\Exception\CommonMarkException;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
 use Partitech\SonataExtra\Contract\CategoryInterface;
 use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Contract\TagInterface;
 use Partitech\SonataExtra\Contract\UserInterface;
 use Partitech\SonataExtra\Enum\ArticleStatus;
+use Partitech\SonataExtra\Markdown\VideoLinkExtension;
 use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 use Partitech\SonataExtra\Attribute\Translatable;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
@@ -22,7 +25,7 @@ use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment\Environment;
 use JMS\Serializer\Annotation as Serializer;
 
-#[ORM\Index(columns: ['content'], name: 'content_fulltext_idx', flags: ['fulltext'])]
+#[ORM\Index(name: 'content_fulltext_idx', columns: ['content'], flags: ['fulltext'])]
 #[ORM\Entity(repositoryClass: 'Partitech\SonataExtra\Repository\ArticleRepository')]
 #[ORM\Table(name: 'sonata_extra__article')]
 class Article
@@ -39,8 +42,6 @@ class Article
 
     #[ORM\Column(name: "is_default", type: "boolean")]
     private bool $isDefault = false;
-
-
 
     #[ORM\Column(type: 'text', nullable: true, options: ['charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'])]
     #[Translatable]
@@ -60,11 +61,11 @@ class Article
     private string $slug;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $publishedAt = null;
+    private ?DateTime $publishedAt = null;
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private $author;
+    private ?UserInterface $author;
 
     #[ORM\Column(type: 'string', length: 50)]
     private string $status;
@@ -72,7 +73,7 @@ class Article
     #[ORM\Column(type: 'string', length: 50, options: ['default' => 'markdown'])]
     private string $type_editor = 'markdown';
 
-    #[ORM\OneToMany(mappedBy: 'article', targetEntity: ArticleRevision::class, cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: ArticleRevision::class, mappedBy: 'article', cascade: ['persist', 'remove'])]
     #[Serializer\Groups(['default'])]
     #[Serializer\MaxDepth(1)]
     private Collection $revisions;
@@ -95,7 +96,7 @@ class Article
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'featured_image__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $featured_image;
+    private ?MediaInterface $featured_image=null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     #[Translatable]
@@ -119,7 +120,7 @@ class Article
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'seo_og_image__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $seo_og_image;
+    private ?MediaInterface $seo_og_image=null;
 
     public function __construct()
     {
@@ -157,6 +158,9 @@ class Article
         return $this->content;
     }
 
+    /**
+     * @throws CommonMarkException
+     */
     public function getHtmlContent(): string
     {
         if($this->getTypeEditor()=='markdown'){
@@ -164,7 +168,7 @@ class Article
             $config = [];
             $environment = new Environment($config);
             $environment->addExtension(new CommonMarkCoreExtension());
-            $environment->addExtension(new \Partitech\SonataExtra\Markdown\VideoLinkExtension());
+            $environment->addExtension(new VideoLinkExtension());
 
             $converter = new MarkdownConverter($environment);
 
@@ -197,19 +201,19 @@ class Article
     }
 
 
-    public function getPublishedAt(): ?\DateTime
+    public function getPublishedAt(): ?DateTime
     {
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(?\DateTime $publishedAt): self
+    public function setPublishedAt(?DateTime $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
 
         return $this;
     }
 
-    public function getAuthor()
+    public function getAuthor(): ?UserInterface
     {
         return $this->author;
     }
@@ -231,7 +235,7 @@ class Article
         $this->status = $status;
 
         if ($status === ArticleStatus::PUBLISHED->value && null === $this->publishedAt) {
-            $this->setPublishedAt(new \DateTime());
+            $this->setPublishedAt(new DateTime());
         }
 
         return $this;
@@ -323,14 +327,14 @@ class Article
         return $this;
     }
 
-    public function removeCatgory($category): self
+    public function removeCategory($category): self
     {
         $this->category->removeElement($category);
 
         return $this;
     }
 
-    public function getFeaturedImage()
+    public function getFeaturedImage(): ?MediaInterface
     {
         return $this->featured_image;
     }
@@ -413,7 +417,7 @@ class Article
         return $this;
     }
 
-    public function getSeoOgImage()
+    public function getSeoOgImage(): ?MediaInterface
     {
         return $this->seo_og_image;
     }
@@ -425,7 +429,7 @@ class Article
         return $this;
     }
 
-    public function generateExcerpt($maxChars = 500)
+    public function generateExcerpt($maxChars = 500): string
     {
         $content = $this->getHtmlContent();
 
@@ -434,8 +438,7 @@ class Article
         if (mb_strlen($contentWithoutTags) <= $maxChars) {
             return $contentWithoutTags;
         } else {
-            $excerpt = mb_substr($contentWithoutTags, 0, $maxChars - 3) . '...';
-            return $excerpt;
+            return mb_substr($contentWithoutTags, 0, $maxChars - 3) . '...';
         }
     }
 

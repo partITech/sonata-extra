@@ -6,14 +6,12 @@ use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
 use Partitech\SonataExtra\Entity\Article;
 use Partitech\SonataExtra\Service\LocaleService;
-use Sonata\ClassificationBundle\Model\CategoryManagerInterface;
 use Sonata\MediaBundle\Provider\Pool;
-use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -33,13 +31,14 @@ class BlogController extends AbstractController
     #[Required]
     public function autowireDependencies(
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        PaginatorInterface $paginator,
-        Pool $mediaPool,
-        SiteSelectorInterface $siteSelector,
-        RouterInterface $router,
-        LocaleService $localeService,
-    ): void {
+        ParameterBagInterface  $parameterBag,
+        PaginatorInterface     $paginator,
+        Pool                   $mediaPool,
+        SiteSelectorInterface  $siteSelector,
+        RouterInterface        $router,
+        LocaleService          $localeService,
+    ): void
+    {
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
         $this->paginator = $paginator;
@@ -52,19 +51,19 @@ class BlogController extends AbstractController
     #[Route('/blog-category/{slug}', name: 'sonata_extra_blog_category')]
     public function category(string $slug, Request $request): Response
     {
-        $category=$slug;
+        $category = $slug;
         $pageNumber = $request->query->getInt('page', 1);
         $settings = $this->parameterBag->get('partitech_sonata_extra.blog');
         $max_per_page = $settings['category']['max_per_page'];
         $category_class = $this->parameterBag->get('partitech_sonata_extra.category.class');
 
-        $categoryEntity = $this->entityManager->getRepository($category_class)->findOneBy(['slug' => $category,'enabled' => true]);
+        $categoryEntity = $this->entityManager->getRepository($category_class)->findOneBy(['slug' => $category, 'enabled' => true]);
         if (!$categoryEntity) {
             throw $this->createNotFoundException('La catégorie demandée n\'existe pas.');
         }
 
         $articles = $this->entityManager->getRepository(Article::class)
-            ->QueryPublishedByCategory($categoryEntity,$this->siteSelector->retrieve());
+            ->QueryPublishedByCategory($categoryEntity, $this->siteSelector->retrieve());
 
         $pagination = $this->paginator->paginate(
             $articles,
@@ -74,13 +73,13 @@ class BlogController extends AbstractController
         );
 
         $response = $this->render('@PartitechSonataExtra/Controller/Blog/category.html.twig', [
-           'category' => $category,
-           'pagination' => $pagination,
-            'entity'=>$categoryEntity
+            'category' => $category,
+            'pagination' => $pagination,
+            'entity' => $categoryEntity
         ]);
 
         /* inject translations links into language request for language selector*/
-        $linkHeader = $this->localeService->languageSelectorGetHeaderLinks($categoryEntity,'sonata_extra_blog_category');
+        $linkHeader = $this->localeService->languageSelectorGetHeaderLinks($categoryEntity, 'sonata_extra_blog_category');
         $response->headers->set('Link', $linkHeader);
 
         if (method_exists($categoryEntity, 'getSeoOgTitle')) {
@@ -114,7 +113,7 @@ class BlogController extends AbstractController
         $max_per_page = $settings['category']['max_per_page'];
         $tag_class = $this->parameterBag->get('partitech_sonata_extra.tag.class');
 
-        $tagEntity = $this->entityManager->getRepository($tag_class)->findOneBy(['slug' => $slug,'enabled' => true]);
+        $tagEntity = $this->entityManager->getRepository($tag_class)->findOneBy(['slug' => $slug, 'enabled' => true]);
         if (!$tagEntity) {
             throw $this->createNotFoundException('Le tag demandée n\'existe pas.');
         }
@@ -134,7 +133,7 @@ class BlogController extends AbstractController
         ]);
 
         /* inject translations links into language request for language selector*/
-        $linkHeader = $this->localeService->languageSelectorGetHeaderLinks($tagEntity,'sonata_extra_blog_tag');
+        $linkHeader = $this->localeService->languageSelectorGetHeaderLinks($tagEntity, 'sonata_extra_blog_tag');
         $response->headers->set('Link', $linkHeader);
 
         if (method_exists($tagEntity, 'getSeoOgTitle')) {
@@ -173,7 +172,7 @@ class BlogController extends AbstractController
         ]);
 
         /* inject translations links into language request for language selector*/
-        $linkHeader = $this->localeService->languageSelectorGetHeaderLinks($content,'sonata_extra_blog_article');
+        $linkHeader = $this->localeService->languageSelectorGetHeaderLinks($content, 'sonata_extra_blog_article');
         $response->headers->set('Link', $linkHeader);
 
         $response->headers->set('Content-Language', $content->translations[$content->getSite()->getId()]['lang']);
@@ -186,7 +185,7 @@ class BlogController extends AbstractController
 
         return $response;
     }
-    
+
     #[Route('/blog-search', name: 'sonata_extra_blog_search')]
     public function search(Request $request): Response
     {
@@ -196,26 +195,24 @@ class BlogController extends AbstractController
         $max_per_page = $settings['category']['max_per_page'];
 
         $articles = $this->entityManager->getRepository(Article::class)
-                                        ->QueryPublishedByKeyWord($searchTerm, $this->siteSelector->retrieve());
-        
+            ->QueryPublishedByKeyWord($searchTerm, $this->siteSelector->retrieve());
+
         $pagination = $this->paginator->paginate(
             $articles,
             $pageNumber,
             $max_per_page,
-        
+
         );
 
         return $this->render('@PartitechSonataExtra/Controller/Blog/search.html.twig', [
             'category' => null,
             'pagination' => $pagination,
-            'entity'=>null
+            'entity' => null
         ]);
-        return $response;
-
     }
 
-    private function getMediaPath($media = false)
-    : false|string {
+    private function getMediaPath($media = false): false|string
+    {
         if (empty($media)) {
             return false;
         }
