@@ -144,9 +144,14 @@ class EditorAdmin extends AbstractAdmin
             'default'
         );
 
-        $media = $this->mediaManager->findOneBy([
-            'id' => $this->getSubject()->getFeaturedImage()->getId(),
-        ]);
+        if(!empty($this->getSubject()) && !empty($this->getSubject()->getFeaturedImage())){
+            $media = $this->mediaManager->findOneBy([
+                'id' => $this->getSubject()->getFeaturedImage()->getId(),
+            ]);
+        }else{
+            $media=false;
+        }
+
 
         if ($this->hasSubject() && null !== $this->getSubject()->getFeaturedImage()) {
             $mediaUrl = $this->providerImage->generatePublicUrl($media, 'default_small');
