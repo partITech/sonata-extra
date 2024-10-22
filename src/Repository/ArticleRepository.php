@@ -3,10 +3,11 @@
 namespace Partitech\SonataExtra\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
-use Partitech\SonataExtra\Contract\SiteInterface;
 use Partitech\SonataExtra\Entity\Article;
 use Partitech\SonataExtra\Enum\ArticleStatus;
+use Sonata\PageBundle\Model\SiteInterface;
 
 class ArticleRepository extends ServiceEntityRepository
 {
@@ -45,7 +46,7 @@ class ArticleRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function QueryPublishedByCategory($categoryEntity, \Sonata\PageBundle\Model\SiteInterface $site)
+    public function QueryPublishedByCategory($categoryEntity, SiteInterface $site): Query
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')
@@ -59,7 +60,7 @@ class ArticleRepository extends ServiceEntityRepository
         ;
     }
     
-    public function QueryPublishedByKeyWord($searchTerm, \Sonata\PageBundle\Model\SiteInterface $site)
+    public function QueryPublishedByKeyWord($searchTerm, SiteInterface $site): mixed
     {
 
         $query = $this->createQueryBuilder('a')
@@ -71,18 +72,11 @@ class ArticleRepository extends ServiceEntityRepository
                     ->setParameter('content', '%' . $searchTerm . '%')
                     ->getQuery()
             ;
-        $result = $query->getResult();
-        try {
-
-        } catch (\Exception $e) {
-            //  test errors
-        }
-        
-        return $result;
+        return $query->getResult();
     }
     
     
-    public function findPublishedByTag($categoryEntity): array
+    public function findPublishedByTag($categoryEntity): mixed
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')
@@ -94,7 +88,7 @@ class ArticleRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function QueryPublishedByTag($tagEntity): array
+    public function QueryPublishedByTag($tagEntity): mixed
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')
@@ -106,7 +100,7 @@ class ArticleRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function findBySite($siteId): array
+    public function findBySite($siteId): mixed
     {
         return $this->createQueryBuilder('a')
             ->andWhere('a.site = :val')
@@ -115,7 +109,7 @@ class ArticleRepository extends ServiceEntityRepository
             ->getResult();
     }
     
-    public function findPublishedBySite(\Sonata\PageBundle\Model\SiteInterface $site): array
+    public function findPublishedBySite(SiteInterface $site): mixed
     {
         return $this->createQueryBuilder('a')
                     ->andWhere('a.site = :site')

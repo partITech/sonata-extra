@@ -3,6 +3,8 @@
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Controller\Admin\EditorRevisionsController;
+use Partitech\SonataExtra\Entity\EditorRevision;
 use Partitech\SonataExtra\Enum\EditorStatus;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridInterface;
@@ -14,8 +16,8 @@ use Sonata\AdminBundle\Route\RouteCollectionInterface;
 #[AsAdmin(
     manager_type: 'orm',
     label: 'Editor Revision',
-    model_class: \Partitech\SonataExtra\Entity\EditorRevision::class,
-    controller: \Partitech\SonataExtra\Controller\Admin\EditorRevisionsController::class,
+    model_class: EditorRevision::class,
+    controller: EditorRevisionsController::class,
     calls: [
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
@@ -24,7 +26,7 @@ use Sonata\AdminBundle\Route\RouteCollectionInterface;
 class EditorRevisionAdmin extends AbstractAdmin
 {
     protected $baseRoutePattern = 'editor-revision';
-    protected $exportFormats = [];
+    protected array $exportFormats = [];
 
     protected function configureDefaultSortValues(array &$sortValues): void
     {

@@ -9,7 +9,6 @@ use Partitech\SonataExtra\Contract\MediaInterface;
 use Sonata\AdminBundle\Admin\AbstractAdminExtension;
 use Sonata\AdminBundle\Admin\AdminInterface;
 use Sonata\AdminBundle\Datagrid\ListMapper;
-// use Sonata\AdminBundle\Form\ListMapper;
 use Sonata\AdminBundle\Datagrid\ProxyQueryInterface;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Form\Type\ModelListType;
@@ -27,39 +26,40 @@ class PageAdminExtension extends AbstractAdminExtension
     private ImageProvider $providerImage;
     private ParameterBagInterface $parameterBag;
     private array $sites = [];
+    private bool $seoProposal;
 
 
     #[Required]
     public function autowireDependencies(
         EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        MediaManager $mediaManager,
-        ImageProvider $providerImage,
-        RequestStack $requestStack,
-    ): void {
+        ParameterBagInterface  $parameterBag,
+        MediaManager           $mediaManager,
+        ImageProvider          $providerImage,
+        RequestStack           $requestStack,
+    ): void
+    {
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
         $this->mediaManager = $mediaManager;
         $this->providerImage = $providerImage;
-
+        $smart_service_conf = $this->parameterBag->get('partitech_sonata_extra.smart_service');
+        $this->seoProposal = $smart_service_conf['seo_proposal_on_article'];
 
         $request = $requestStack->getCurrentRequest();
-        if(!empty($request)){
+        if (!empty($request)) {
             $smart_service_conf = $this->parameterBag->get('partitech_sonata_extra.smart_service');
             $real_time_preview = $this->parameterBag->get('partitech_sonata_extra.page.realtime_preview');
-            $request->attributes->set('seo_proposal_on_page' , $smart_service_conf['seo_proposal_on_page']);
-            $request->attributes->set('realtime_preview' , $real_time_preview);
+            $request->attributes->set('seo_proposal_on_page', $smart_service_conf['seo_proposal_on_page']);
+            $request->attributes->set('realtime_preview', $real_time_preview);
         }
-
-
     }
 
-    public function getSeoProposalEnabled(){
-
+    public function getSeoProposalEnabled(): bool
+    {
         return $this->seoProposal;
     }
 
-    public function cleanLocalRouteNames()
+    public function cleanLocalRouteNames(): void
     {
         $pageClass = $this->parameterBag->get('sonata.page.page.class');
         $qb = $this->entityManager->createQueryBuilder();
@@ -75,12 +75,12 @@ class PageAdminExtension extends AbstractAdminExtension
         $routeNamesToDelete = [];
         foreach ($pages as $page) {
             $routeName = str_replace('_page_alias_', '', $page->getPageAlias());
-            foreach($this->sites as $site) {
-                $routeNamesToDelete[$routeName.'_'.$site->getLocale()] = "'".$routeName.'_'.$site->getLocale()."'";
+            foreach ($this->sites as $site) {
+                $routeNamesToDelete[$routeName . '_' . $site->getLocale()] = "'" . $routeName . '_' . $site->getLocale() . "'";
             }
         }
 
-        if(!empty($routeNamesToDelete)){
+        if (!empty($routeNamesToDelete)) {
             $placeholdersString = implode(', ', $routeNamesToDelete);
             $qb = $this->entityManager->createQueryBuilder();
             $qb->delete($pageClass, 'p')
@@ -92,6 +92,7 @@ class PageAdminExtension extends AbstractAdminExtension
 
 
     }
+
     public function configure(AdminInterface $admin): void
     {
         $siteClass = $this->parameterBag->get('sonata.page.site.class');
@@ -134,7 +135,7 @@ class PageAdminExtension extends AbstractAdminExtension
             }
         }
 
-        $imageHtml = $mediaUrl ? '<img src="'.$mediaUrl.'" alt="'.$mediaName.'" class="img-thumbnail" />' : 'Aucune image sélectionnée';
+        $imageHtml = $mediaUrl ? '<img src="' . $mediaUrl . '" alt="' . $mediaName . '" class="img-thumbnail" />' : 'Aucune image sélectionnée';
 
         if ($page->isHybrid()) {
             $form->with('main')
@@ -185,12 +186,12 @@ class PageAdminExtension extends AbstractAdminExtension
                         $relativePath = $site->getRelativePath();
 
                         if (!\in_array($relativePath, [null, '/'], true)) {
-                            $path = $relativePath.$path;
+                            $path = $relativePath . $path;
                         }
                     }
 
                     $menu->addChild('view_page', [
-                        'uri' => '//'.$site->getHost().$path,
+                        'uri' => '//' . $site->getHost() . $path,
                         'linkAttributes' => ['target' => '_blank'],
                     ]);
                 } catch (\Exception) {
@@ -205,8 +206,8 @@ class PageAdminExtension extends AbstractAdminExtension
     {
         $page = $admin->getSubject();
         if ($page->isHybrid() && !empty($object->getCustomUrl()) && empty($object->getPageAlias())) {
-            $route_initial=$object->getRouteName();
-            $route_new=$route_initial.'_'.$object->getSite()->getLocale();
+            $route_initial = $object->getRouteName();
+            $route_new = $route_initial . '_' . $object->getSite()->getLocale();
 
             $object->setRouteName($route_new);
             $object->setSlug('');

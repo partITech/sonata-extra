@@ -13,10 +13,9 @@ class GutenbergType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
-        // ...
     }
 
-    public function buildView(FormView $view, FormInterface $form, array $options)
+    public function buildView(FormView $view, FormInterface $form, array $options): void
     {
         $view->vars['gutenberg_assets'] = [
             'css' => [
@@ -57,12 +56,12 @@ class GutenbergType extends AbstractType
         $view->vars['allowed_blocks'] = json_encode($mergedBlocks);
     }
 
-    public function getParent()
+    public function getParent(): string
     {
         return TextareaType::class;
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'context' => 'default',
@@ -175,13 +174,12 @@ class GutenbergType extends AbstractType
         ]);
     }
 
-    public function array_unique_multidimensional($array)
+    public function array_unique_multidimensional($array): array
     {
         $serialized = array_map('serialize', $array);
         $unique = array_unique($serialized);
         $unique = array_intersect_key($array, $unique);
 
-        // Réindexer les clés du tableau
         return array_values($unique);
     }
 }

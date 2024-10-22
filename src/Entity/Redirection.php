@@ -4,7 +4,6 @@ namespace Partitech\SonataExtra\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Partitech\SonataExtra\Repository\RedirectionRepository;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: RedirectionRepository::class)]
 #[ORM\Table(name: 'sonata_extra__redirection')]
@@ -16,22 +15,22 @@ class Redirection
     private $id;
 
     #[ORM\Column(type: 'boolean')]
-    private $enabled;
+    private bool $enabled;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $source;
+    private string $source;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $sourceHost;
+    private string $sourceHost;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $target;
+    private string $target;
 
     #[ORM\Column(type: 'integer')]
-    private $statusCode;
+    private int $statusCode;
 
     #[ORM\Column(type: 'string', length: 255)]
-    private $user;
+    private string $user;
 
     public function __toString(): string
     {

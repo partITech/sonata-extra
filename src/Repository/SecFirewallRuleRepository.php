@@ -1,6 +1,4 @@
 <?php
-// src/Repository/SecFirewallRuleRepository.php
-
 namespace Partitech\SonataExtra\Repository;
 
 use Partitech\SonataExtra\Entity\SecFirewallRule;

@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace Partitech\SonataExtra\Controller\Admin;
 
+use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
+use Partitech\SonataExtra\Traits\ControllerTranslationTrait;
 use Partitech\SonataMenu\Model\MenuInterface;
 use Partitech\SonataMenu\Model\MenuItem;
 use Partitech\SonataMenu\Model\MenuItemInterface;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
 use Sonata\AdminBundle\Admin\Pool;
 use Sonata\AdminBundle\Bridge\Exporter\AdminExporter;
 use Sonata\AdminBundle\Controller\CRUDController as Controller;
@@ -28,15 +32,18 @@ use Symfony\Contracts\Translation\TranslatorInterface;
 
 final class CategoryAdminController extends Controller
 {
-    use \Partitech\SonataExtra\Traits\ControllerTranslationTrait;
+    use ControllerTranslationTrait;
 
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
-    private $translator;
-    private $routeGenerator;
-    private $adminPool;
-    private $requestStack;
-    private $TranslationController;
+    private TranslatorInterface $translator;
+    private DefaultRouteGenerator $routeGenerator;
+    private Pool $adminPool;
+    private RequestStack $requestStack;
+    private TranslationController $translationController;
+    private SiteManagerInterface $siteManager;
+    private mixed $categories_class;
+    private Array $categories;
 
     #[Required]
     public function autowireDependencies(
@@ -47,7 +54,7 @@ final class CategoryAdminController extends Controller
         RequestStack $requestStack,
         SiteManagerInterface $siteManager,
         ParameterBagInterface $parameterBag,
-        TranslationController $TranslationController
+        TranslationController $translationController
     ): void {
         $this->entityManager = $entityManager;
         $this->translator = $translator;
@@ -56,7 +63,7 @@ final class CategoryAdminController extends Controller
         $this->requestStack = $requestStack;
         $this->siteManager = $siteManager;
         $this->parameterBag = $parameterBag;
-        $this->TranslationController = $TranslationController;
+        $this->translationController = $translationController;
 
         $this->updateCategoriesWithDefaultContext();
     }
@@ -72,9 +79,13 @@ final class CategoryAdminController extends Controller
     public function createTranslationAction($id, $from_site, $to_site, $fqcn): Response
     {
 
-        return $this->TranslationController->createTranslationAction($id, $from_site, $to_site, $fqcn);
+        return $this->translationController->createTranslationAction($id, $from_site, $to_site, $fqcn);
     }
 
+    /**
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
+     */
     public function listAction(Request $request): Response
     {
 
@@ -117,7 +128,7 @@ final class CategoryAdminController extends Controller
             $exportFormats = $exporter->getAvailableFormats($this->admin);
         }
 
-        return $this->renderWithExtraParams($this->admin->getTemplateRegistry()->getTemplate('list'), [
+        return $this->render($this->admin->getTemplateRegistry()->getTemplate('list'), [
             'action' => 'list',
             'form' => $formView,
             'datagrid' => $datagrid,
@@ -126,6 +137,10 @@ final class CategoryAdminController extends Controller
         ]);
     }
 
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     */
     public function treeAction(Request $request): Response
     {
         $categoryManager = $this->container->get('sonata.classification.manager.category');
@@ -148,8 +163,6 @@ final class CategoryAdminController extends Controller
             if (!empty($items)) {
                 $items = json_decode($items);
                 $update = $this->updateCategoryTree($items);
-                /* @var TranslatorInterface $translator */
-                // $translator = $this->get('translator');
 
                 $request->getSession()->getFlashBag()->add('notice',
                     $this->translator->trans(
@@ -219,15 +232,19 @@ final class CategoryAdminController extends Controller
         ]);
     }
 
-    private function updateCategoryTree($items, $parent = null)
+    /**
+     * @throws NotFoundExceptionInterface
+     * @throws ContainerExceptionInterface
+     */
+    private function updateCategoryTree($items, $parent = null): bool
     {
+        $update = false;
         if (!empty($items)) {
             $categoryManager = $this->container->get('sonata.classification.manager.category');
 
             foreach ($items as $pos => $item) {
                 $categoryItem = $categoryManager->findOneBy(['id' => $item->id]);
                 if ($categoryItem) {
-                    // dd($categoryItem);
                     $categoryItem->setPosition($pos);
                     $categoryItem->setParent($parent);
 
@@ -246,7 +263,7 @@ final class CategoryAdminController extends Controller
         return $update;
     }
 
-    public function updateMenuTree($menu, $items, $parent = null)
+    public function updateMenuTree($menu, $items, $parent = null): bool
     {
         $update = false;
 
@@ -268,7 +285,7 @@ final class CategoryAdminController extends Controller
                     $this->em->persist($menuItem);
                 }
 
-                if (isset($item->children) && !empty($item->children)) {
+                if (!empty($item->children)) {
                     $this->updateMenuTree($menu, $item->children, $menuItem);
                 }
             }
@@ -281,7 +298,7 @@ final class CategoryAdminController extends Controller
         return $update;
     }
 
-    public function toggleAction($id)
+    public function toggleAction($id): RedirectResponse
     {
         /** @var MenuItemInterface $object */
         $object = $this->admin->getSubject();
@@ -381,16 +398,18 @@ final class CategoryAdminController extends Controller
             return;
         }
 
+        $parameters = new ArrayCollection([
+            'context' => $context,
+            'site' => $this->siteId,
+        ]);
+
         /** @var CategoryInterface[] $categories */
         $categories = $this->entityManager->getRepository($this->categories_class)
             ->createQueryBuilder('c')
             ->where('c.context = :context')
-            ->andWhere('c.site = :site') // Utilisez andWhere pour la seconde condition
-            ->orderBy('c.parent', 'ASC') // Précisez l'ordre ASC ou DESC
-            ->setParameters([
-                'context' => $context, // Passez un tableau à setParameters
-                'site' => $this->siteId,
-            ])
+            ->andWhere('c.site = :site')
+            ->orderBy('c.parent', 'ASC')
+            ->setParameters($parameters)
             ->getQuery()
             ->getResult();
 
@@ -432,8 +451,8 @@ final class CategoryAdminController extends Controller
             ->getResult();
 
         if(!empty($categoryNoContext)){
-            $this->context_class = $this->parameterBag->get('sonata.classification.admin.context.entity');
-            $context = $this->entityManager->getRepository($this->context_class)
+            $context_class = $this->parameterBag->get('sonata.classification.admin.context.entity');
+            $context = $this->entityManager->getRepository($context_class)
                 ->createQueryBuilder('c')
                 ->where('c.enabled = 1')
                 ->setMaxResults(1)
@@ -445,8 +464,6 @@ final class CategoryAdminController extends Controller
                 $this->entityManager->persist($category);
             }
             $this->entityManager->flush();
-
-
         }
     }
 }

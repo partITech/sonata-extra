@@ -11,12 +11,12 @@ use Symfony\Component\Mime\Address;
 
 class ContactBlockMailerService
 {
-    public const CONFIRMATION_TEMPLATE = '@PartitechSonataExtra/Blocks/contact/confirmation_email.html.twig';
-    public const ADMIN_NOTIFICATION_TEMPLATE = '@PartitechSonataExtra/Blocks/contact/admin_notification_email.html.twig';
+    public const string CONFIRMATION_TEMPLATE = '@PartitechSonataExtra/Blocks/contact/confirmation_email.html.twig';
+    public const string ADMIN_NOTIFICATION_TEMPLATE = '@PartitechSonataExtra/Blocks/contact/admin_notification_email.html.twig';
 
     public function __construct(
-        private MailerInterface $mailer,
-        private LoggerInterface $logger
+        private readonly MailerInterface $mailer,
+        private readonly LoggerInterface $logger
     ) {
     }
 

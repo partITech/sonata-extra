@@ -27,14 +27,12 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Contracts\Translation\TranslatorInterface;
 use Twig\Environment;
 use ReCaptcha\ReCaptcha;
-use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 
 #[AutoconfigureTag(name: 'sonata.block')]
 final class ContactBlockService extends AbstractBlockService implements EditableBlockService
 {
     public function __construct(
         Environment $twig,
-        private ParameterBagInterface $parameterBag,
         private readonly TranslatorInterface $translator,
         private readonly RequestStack $requestStack,
         private readonly FormFactoryInterface $formFactory,

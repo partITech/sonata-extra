@@ -28,21 +28,22 @@ use Twig\Environment;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class PageMenuBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private CmsManagerSelectorInterface $cmsSelector;
 
     #[Required]
     public function autowireDependencies(
-        Environment $twig,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
+        Environment                 $twig,
+        EntityManagerInterface      $entityManager,
+        ParameterBagInterface       $parameterBag,
         CmsManagerSelectorInterface $cmsSelector,
-    ): void {
+    ): void
+    {
         parent::__construct($twig);
         $this->entityManager = $entityManager;
-        $this->parameterBag = $parameterBag;
-        $this->cmsSelector = $cmsSelector;
+        $this->parameterBag  = $parameterBag;
+        $this->cmsSelector   = $cmsSelector;
     }
 
     public function execute(BlockContextInterface $blockContext, Response $response = null): Response
@@ -103,7 +104,7 @@ final class PageMenuBlockService extends AbstractBlockService implements Editabl
             $id = $pageNameArray->getId();
             $site = $pageNameArray->getSite()->getName();
 
-            $pageNamesChoices[$site.' # '.$id.' # '.$pageName] = $id;
+            $pageNamesChoices[$site . ' # ' . $id . ' # ' . $pageName] = $id;
         }
 
         $form->add('settings', ImmutableArrayType::class, [
@@ -160,18 +161,18 @@ final class PageMenuBlockService extends AbstractBlockService implements Editabl
 
     private function buildPageTree(array $pages, $selectedPageId = false): array
     {
-        // Indexer les pages par ID pour un accès facile
+        // Index pages by ID for easy access
         $indexedPages = [];
         foreach ($pages as $page) {
             $indexedPages[$page->getId()] = ['page' => $page, 'children' => []];
         }
 
-        // Si un ID de page sélectionnée est fourni, filtrer les pages
+        // If a selected page ID is provided, filter pages
         if (false !== $selectedPageId) {
             $indexedPages = $this->filterDescendants($indexedPages, $selectedPageId);
         }
 
-        // Construire l'arbre
+        // Build the tree
         $tree = [];
         foreach ($indexedPages as $id => $node) {
             $parent = $node['page']->getParent();
@@ -192,7 +193,7 @@ final class PageMenuBlockService extends AbstractBlockService implements Editabl
         return $tree;
     }
 
-    // Fonction supplémentaire pour filtrer les descendants de la page sélectionnée
+    // Additional function to filter descendants of the selected page
     private function filterDescendants(array $indexedPages, $selectedPageId): array
     {
         $descendants = [];

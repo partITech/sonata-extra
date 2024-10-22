@@ -18,5 +18,4 @@ class SecIpRuleRepository extends ServiceEntityRepository
         parent::__construct($registry, SecIpRule::class);
     }
 
-    // Custom methods can be added here
 }

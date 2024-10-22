@@ -3,6 +3,7 @@
 namespace Partitech\SonataExtra\Repository;
 
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
+use Doctrine\ORM\Query;
 use Doctrine\Persistence\ManagerRegistry;
 use Partitech\SonataExtra\Entity\Editor;
 use Partitech\SonataExtra\Enum\EditorStatus;
@@ -32,7 +33,7 @@ class EditorRepository extends ServiceEntityRepository
         }
     }
 
-    public function findPublishedByCategory($categoryEntity): array
+    public function findPublishedByCategory($categoryEntity): mixed
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')
@@ -44,7 +45,7 @@ class EditorRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function QueryPublishedByCategory($categoryEntity)
+    public function QueryPublishedByCategory($categoryEntity): Query
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')
@@ -56,7 +57,7 @@ class EditorRepository extends ServiceEntityRepository
         ;
     }
 
-    public function findPublishedByTag($categoryEntity): array
+    public function findPublishedByTag($categoryEntity): mixed
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')
@@ -68,7 +69,7 @@ class EditorRepository extends ServiceEntityRepository
             ->getResult();
     }
 
-    public function QueryPublishedByTag($tagEntity): array
+    public function QueryPublishedByTag($tagEntity): mixed
     {
         return $this->createQueryBuilder('a')
             ->where('a.status = :status')

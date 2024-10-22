@@ -3,6 +3,7 @@
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Entity\FaqQuestion;
 use Runroom\SortableBehaviorBundle\Admin\SortableAdminTrait;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
@@ -16,8 +17,8 @@ use Sonata\FormatterBundle\Form\Type\SimpleFormatterType;
 #[AsAdmin(
     manager_type: 'orm',
     label: 'FAQs - Questions',
-    model_class: \Partitech\SonataExtra\Entity\FaqQuestion::class,
-    parent: \Partitech\SonataExtra\Admin\FaqCategoryAdmin::class,
+    model_class: FaqQuestion::class,
+    parent: FaqCategoryAdmin::class,
     calls: [
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
@@ -27,7 +28,7 @@ class FaqQuestionAdmin extends AbstractAdmin
     use SortableAdminTrait {
         configureRoutes as protected sortableAdminTraitConfigureRoutes;
     }
-    protected $parentAssociationMapping = 'category';
+    protected string $parentAssociationMapping = 'category';
 
     protected function configureFormFields(FormMapper $form): void
     {

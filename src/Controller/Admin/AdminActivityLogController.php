@@ -3,6 +3,7 @@
 namespace Partitech\SonataExtra\Controller\Admin;
 
 use Doctrine\ORM\EntityManagerInterface;
+use Exception;
 use Partitech\SonataExtra\Entity\AdminActivityEntityChangeLog;
 use Partitech\SonataExtra\Entity\AdminActivityLog;
 use Sonata\AdminBundle\Controller\CRUDController;
@@ -49,7 +50,7 @@ class AdminActivityLogController extends CRUDController
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function revertItemAction(?AdminActivityLog $id, ?AdminActivityEntityChangeLog $changeLog): Response
     {
@@ -88,9 +89,11 @@ class AdminActivityLogController extends CRUDController
         return $this->redirectToRoute('admin_partitech_sonataextra_adminactivitylog_list');
     }
 
+    /**
+     * @throws Exception
+     */
     public function revertAction($id = null): Response
     {
-        // Trouver l'entrée ActivityLogAdmin
         $adminActivityLogRepo = $this->entityManager->getRepository(AdminActivityLog::class);
         $adminActivityLog = $adminActivityLogRepo->find($id);
 
@@ -101,7 +104,6 @@ class AdminActivityLogController extends CRUDController
             return $this->redirectToRoute('admin_partitech_sonataextra_adminactivitylog_list');
         }
 
-        // Trouver toutes les entrées EntityChangeLog associées
         $changeLogRepo = $this->entityManager->getRepository(AdminActivityEntityChangeLog::class);
         $changeLogs = $changeLogRepo->findBy(['adminActivityLog' => $adminActivityLog]);
 
@@ -135,9 +137,11 @@ class AdminActivityLogController extends CRUDController
         return new RedirectResponse($this->admin->generateUrl('list', []));
     }
 
+    /**
+     * @throws \Doctrine\DBAL\Exception
+     */
     public function approveAction($id = null): Response
     {
-        // Trouver l'entrée ActivityLogAdmin
         $adminActivityLogRepo = $this->entityManager->getRepository(AdminActivityLog::class);
         $adminActivityLog = $adminActivityLogRepo->find($id);
 
@@ -150,7 +154,6 @@ class AdminActivityLogController extends CRUDController
         $action = $adminActivityLog->getActionType();
 
         if ('create' == $action || 'update' == $action) {
-            // Trouver toutes les entrées EntityChangeLog associées
             $changeLogRepo = $this->entityManager->getRepository(AdminActivityEntityChangeLog::class);
             $changeLogs = $changeLogRepo->findBy(['adminActivityLog' => $adminActivityLog]);
 
@@ -184,7 +187,7 @@ class AdminActivityLogController extends CRUDController
                         $associations = $metadata->getAssociationMappings();
 
                         if (!empty($associations[$fieldName]) && \Doctrine\ORM\Mapping\ClassMetadataInfo::MANY_TO_ONE == $associations[$fieldName]['type']) {
-                            // on est dans une relation parent/enfant. et on est l'enfant.
+                            // we are in a parent/child relationship. and we are the child.
                             if (null == $NewValue) {
                                 $this->entityManager->remove($entity);
                             }
@@ -251,7 +254,7 @@ class AdminActivityLogController extends CRUDController
                         $associations = $metadata->getAssociationMappings();
 
                         if (!empty($associations[$fieldName]) && \Doctrine\ORM\Mapping\ClassMetadataInfo::MANY_TO_ONE == $associations[$fieldName]['type']) {
-                            // on est dans une relation parent/enfant. et on est l'enfant.
+                            // we are in a parent/child relationship. and we are the child.
                             if (null == $NewValue) {
                                 if ('update' == $action) {
                                     $entity->ignore_log = true;
@@ -270,19 +273,10 @@ class AdminActivityLogController extends CRUDController
                                 }
                             }
                         } else {
-                            if ($accessorEntityClass) {
-                                if ($accessorEntityClass == $refEntityClass) {
-                                    // dd('si cest lentité parent, on lui affecte notre entité parente');
-                                    // si c'est l'entité parent, on lui affecte notre entité parente
-                                    // $accessor->setValue($entity, $fieldName, $lastInsertId);
-                                } else {
-                                    // sinon, si la valeur est non null on recherche l'élément avec l'id
-                                    if ($NewValue) {
-                                        $accessorEntityClassRepo = $this->entityManager->getRepository($accessorEntityClass);
-                                        $accessorEntity = $accessorEntityClassRepo->find($NewValue);
-                                        $accessor->setValue($entity, $fieldName, $accessorEntity);
-                                    }
-                                }
+                            if ($accessorEntityClass && $accessorEntityClass != $refEntityClass && $NewValue) {
+                                $accessorEntityClassRepo = $this->entityManager->getRepository($accessorEntityClass);
+                                $accessorEntity = $accessorEntityClassRepo->find($NewValue);
+                                $accessor->setValue($entity, $fieldName, $accessorEntity);
                             } else {
                                 $accessor->setValue($entity, $fieldName, $NewValue);
                             }
@@ -329,11 +323,9 @@ class AdminActivityLogController extends CRUDController
         $description .= str_replace('[user]', $user->getUsername(), $message);
         $description = str_replace('[date]', $current_date, $description);
 
-        $sql = 'update sonata_extra__admin_activity_log set approval=1, description=:description where id=:id';
-
         $conn = $this->entityManager->getConnection();
 
-        $stmt = $conn->prepare($sql);
+        $stmt = $conn->prepare('update sonata_extra__admin_activity_log set approval=1, description=:description where id=:id');
         $stmt->executeQuery([
             'id' => $id,
             'description' => $description,
@@ -342,7 +334,7 @@ class AdminActivityLogController extends CRUDController
         return $this->redirectToRoute('admin_partitech_sonataextra_approval_list');
     }
 
-    private function getRefclass($entityClass, $field)
+    private function getRefclass($entityClass, $field): mixed
     {
         $metadata = $this->entityManager->getClassMetadata($entityClass);
         foreach ($metadata->associationMappings as $object) {
@@ -350,9 +342,10 @@ class AdminActivityLogController extends CRUDController
                 return $object['targetEntity'];
             }
         }
+        return null;
     }
 
-    private function getRefField($entityClass, $refEntityClass)
+    private function getRefField($entityClass, $refEntityClass): mixed
     {
         $metadata = $this->entityManager->getClassMetadata($entityClass);
         foreach ($metadata->associationMappings as $object) {
@@ -360,10 +353,11 @@ class AdminActivityLogController extends CRUDController
                 return $object['fieldName'];
             }
         }
+        return null;
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     private function convertIfNeeded(object $entity, string $fieldName, mixed $value): mixed
     {

@@ -6,7 +6,7 @@
     
     class ImportWpProgressEvent extends Event
     {
-        public const NAME = 'import.wp.progress';
+        public const string NAME = 'import.wp.progress';
         
         
         public function __construct(

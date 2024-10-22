@@ -11,7 +11,6 @@ use Sonata\AdminBundle\Route\RouteCollectionInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Contracts\Service\Attribute\Required;
-use Symfony\Contracts\Translation\TranslatorInterface;
 use Partitech\SonataExtra\Entity\Redirection;
 use Partitech\SonataExtra\Controller\Admin\RedirectionAdminController;
 

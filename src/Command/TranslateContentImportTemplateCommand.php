@@ -4,7 +4,6 @@ namespace Partitech\SonataExtra\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Partitech\SonataExtra\Controller\Admin\PageAdminController;
-use Partitech\SonataExtra\Service\TranslateObjectService;
 use Partitech\SonataExtra\SmartService\TranslationCreateTemplateService;
 use Sonata\AdminBundle\Admin\Pool;
 use Symfony\Component\Console\Attribute\AsCommand;
@@ -17,7 +16,6 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Contracts\Service\Attribute\Required;
 
-
 #[AsCommand(
     name: 'sonata:extra:translation-import-template',
     description: 'Import your content from a file structure exported from sonata:extra:translation-create-template',
@@ -27,21 +25,23 @@ class TranslateContentImportTemplateCommand extends Command
     private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private Pool $adminPool;
-    private TranslationCreateTemplateService $TranslationCreateTemplateService;
+    private TranslationCreateTemplateService $translationCreateTemplateService;
+    private PageAdminController $pageAdminController;
 
     #[Required]
     public function autowireDependencies(
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        TranslationCreateTemplateService $TranslationCreateTemplateService,
-        Pool $adminPool,
-        PageAdminController $PageAdminController
-    ): void {
+        EntityManagerInterface           $entityManager,
+        ParameterBagInterface            $parameterBag,
+        TranslationCreateTemplateService $translationCreateTemplateService,
+        Pool                             $adminPool,
+        PageAdminController              $pageAdminController
+    ): void
+    {
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
-        $this->TranslationCreateTemplateService = $TranslationCreateTemplateService;
+        $this->translationCreateTemplateService = $translationCreateTemplateService;
         $this->adminPool = $adminPool;
-        $this->PageAdminController = $PageAdminController;
+        $this->pageAdminController = $pageAdminController;
     }
 
     protected function configure(): void
@@ -58,8 +58,7 @@ class TranslateContentImportTemplateCommand extends Command
                 null,
                 InputOption::VALUE_REQUIRED,
                 'Specify the entity to translate by its admin service.'
-            )
-        ;
+            );
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -75,7 +74,6 @@ class TranslateContentImportTemplateCommand extends Command
             $io->success('Usage: bin/console sonata:extra:translation-import-template --service="Partitech\SonataExtra\Admin\ArticleAdmin"');
             return Command::SUCCESS;
         }
-
 
 
         if (!$service) {
@@ -94,14 +92,14 @@ class TranslateContentImportTemplateCommand extends Command
             $siteLocales[$s->getId()] = $s->getLocale();
         }
 
-        $serviceName=$this->TranslationCreateTemplateService->getClassNameByEntityClass($entityClass);
-        $translationPath=$this->TranslationCreateTemplateService->getTemplateTranslationPath($serviceName);
-        $translationlist=$this->TranslationCreateTemplateService->readTemplateTranslationPath($translationPath);
+        $serviceName = $this->translationCreateTemplateService->getClassNameByEntityClass($entityClass);
+        $translationPath = $this->translationCreateTemplateService->getTemplateTranslationPath($serviceName);
+        $translationList = $this->translationCreateTemplateService->readTemplateTranslationPath($translationPath);
 
         $progressBar = new ProgressBar($output, 100);
-        $format="\n\t\t<fg=white;bg=cyan> %status:-45s%</>\n\n";
-        $format.="\t\t[%bar%] %percent:3s%%\n\n";
-        $format.="\t\t\n";
+        $format = "\n\t\t<fg=white;bg=cyan> %status:-45s%</>\n\n";
+        $format .= "\t\t[%bar%] %percent:3s%%\n\n";
+        $format .= "\t\t\n";
         $progressBar->setFormat($format);
         $progressBar->setBarCharacter('<fg=green>⚬</>');
         $progressBar->setEmptyBarCharacter("<fg=red>⚬</>");
@@ -109,42 +107,29 @@ class TranslateContentImportTemplateCommand extends Command
 
         $progressBar->setProgress(0);
         $progressBar->setMessage('Initialisation', 'status');
-        //$progressBar->setMessage('waiting', 'current_job');
         $progressBar->start();
 
-
-
-
-        $jobs=0;
-        $total_job=count($translationlist);
-        foreach ($translationlist as $itemId) {
-
-
-            $progress_percent=round((100/$total_job)*$jobs);
-            $progressBar->setMessage('<fg=green>'.$jobs.' / '.$total_job.' tasks</> ', 'status');
+        $jobs = 0;
+        $total_job = count($translationList);
+        foreach ($translationList as $itemId) {
+            $progress_percent = round((100 / $total_job) * $jobs);
+            $progressBar->setMessage('<fg=green>' . $jobs . ' / ' . $total_job . ' tasks</> ', 'status');
 
             $progressBar->setProgress($progress_percent);
             $progressBar->display();
-            if($service=="sonata.page.admin.page"){
-                //$this->TranslateObjectService->createTranslation($item->getId(), $referenceSite, $site_id, $service);
-                //$this->PageAdminController->createPageFromLocaleAction($item->getId(), $referenceSite, $site_id);
-            }else{
-                 $this->TranslationCreateTemplateService->importTranslation(
-                     $translationPath,
-                     $itemId,
-                     $entityClass);
 
-
+            if ($service != "sonata.page.admin.page") {
+                $this->translationCreateTemplateService->importTranslation(
+                    $translationPath,
+                    $itemId,
+                    $entityClass);
             }
 
             $jobs++;
-
         }
 
         $progressBar->finish();
         $io->success('Items have successfully been imported');
         return Command::SUCCESS;
     }
-
-
 }

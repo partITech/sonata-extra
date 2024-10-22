@@ -1,7 +1,4 @@
 <?php
-
-// src/Block/HelloWorldBlockService.php
-
 namespace Partitech\SonataExtra\Block;
 
 use App\Entity\SonataClassificationTag as Tag;
@@ -33,10 +30,10 @@ use Twig\Environment;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class BlogListTagsBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private CmsManagerSelectorInterface $cmsSelector;
-    private $categoryManager;
+    private CategoryManagerInterface $categoryManager;
     private PaginatorInterface $paginator;
 
     #[Required]
@@ -58,21 +55,11 @@ final class BlogListTagsBlockService extends AbstractBlockService implements Edi
 
     public function execute(BlockContextInterface $blockContext, Response $response = null): Response
     {
-        $page = $blockContext->getBlock()->getSetting('page', 1);
-
-        $tag_class = $this->parameterBag->get('partitech_sonata_extra.tag.class');
-
-        $cms = $this->cmsSelector->retrieve();
-        $site = $cms->getCurrentPage()->getSite();
-
         $settings = $blockContext->getSettings();
         $class = $settings['class'];
         $template = $settings['template'];
-        $max_item = $settings['max_item'];
         $title = $settings['title'];
-
         $tagWeights = $this->getTagWeights();
-
         $tagWeights = $this->normalizeWeights($tagWeights);
 
         return $this->renderResponse($template, [
@@ -86,10 +73,8 @@ final class BlogListTagsBlockService extends AbstractBlockService implements Edi
 
     private function getTagWeights(): array
     {
-        $tag_class = $this->parameterBag->get('partitech_sonata_extra.tag.class');
         $cms = $this->cmsSelector->retrieve();
         $site = $cms->getCurrentPage()->getSite();
-
 
         $subQuery = $this->entityManager->createQueryBuilder()
             ->select('COUNT(a_sub.id)')
@@ -98,8 +83,6 @@ final class BlogListTagsBlockService extends AbstractBlockService implements Edi
             ->where('t_sub.id = t.id')
             ->andWhere('a_sub.site = '.$site->getId())
             ->getDQL();
-
-
 
         $qb = $this->entityManager->createQueryBuilder();
         $qb->select('t, (' . $subQuery . ') AS articleCount')
@@ -149,17 +132,9 @@ final class BlogListTagsBlockService extends AbstractBlockService implements Edi
         $this->configureEditForm($form, $block);
     }
 
-    public function configureEditForm(FormMapper $formMapper, BlockInterface $block): void
+    public function configureEditForm(FormMapper $form, BlockInterface $block): void
     {
-        $tag_class = $this->parameterBag->get('partitech_sonata_extra.tag.class');
-        $tags = $this->entityManager->getRepository($tag_class)->findAll();
-
-        $tagChoices = [];
-        foreach ($tags as $tag) {
-            $tagChoices[$tag->getName()] = $tag->getId(); // Assurez-vous que la méthode getName et getId existe dans votre entité Category
-        }
-
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
                 ['title', TextType::class, [
                     'label' => 'Title',

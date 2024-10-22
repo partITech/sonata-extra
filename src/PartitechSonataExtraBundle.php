@@ -8,8 +8,6 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Extension\ExtensionInterface;
 use Symfony\Component\HttpKernel\Bundle\AbstractBundle;
 
-// use Partitech\SonataExtra\DependencyInjection\Compiler\ResolveTargetEntityPass;
-
 class PartitechSonataExtraBundle extends AbstractBundle
 {
     public function getPath(): string
@@ -25,12 +23,12 @@ class PartitechSonataExtraBundle extends AbstractBundle
     /**
      * @return void
      */
-    public function build(ContainerBuilder $container)
+    public function build(ContainerBuilder $container): void
     {
         parent::build($container);
 
         $container->addCompilerPass(new class() implements CompilerPassInterface {
-            public function process(ContainerBuilder $container)
+            public function process(ContainerBuilder $container): void
             {
                 $definition = $container->findDefinition('doctrine.orm.resolve_target_entity_listener');
 

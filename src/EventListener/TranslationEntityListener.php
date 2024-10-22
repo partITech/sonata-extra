@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Partitech\SonataExtra\Routing\PageUrlGenerator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use Throwable;
 
 readonly class TranslationEntityListener
 {
@@ -52,11 +53,10 @@ readonly class TranslationEntityListener
         $translations = $objectManager->getRepository(get_class($entity))
             ->createQueryBuilder('e')
             ->where('e.translation_from_id = :id')
-            // ->orWhere('e.id = :id')
             ->setParameter('id', $entity->getTranslationFromId())
             ->getQuery()
             ->getResult();
-        //check if has a default one
+        //check if it has a default one
         $defaultTranslation=false;
         foreach ($translations as $translation) {
             if(method_exists($translation, 'getIsDefault') && $translation->getIsDefault()){
@@ -81,13 +81,12 @@ readonly class TranslationEntityListener
                         try{
                             $url = $this->PageUrlGenerator->generate($route_name, $routeVariables, UrlGeneratorInterface::ABSOLUTE_URL);
                             $locales[$translation->getSite()->getId()]['routes'][$route_name] = $url;
-                        }catch (\Exception $exception){ }
+                        }catch (Throwable $e){ }
                     }
                 } else {
                     if ($this->isPage($entity) && $entity->getRouteName() == 'page_slug' /*&& empty($baseRouteName)*/) {
                             $url = $this->PageUrlGenerator->generate($entity->getRouteName(), ['url' => $translation->getUrl(), 'site' => $translation->getSite(), 'currentSite' => $current_site], UrlGeneratorInterface::ABSOLUTE_URL);
                             $locales[$translation->getSite()->getId()]['routes'][$entity->getRouteName()] = $url;
-                        /*if ($entity->getRouteName() == 'page_slug') {}*/
                     }else{
                         foreach ($baseRouteName as $route_name) {
 
@@ -96,7 +95,7 @@ readonly class TranslationEntityListener
                             try{
                                 $url = $this->PageUrlGenerator->generate($route_name, $routeVariables, UrlGeneratorInterface::ABSOLUTE_URL);
                                 $locales[$translation->getSite()->getId()]['routes'][$route_name] = $url;
-                            }catch (\Exception $exception){ }
+                            }catch (Throwable $exception){ }
                         }
                     }
 
@@ -118,7 +117,7 @@ readonly class TranslationEntityListener
                             try{
                                 $url = $this->PageUrlGenerator->generate($route_name, $routeVariables, UrlGeneratorInterface::ABSOLUTE_URL);
                                 $locales[$siteId]['routes'][$route_name] = $url;
-                            }catch (\Exception $exception){}
+                            }catch (Throwable $exception){}
                         }
                     }
                 }
@@ -156,14 +155,6 @@ readonly class TranslationEntityListener
         $entity = $args->getObject();
         $objectManager = $args->getObjectManager();
 
-        // Needs to be a translation Trait Entity
-       /* if (!$this->isTranslation($entity) || !$this->isPage($entity)) {
-            return;
-        }*/
-
-        // Only for root entries
-
-
         if($this->isTranslation($entity)){
             if (!empty($entity->getTranslationFromId())) {
                 return;
@@ -191,9 +182,7 @@ readonly class TranslationEntityListener
             $entity->setTranslationFromId($entity->getId());
             $objectManager->persist($entity);
             $objectManager->getUnitOfWork()->computeChangeSets();
-
         }
-
     }
 
 }

@@ -34,9 +34,6 @@
                 'route_name' => 'sonata_extra_blog_tag',
                 'slug' => null,
             ],
-//            'author' => [
-//                'route_name' => null,
-//            ],
         ];
         
         private string $siteRelativepath;
@@ -84,7 +81,6 @@
             $rootEntity = $this->pageRepository->findOneBy(['routeName' => PageInterface::PAGE_ROUTE_CMS_NAME ], ['id' => 'ASC']);
             foreach($this->categories as $idx => $cat){
                 $entity = $this->pageRepository->findOneBy(['routeName' => $cat['route_name'], 'parent' => $rootEntity->getId()]);
-//                $url = (empty($entity->getCustomUrl()))? $entity->getSlug(): $entity->getCustomUrl();
                 $url = $entity->getSlug();
                 $this->categories[$idx]['slug'] = $url;
             }

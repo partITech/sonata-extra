@@ -1,7 +1,4 @@
 <?php
-
-// src/Block/HelloWorldBlockService.php
-
 namespace Partitech\SonataExtra\Block;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -25,7 +22,7 @@ use Twig\Environment;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class SliderBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(Environment $twig, EntityManagerInterface $entityManager)
     {
@@ -35,8 +32,6 @@ final class SliderBlockService extends AbstractBlockService implements EditableB
 
     public function execute(BlockContextInterface $blockContext, Response $response = null): Response
     {
-        // $template = $blockContext->getTemplate();
-
         $settings = $blockContext->getSettings();
         $template = $settings['template'];
 

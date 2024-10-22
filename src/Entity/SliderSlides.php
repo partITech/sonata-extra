@@ -8,7 +8,6 @@ use Doctrine\ORM\Mapping\Index;
 use Partitech\SonataExtra\Attribute\Translatable;
 use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Repository\SliderRepository;
-use JMS\Serializer\Annotation as Serializer;
 
 #[ORM\Entity(repositoryClass: SliderRepository::class)]
 #[ORM\Table(name: 'sonata_extra__slider_slides', indexes: [
@@ -45,7 +44,7 @@ class SliderSlides
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'media__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $mediaMedia;
+    private ?MediaInterface $mediaMedia=null;
 
     #[ORM\Column(nullable: true)]
     private ?bool $active = null;
@@ -104,12 +103,12 @@ class SliderSlides
         return $this;
     }
 
-    public function getMediaMedia()
+    public function getMediaMedia(): ?MediaInterface
     {
         return $this->mediaMedia;
     }
 
-    public function setMediaMedia($mediaMedia): self
+    public function setMediaMedia(?MediaInterface $mediaMedia): self
     {
         $this->mediaMedia = $mediaMedia;
 

@@ -8,7 +8,7 @@ use Partitech\SonataExtra\Entity\ArticleRevision;
 
 class ArticleRevisionListener
 {
-    public function onFlush(OnFlushEventArgs $args)
+    public function onFlush(OnFlushEventArgs $args): void
     {
         $em = $args->getObjectManager();
         $uow = $em->getUnitOfWork();

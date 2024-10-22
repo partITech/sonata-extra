@@ -9,7 +9,7 @@ use Partitech\SonataExtra\Contract\MediaInterface;
 trait SonataExtraPagePageTrait
 {
     #[ORM\Column(type: 'integer', nullable: true)]
-    private $translation_from_id;
+    private ?int $translation_from_id;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $ogTitle = null;
@@ -19,11 +19,9 @@ trait SonataExtraPagePageTrait
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'], fetch: 'EAGER')]
     #[ORM\JoinColumn(name: 'media__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $ogImage;
+    private ?MediaInterface $ogImage=null;
 
-    public $translations;
-
-
+    public ?array $translations=null;
 
 
     public function getOgTitle(): ?string
@@ -50,26 +48,28 @@ trait SonataExtraPagePageTrait
         return $this;
     }
 
-    public function getOgImage()
+    public function getOgImage(): ?MediaInterface
     {
         return $this->ogImage;
     }
 
-    public function setOgImage($ogImage): self
+    public function setOgImage(?MediaInterface $ogImage): self
     {
         $this->ogImage = $ogImage;
 
         return $this;
     }
 
-    public function getTranslationFromId()
+    public function getTranslationFromId(): ?int
     {
         return $this->translation_from_id;
     }
 
-    public function setTranslationFromId($translation_from_id): void
+    public function setTranslationFromId(int $translation_from_id): self
     {
         $this->translation_from_id = $translation_from_id;
+
+        return $this;
     }
 
     public function setTranslations(array $locales): self
@@ -79,18 +79,20 @@ trait SonataExtraPagePageTrait
         return $this;
     }
 
-    public function getTranslations()
+    public function getTranslations(): ?array
     {
         return $this->translations;
     }
 
-        public function getBaseRouteName(): array
-        {
-            return !empty($this->baseRouteName)?$this->baseRouteName:[];
-        }
+    public function getBaseRouteName(): array
+    {
+        return !empty($this->baseRouteName) ? $this->baseRouteName : [];
+    }
 
-        public function setBaseRouteName(array $baseRouteName): void
-        {
-            $this->baseRouteName = $baseRouteName;
-        }
+    public function setBaseRouteName(array $baseRouteName): self
+    {
+        $this->baseRouteName = $baseRouteName;
+
+        return $this;
+    }
 }

@@ -37,10 +37,9 @@ class LocaleService
         $site_id=$entity->getSite()->getId();
         $categories = $entity->getCategory();
         $r = $this->entityManager->getRepository($categoryClass);
-        $rs=[];
         foreach($categories as $c){
             if(!empty($c->translations[$site_id]['entity_id'])){
-                $entity->removeCatgory($c);
+                $entity->removeCategory($c);
                 $q = $r->createQueryBuilder('q');
                 $q->where('q.id = :id');
                 $q->setParameter('id', $c->translations[$site_id]['entity_id']);
@@ -51,7 +50,8 @@ class LocaleService
         return $entity;
     }
 
-    public function fixEntityTag($entity){
+    public function fixEntityTag(mixed $entity): mixed
+    {
         $tagClass = $this->parameterBag->get('partitech_sonata_extra.tag.class');
         $site_id=$entity->getSite()->getId();
         $tags = $entity->getTags();

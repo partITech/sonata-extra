@@ -4,7 +4,6 @@ namespace Partitech\SonataExtra\Block;
 use  Partitech\SonataExtra\Entity\Editor;
 use Doctrine\ORM\EntityManagerInterface;
 use Knp\Component\Pager\PaginatorInterface;
-use Partitech\SonataExtra\Entity\Article;
 use Sonata\BlockBundle\Block\BlockContextInterface;
 use Sonata\BlockBundle\Block\Service\AbstractBlockService;
 use Sonata\BlockBundle\Block\Service\EditableBlockService;
@@ -19,22 +18,19 @@ use Sonata\PageBundle\CmsManager\CmsManagerSelectorInterface;
 use Symfony\Component\DependencyInjection\Attribute\AutoconfigureTag;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\OptionsResolver;
-use Symfony\Component\Validator\Constraints\NotBlank;
-use Symfony\Component\Validator\Constraints\Type;
 use Symfony\Contracts\Service\Attribute\Required;
 use Twig\Environment;
 
 #[AutoconfigureTag(name: 'sonata.block')]
 final class EditorBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
     private CmsManagerSelectorInterface $cmsSelector;
-    private $categoryManager;
+    private CategoryManagerInterface $categoryManager;
     private PaginatorInterface $paginator;
 
     #[Required]
@@ -56,10 +52,6 @@ final class EditorBlockService extends AbstractBlockService implements EditableB
 
     public function execute(BlockContextInterface $blockContext, Response $response = null): Response
     {
-        $page = $blockContext->getBlock()->getSetting('page', 1);
-
-
-
         $cms = $this->cmsSelector->retrieve();
         $site = $cms->getCurrentPage()->getSite();
 
@@ -93,7 +85,7 @@ final class EditorBlockService extends AbstractBlockService implements EditableB
         $this->configureEditForm($form, $block);
     }
 
-    public function configureEditForm(FormMapper $formMapper, BlockInterface $block): void
+    public function configureEditForm(FormMapper $form, BlockInterface $block): void
     {
 
         $editor = $this->entityManager->getRepository(Editor::class)->findAll();
@@ -103,7 +95,7 @@ final class EditorBlockService extends AbstractBlockService implements EditableB
             $editorChoices[$category->getTitle()] = $category->getId();
         }
 
-        $formMapper->add('settings', ImmutableArrayType::class, [
+        $form->add('settings', ImmutableArrayType::class, [
             'keys' => [
                 ['editor', ChoiceType::class, [
                     'label' => 'Content editor',

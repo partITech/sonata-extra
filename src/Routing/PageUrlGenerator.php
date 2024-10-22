@@ -3,7 +3,6 @@
 namespace Partitech\SonataExtra\Routing;
 
 use InvalidArgumentException;
-use mysql_xdevapi\Exception;
 use Sonata\PageBundle\Model\SiteInterface;
 use Sonata\PageBundle\Model\SiteManagerInterface;
 use Sonata\PageBundle\Site\SiteSelectorInterface;
@@ -117,19 +116,6 @@ class PageUrlGenerator
         }else{
             return [];
         }
-        if(!empty($this->router->getRouteCollection()) && !empty($this->router->getRouteCollection()->get($routeName))){
-            $route = $this->router->getRouteCollection()->get($routeName);
-
-            if (!$route) {
-                throw new InvalidArgumentException("Route '{$routeName}' not found.");
-            }
-
-            return $route->compile()->getPathVariables();
-        }else{
-            return [];
-        }
-
-
     }
 
     function createRouteVariableValue($entity, $routeName): array
@@ -152,7 +138,6 @@ class PageUrlGenerator
 
     public function isCliMode(): bool
     {
-        // Retourne true si l'application est exécutée en ligne de commande
         return php_sapi_name() === 'cli' || php_sapi_name() === 'phpdbg';
     }
 }

@@ -1,14 +1,14 @@
 <?php
-    
+
 namespace Partitech\SonataExtra\EventListener;
-    
+
 use Symfony\Component\HttpKernel\Event\ResponseEvent;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class SecurityHeadersListener
 {
-    const NONE = 'none';
-    const SECURITY_TYPES = [
+    const string NONE = 'none';
+    const array SECURITY_TYPES = [
         'default-src' => 'default_src',
         'script-src' => 'script_src',
         'style-src' => 'style_src',
@@ -28,15 +28,12 @@ class SecurityHeadersListener
         'worker-src' => 'worker_src',
         'navigate-to' => 'navigate_to'
     ];
-    
-    
-    public function __construct(
-        private ?array $policies
-    )
+
+
+    public function __construct(private readonly ?array $policies)
     {
-    
     }
-    
+
     public function onKernelResponse(ResponseEvent $event): void
     {
         $response = $event->getResponse();
@@ -44,25 +41,25 @@ class SecurityHeadersListener
         foreach (self::SECURITY_TYPES as $directive => $configKey) {
             if (isset($this->policies[$configKey])) {
                 $datas = $this->getDataForKey($configKey);
-                if(!is_null($datas)){
+                if (!is_null($datas)) {
                     $computedPolicies[$configKey] = $directive . ' ' . $datas;
                 }
             }
         }
-        if(empty($computedPolicies)){
+        if (empty($computedPolicies)) {
             return;
         }
         $response->headers->set("Content-Security-Policy", implode('; ', $computedPolicies), false);
     }
-    
+
     private function getDataForKey(string $configKey): ?string
     {
         $values = null;
-        
-        foreach($this->policies[$configKey] as $data) {
+
+        foreach ($this->policies[$configKey] as $data) {
             $values .= ' ' . $data . ' ';
         }
-        if(is_null($values)){
+        if (is_null($values)) {
             return null;
         }
         return $values;

@@ -3,7 +3,9 @@
 namespace Partitech\SonataExtra\Service;
 
 use Doctrine\ORM\EntityManagerInterface;
+use League\Csv\Exception;
 use League\Csv\Reader;
+use League\Csv\UnavailableStream;
 use Partitech\SonataExtra\Entity\Redirection;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
@@ -11,7 +13,7 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class ImportCsvHandler
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
     private TokenStorageInterface $tokenStorage;
 
     #[Required]
@@ -23,7 +25,11 @@ class ImportCsvHandler
         $this->tokenStorage = $tokenStorage;
     }
 
-    public function handle(UploadedFile $file)
+    /**
+     * @throws UnavailableStream
+     * @throws Exception
+     */
+    public function handle(UploadedFile $file): void
     {
         $csv = Reader::createFromPath($file->getRealPath(), 'r');
         $csv->setHeaderOffset(0);

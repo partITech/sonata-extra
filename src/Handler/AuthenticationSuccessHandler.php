@@ -16,25 +16,16 @@ use Symfony\Contracts\Service\Attribute\Required;
 
 class AuthenticationSuccessHandler extends DefaultAuthenticationSuccessHandler
 {
-    private $siteManager;
-    private $entityManager;
-    private $mediaManager;
-    private $providerImage;
+    private EntityManagerInterface $entityManager;
     private ParameterBagInterface $parameterBag;
 
     #[Required]
     public function autowireDependencies(
-        SiteManagerInterface $siteManager,
         EntityManagerInterface $entityManager,
         ParameterBagInterface $parameterBag,
-        MediaManager $mediaManager,
-        ImageProvider $providerImage
     ): void {
-        $this->siteManager = $siteManager;
         $this->entityManager = $entityManager;
         $this->parameterBag = $parameterBag;
-        $this->mediaManager = $mediaManager;
-        $this->providerImage = $providerImage;
     }
 
     public function __construct(HttpUtils $httpUtils)

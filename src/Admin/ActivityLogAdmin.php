@@ -29,7 +29,6 @@ use Symfony\Contracts\Service\Attribute\Required;
 )]
 class ActivityLogAdmin extends AbstractAdmin
 {
-    //protected int $maxPerPage = 50;
     private AdminActivityLogRepository $adminActivityLogRepository;
 
     #[Required]
@@ -59,7 +58,7 @@ class ActivityLogAdmin extends AbstractAdmin
         $query->andWhere(
             $query->expr()->eq($rootAlias.'.approval', ':approval_param')
         );
-        $query->setParameter('approval_param', 1);  // 1 pour les modifications approuvées
+        $query->setParameter('approval_param', 1);  // 1 for approved modifications
 
         return $query;
     }
@@ -127,8 +126,8 @@ class ActivityLogAdmin extends AbstractAdmin
 
     protected function configureRoutes(RouteCollectionInterface $collection): void
     {
-        $collection->remove('create');  // Supprimer l'action de création
-        $collection->remove('delete');  // Supprimer l'action de suppression
+        $collection->remove('create');
+        $collection->remove('delete');
         $collection->add('revert', $this->getRouterIdParameter().'/revert');
         $collection->add('revert_item', $this->getRouterIdParameter().'/revert-changelog/{changeLog}');
     }

@@ -2,17 +2,18 @@
 
 namespace Partitech\SonataExtra\Entity;
 
+use DateTime;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use League\CommonMark\Environment\Environment;
+use League\CommonMark\Exception\CommonMarkException;
 use League\CommonMark\Extension\CommonMark\CommonMarkCoreExtension;
-use League\CommonMark\GithubFlavoredMarkdownConverter;
-
 use League\CommonMark\MarkdownConverter;
 use Partitech\SonataExtra\Contract\MediaInterface;
 use Partitech\SonataExtra\Contract\UserInterface;
 use Partitech\SonataExtra\Enum\ArticleStatus;
+use Partitech\SonataExtra\Markdown\VideoLinkExtension;
 use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 use Partitech\SonataExtra\Attribute\Translatable;
 use JMS\Serializer\Annotation as Serializer;
@@ -35,11 +36,11 @@ class Editor
     private string $title;
 
     #[ORM\Column(type: 'datetime', nullable: true)]
-    private ?\DateTime $publishedAt = null;
+    private ?DateTime $publishedAt = null;
 
     #[ORM\ManyToOne(targetEntity: UserInterface::class)]
     #[ORM\JoinColumn(nullable: true)]
-    private $author;
+    private UserInterface $author;
 
     #[ORM\Column(type: 'string', length: 50)]
     private string $status;
@@ -47,14 +48,14 @@ class Editor
     #[ORM\Column(type: 'string', length: 50, options: ['default' => 'gutenberg'])]
     private string $type_editor = 'textarea';
 
-    #[ORM\OneToMany(mappedBy: 'editor', targetEntity: 'EditorRevision', cascade: ['persist', 'remove'])]
+    #[ORM\OneToMany(targetEntity: 'EditorRevision', mappedBy: 'editor', cascade: ['persist', 'remove'])]
     #[Serializer\Groups(['default'])]
     #[Serializer\MaxDepth(1)]
     private Collection $revisions;
 
     #[ORM\ManyToOne(targetEntity: MediaInterface::class, cascade: ['persist'])]
     #[ORM\JoinColumn(name: 'featured_image__media_id', referencedColumnName: 'id', nullable: true, onDelete: 'SET NULL')]
-    private $featured_image;
+    private ?MediaInterface $featured_image=null;
 
     public function __construct()
     {
@@ -98,6 +99,9 @@ class Editor
         return $this;
     }
 
+    /**
+     * @throws CommonMarkException
+     */
     public function getHtmlContent(): string
     {
 
@@ -106,7 +110,7 @@ class Editor
             $config = [];
             $environment = new Environment($config);
             $environment->addExtension(new CommonMarkCoreExtension());
-            $environment->addExtension(new \Partitech\SonataExtra\Markdown\VideoLinkExtension());
+            $environment->addExtension(new VideoLinkExtension());
 
             $converter = new MarkdownConverter($environment);
 
@@ -148,19 +152,19 @@ class Editor
         return $this;
     }
 
-    public function getPublishedAt(): ?\DateTime
+    public function getPublishedAt(): ?DateTime
     {
         return $this->publishedAt;
     }
 
-    public function setPublishedAt(?\DateTime $publishedAt): self
+    public function setPublishedAt(?DateTime $publishedAt): self
     {
         $this->publishedAt = $publishedAt;
 
         return $this;
     }
 
-    public function getAuthor()
+    public function getAuthor(): UserInterface
     {
         return $this->author;
     }
@@ -172,7 +176,7 @@ class Editor
         return $this;
     }
 
-    public function getStatus(): string  // nouveau getter
+    public function getStatus(): string
     {
         return $this->status;
     }
@@ -182,7 +186,7 @@ class Editor
         $this->status = $status;
 
         if ($status === ArticleStatus::PUBLISHED->value && null === $this->publishedAt) {
-            $this->setPublishedAt(new \DateTime());
+            $this->setPublishedAt(new DateTime());
         }
 
         return $this;
@@ -198,7 +202,7 @@ class Editor
         $this->type_editor = $type_editor;
     }
 
-    public function getFeaturedImage()
+    public function getFeaturedImage(): ?MediaInterface
     {
         return $this->featured_image;
     }

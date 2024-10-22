@@ -4,7 +4,6 @@ namespace Partitech\SonataExtra\Block;
 
 use _PHPStan_993c0a2e7\Nette\Neon\Exception;
 use Doctrine\ORM\EntityManagerInterface;
-use Knp\Menu\FactoryInterface;
 use Sonata\BlockBundle\Block\BlockContextInterface;
 use Sonata\BlockBundle\Block\Service\AbstractBlockService;
 use Sonata\MediaBundle\Entity\MediaManager;
@@ -19,51 +18,46 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Contracts\Service\Attribute\Required;
-use Twig\Environment;
 use Partitech\SonataExtra\Service\AssetsHandler;
 use Symfony\Component\HttpFoundation\RequestStack;
-
 use Sonata\PageBundle\CmsManager\CmsManagerInterface;
-
-use function PHPUnit\Framework\throwException;
 
 
 #[AutoconfigureTag(name: 'sonata.block')]
 class LanguageSelectorBlockService extends AbstractBlockService
 {
-    private $pageManager;
-    private $router;
+    private PageManagerInterface $pageManager;
+    private RouterInterface $router;
     private CmsManagerSelectorInterface $cmsSelector;
     private AssetsHandler $assetsHandler;
     private CmsManagerInterface $cmsManager;
 
     #[Required]
     public function autowireDependencies(
-        Environment $twig,
-        FactoryInterface $factory,
         CmsManagerSelectorInterface $cmsSelector,
-        RequestListener $requestListener,
-        PageManagerInterface $pageManager,
-        EntityManagerInterface $entityManager,
-        ParameterBagInterface $parameterBag,
-        MediaManager $mediaManager,
-        ImageProvider $providerImage,
-        RouterInterface $router,
-        AssetsHandler $assetsHandler,
-        RequestStack $requestStack,
-        CmsManagerInterface $cmsManager
-    ): void {
+        RequestListener             $requestListener,
+        PageManagerInterface        $pageManager,
+        EntityManagerInterface      $entityManager,
+        ParameterBagInterface       $parameterBag,
+        MediaManager                $mediaManager,
+        ImageProvider               $providerImage,
+        RouterInterface             $router,
+        AssetsHandler               $assetsHandler,
+        RequestStack                $requestStack,
+        CmsManagerInterface         $cmsManager
+    ): void
+    {
         $this->requestListener = $requestListener;
-        $this->pageManager = $pageManager;
-        $this->entityManager = $entityManager;
-        $this->parameterBag = $parameterBag;
-        $this->mediaManager = $mediaManager;
-        $this->providerImage = $providerImage;
-        $this->router = $router;
-        $this->cmsSelector = $cmsSelector;
-        $this->assetsHandler = $assetsHandler;
-        $this->requestStack = $requestStack;
-        $this->cmsManager = $cmsManager;
+        $this->pageManager     = $pageManager;
+        $this->entityManager   = $entityManager;
+        $this->parameterBag    = $parameterBag;
+        $this->mediaManager    = $mediaManager;
+        $this->providerImage   = $providerImage;
+        $this->router          = $router;
+        $this->cmsSelector     = $cmsSelector;
+        $this->assetsHandler   = $assetsHandler;
+        $this->requestStack    = $requestStack;
+        $this->cmsManager      = $cmsManager;
     }
 
     public function configureSettings(OptionsResolver $resolver): void
@@ -80,7 +74,7 @@ class LanguageSelectorBlockService extends AbstractBlockService
         $translations = $page->getTranslations();
         $settings = $blockContext->getSettings();
         $style_url = $settings['style_url'];
-        if(!empty($style_url)){
+        if (!empty($style_url)) {
             $this->assetsHandler->addCss($style_url);
         }
 
@@ -93,47 +87,44 @@ class LanguageSelectorBlockService extends AbstractBlockService
         if (!empty($_GET)) {
             $queryString = http_build_query($_GET);
             $queryString = '?' . $queryString;
-        }else{
-            $queryString='';
+        } else {
+            $queryString = '';
         }
 
-        if(!empty($requestLinks) && !empty($requestCurrent)){
-
-
-            $translations=[];
-            foreach($requestLinks as $l){
+        if (!empty($requestLinks) && !empty($requestCurrent)) {
+            $translations = [];
+            foreach ($requestLinks as $l) {
                 $translations[$l['site']]['routes'][$page->getRouteName()] = $l['routes'][0];
-                $translations[$l['site']]['label']=$l['label'];
-                $translations[$l['site']]['lang']=$l['lang'];
-                $translations[$l['site']]['routes'][0]=$l['routes'][0].$queryString;
-                if($l['site']==$page->getSite()->getId()){
-                    $current=$l;
+                $translations[$l['site']]['label'] = $l['label'];
+                $translations[$l['site']]['lang'] = $l['lang'];
+                $translations[$l['site']]['routes'][0] = $l['routes'][0] . $queryString;
+                if ($l['site'] == $page->getSite()->getId()) {
+                    $current = $l;
                 }
 
             }
-            if(empty($current)){
-                $current=$requestCurrent;
+            if (empty($current)) {
+                $current = $requestCurrent;
             }
 
-        }else{
+        } else {
 
-            if($page->getRouteName()==='page_slug' || $page->getRouteName()==='sonata_extra_blog_search')
-            {
+            if ($page->getRouteName() === 'page_slug' || $page->getRouteName() === 'sonata_extra_blog_search') {
 
 
-                $current=false;
+                $current = false;
                 foreach ($translations as $site => $t) {
                     if (!empty($t['entity_id']) && $t['entity_id'] == $page->getId()) {
                         $current = $t;
                     }
                     if (!empty($t['entity_id'])) {
                         $translation_page = $this->pageManager->findOneBy(['id' => $t['entity_id']]);
-                        $url = '//'.$translation_page->getSite()->getHost().$translation_page->getSite()->getRelativePath().$translation_page->getUrl();
+                        $url = '//' . $translation_page->getSite()->getHost() . $translation_page->getSite()->getRelativePath() . $translation_page->getUrl();
                         if ($translation_page->getEnabled()) {
                             $translations[$site]['url'] = $url;
                         }
-                        if( !empty($translations[$site]['routes'][$page->getRouteName()])){
-                            $translations[$site]['routes'][$page->getRouteName()].=$queryString;
+                        if (!empty($translations[$site]['routes'][$page->getRouteName()])) {
+                            $translations[$site]['routes'][$page->getRouteName()] .= $queryString;
                         }
 
                     }
@@ -163,8 +154,6 @@ class LanguageSelectorBlockService extends AbstractBlockService
             ->setParameter('id', $cms->getCurrentPage()->getId());
 
         return $qb->getQuery()->getOneOrNullResult();
-
-        //return $cms->getCurrentPage();
     }
 
     public function parseLinkHeader(string $linkHeader): array

@@ -2,9 +2,15 @@
 
 namespace Partitech\SonataExtra\DependencyInjection;
 
+use Exception;
 use Partitech\SonataExtra\DependencyInjection\Compiler\ResolveAsAdminAttributes;
 use Sonata\Doctrine\Mapper\DoctrineCollector;
 use Symfony\Component\Config\FileLocator;
+use Symfony\Component\DependencyInjection\Argument\AbstractArgument;
+use Symfony\Component\DependencyInjection\Argument\IteratorArgument;
+use Symfony\Component\DependencyInjection\Argument\ServiceClosureArgument;
+use Symfony\Component\DependencyInjection\Argument\ServiceLocatorArgument;
+use Symfony\Component\DependencyInjection\Argument\TaggedIteratorArgument;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\DependencyInjection\Definition;
@@ -18,14 +24,14 @@ use Symfony\Component\Yaml\Tag\TaggedValue;
 class PartitechSonataExtraExtension extends Extension
 {
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public function load(array $configs, ContainerBuilder $container): void
     {
         $configuration = new Configuration();
         $config = $this->processConfiguration($configuration, $configs);
 
-        // Définir les paramètres du bundle comme des paramètres de service
+        // Set bundle settings as service settings
         $container->setParameter('partitech_sonata_extra.smart_service', $config['smart_service']);
         $container->setParameter('partitech_sonata_extra.smart_service.provider.seo', $config['smart_service']['seo_provider']);
         $container->setParameter('partitech_sonata_extra.smart_service.provider.translation', $config['smart_service']['translation_provider']);

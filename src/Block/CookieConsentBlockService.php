@@ -22,7 +22,7 @@ use Partitech\SonataExtra\Service\AssetsHandler;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class CookieConsentBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $assetsHandler;
+    private AssetsHandler $assetsHandler;
     #[Required]
     public function autowireDependencies(
         Environment $twig,

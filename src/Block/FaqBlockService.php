@@ -23,7 +23,7 @@ use Twig\Environment;
 #[AutoconfigureTag(name: 'sonata.block')]
 final class FaqBlockService extends AbstractBlockService implements EditableBlockService
 {
-    private $entityManager;
+    private EntityManagerInterface $entityManager;
 
     public function __construct(Environment $twig, EntityManagerInterface $entityManager)
     {
@@ -33,8 +33,6 @@ final class FaqBlockService extends AbstractBlockService implements EditableBloc
 
     public function execute(BlockContextInterface $blockContext, Response $response = null): Response
     {
-        // $template = $blockContext->getTemplate();
-
         $settings = $blockContext->getSettings();
         $template = $settings['template'];
 

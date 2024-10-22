@@ -7,7 +7,6 @@
     use Presta\SitemapBundle\Event\SitemapPopulateEvent;
     use Presta\SitemapBundle\Service\UrlContainerInterface;
     use Presta\SitemapBundle\Sitemap\Url\UrlConcrete;
-    use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
     use Presta\SitemapBundle\Sitemap\Url\GoogleMultilangUrlDecorator;
     
     readonly class SitemapSubscriber implements EventSubscriberInterface

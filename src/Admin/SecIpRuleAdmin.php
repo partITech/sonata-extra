@@ -1,8 +1,10 @@
 <?php
+
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
 use Partitech\SonataExtra\Entity\SecIpRule;
+use Psr\Cache\InvalidArgumentException;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -23,12 +25,11 @@ use Symfony\Contracts\Service\Attribute\Required;
 )]
 class SecIpRuleAdmin extends AbstractAdmin
 {
-    private $cache;
+    private CacheInterface $cache;
 
     #[Required]
-    public function required(
-        CacheInterface $cache
-    ): void {
+    public function required(CacheInterface $cache): void
+    {
         $this->cache = $cache;
     }
 
@@ -52,22 +53,34 @@ class SecIpRuleAdmin extends AbstractAdmin
         $show->add('ip');
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function postUpdate($object): void
     {
         $this->clearCache();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function postPersist($object): void
     {
         $this->clearCache();
     }
 
+    /**
+     * @throws InvalidArgumentException
+     */
     public function postRemove($object): void
     {
         $this->clearCache();
     }
 
-    private function clearCache()
+    /**
+     * @throws InvalidArgumentException
+     */
+    private function clearCache(): void
     {
         $this->cache->delete('ip_rules_cache');
     }

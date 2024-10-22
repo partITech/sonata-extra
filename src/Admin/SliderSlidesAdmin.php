@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Partitech\SonataExtra\Admin;
 
 use Partitech\SonataExtra\Attribute\AsAdmin;
+use Partitech\SonataExtra\Entity\SliderSlides;
 use Sonata\AdminBundle\Admin\AbstractAdmin;
 use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
@@ -25,7 +26,7 @@ use Symfony\Contracts\Service\Attribute\Required;
     manager_type: 'orm',
     group: 'Admin',
     label: 'Slides',
-    model_class: \Partitech\SonataExtra\Entity\SliderSlides::class,
+    model_class: SliderSlides::class,
     calls: [
         ['setTranslationDomain', ['PartitechSonataExtraBundle']],
     ]
@@ -63,7 +64,6 @@ final class SliderSlidesAdmin extends AbstractAdmin
     protected function configureDatagridFilters(DatagridMapper $filter): void
     {
         $filter
-            // ->add('id')
             ->add('title', null, ['label' => 'Titre'])
             ->add('subtitle', null, ['label' => 'Sous titre'])
             ->add('btn_label', null, ['label' => 'Label du bouton'])
@@ -77,7 +77,6 @@ final class SliderSlidesAdmin extends AbstractAdmin
     protected function configureListFields(ListMapper $list): void
     {
         $list
-            // ->add('id')
             ->add('title')
             ->add('subtitle', null, ['label' => 'Sous titre'])
             ->add('btn_label', null, ['label' => 'Label du bouton'])
@@ -95,16 +94,15 @@ final class SliderSlidesAdmin extends AbstractAdmin
 
     protected function configureFormFields(FormMapper $form): void
     {
+        $imageHtml=null;
+
         if ($this->hasSubject() && null !== $this->getSubject()->getMediaMedia()) {
             $media = $this->mediaManager->findOneBy([
                 'id' => $this->getSubject()->getMediaMedia()->getId(),
             ]);
             $mediaUrl = $this->providerImage->generatePublicUrl($media, 'default_small');
-        } else {
-            $mediaUrl = null;
+            $imageHtml = $mediaUrl ? '<img src="'.$mediaUrl.'" alt="'.$media->getName().'" class="img-thumbnail" />' : 'Aucune image sélectionnée';
         }
-
-        $imageHtml = $mediaUrl ? '<img src="'.$mediaUrl.'" alt="'.$media->getName().'" class="img-thumbnail" />' : 'Aucune image sélectionnée';
 
         $form
             ->add('id')

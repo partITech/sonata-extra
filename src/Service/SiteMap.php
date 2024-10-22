@@ -19,9 +19,6 @@
     use Symfony\Component\Routing\RequestContext;
     class SiteMap
     {
-        private string $pageClass;
-        private string $articleClass;
-        private string $siteClass;
         private EntityRepository $pageRepository;
         private EntityRepository $siteRepository;
         
@@ -29,23 +26,17 @@
         
         
         public function __construct(
-            private UrlGeneratorInterface $urlGenerator,
-            private RequestContext $context,
-            private CmsPageRouter $cmsPageRouter,
-            private EntityManagerInterface $entityManager,
-            private ArticleRepository $articleRepository,
-            private ParameterBagInterface $parameterBag,
-            private readonly MediaManagerInterface $mediaManager,
-            private readonly Pool $pool,
-            private readonly SiteSelectorInterface $siteSelector,
-            protected RequestStack $requestStack,
-            protected UrlGeneratorInterface $router
+            private readonly EntityManagerInterface $entityManager,
+            private readonly ArticleRepository      $articleRepository,
+            private readonly ParameterBagInterface  $parameterBag,
+            private readonly MediaManagerInterface  $mediaManager,
+            private readonly Pool                   $pool,
+            private readonly SiteSelectorInterface  $siteSelector,
+            protected RequestStack                  $requestStack,
+            protected UrlGeneratorInterface         $router
         ) {
-            $this->articleClass = Article::class;
-            $this->pageClass = $this->parameterBag->get('sonata.page.page.class');
-            $this->siteClass = $this->parameterBag->get('sonata.page.site.class');
-            $this->pageRepository = $this->entityManager->getRepository($this->pageClass);
-            $this->siteRepository = $this->entityManager->getRepository($this->siteClass);
+            $this->pageRepository = $this->entityManager->getRepository($this->parameterBag->get('sonata.page.page.class'));
+            $this->siteRepository = $this->entityManager->getRepository($this->parameterBag->get('sonata.page.site.class'));
         }
         
         public function getPages(): array

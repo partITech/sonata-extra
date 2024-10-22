@@ -37,7 +37,6 @@ class DoctrineActivityListener
     private SerializerInterface $serializer;
     private RequestStack $requestStack;
     private RouterInterface $router;
-    //private CsrfTokenManagerInterface $csrfTokenManager;
     private LoggerInterface $logger;
     private Security $security;
     private ParameterBagInterface $parameterBag;
@@ -51,7 +50,6 @@ class DoctrineActivityListener
         LoggerInterface $logger,
         SerializerInterface $serializer,
         RouterInterface $router,
-        //CsrfTokenManagerInterface $csrfTokenManager,
         Security $security,
         TranslatorInterface $translator
     ): void {
@@ -60,16 +58,15 @@ class DoctrineActivityListener
         $this->serializer = $serializer;
         $this->requestStack = $requestStack;
         $this->router = $router;
-        //$this->csrfTokenManager = $csrfTokenManager;
         $this->logger = $logger;
         $this->security = $security;
         $this->translator = $translator;
     }
 
-    public function onPreBatchAction(BatchActionEvent $event)
+    public function onPreBatchAction(BatchActionEvent $event): bool
     {
 
-        if (!$this->needAproval()) {
+        if (!$this->needApproval()) {
             return true;
         }
 
@@ -84,7 +81,7 @@ class DoctrineActivityListener
             foreach ($event->getIdx() as $idx) {
                 $adminActivityLogRepo = $objectManager->getRepository($modelClass);
                 $entity = $adminActivityLogRepo->find($idx);
-                $adminLogId=$this->logActivity('delete', $entity, $objectManager);
+                $this->logActivity('delete', $entity, $objectManager);
             }
 
             $event->stopPropagation();
@@ -102,7 +99,7 @@ class DoctrineActivityListener
      */
     public function prePersist(PrePersistEventArgs $args): void
     {
-        if ($this->needAproval()) {
+        if ($this->needApproval()) {
             return;
         }
         $entity = $args->getObject();
@@ -114,22 +111,17 @@ class DoctrineActivityListener
         }
         if ($this->isAdmin()) {
             $objectManager = $args->getObjectManager();
-            $adminLogId=$this->logActivity('create', $entity, $objectManager);
-
+            $this->logActivity('create', $entity, $objectManager);
         }
-/*        if (method_exists($entity, 'prePersist')) {
-            $entity->prePersist();
-        }*/
     }
 
     /**
      * @ORM\PreUpdate
      *
-     * @throws Exception
      */
     public function preUpdate(PreUpdateEventArgs $args): void
     {
-        if ($this->needAproval()) {
+        if ($this->needApproval()) {
             return;
         }
 
@@ -151,46 +143,7 @@ class DoctrineActivityListener
 
         }
 
-/*        if (method_exists($entity, 'preUpdate')) {
-            $entity->preUpdate();
-        }*/
 
-        /*if ($this->isAdmin()) {
-            $adminLogId = $this->logActivity('update', $entity, $objectManager);
-
-            $conn = $objectManager->getConnection();
-            $changeSet = $args->getEntityChangeSet();
-
-            foreach ($changeSet as $fieldName => [$oldValue, $newValue]) {
-
-                if($oldValue instanceof \DateTime){
-                    $oldValue = $oldValue->format('Y-m-d H:i:s');
-                }
-
-                if($newValue instanceof \DateTime){
-                    $newValue = $newValue->format('Y-m-d H:i:s');
-                }
-
-
-                $sql = '
-                INSERT INTO admin_activity_entity_change_log
-                (admin_activity_log_id, entity_class, entity_id, field_name, old_value, new_value)
-                VALUES
-                (:adminLogId, :entityClass, :entityId, :fieldName, :oldValue, :newValue)
-            ';
-
-                $params = [
-                    'adminLogId' => $adminLogId,
-                    'entityClass' => get_class($entity),
-                    'entityId' => $entity->getId(),
-                    'fieldName' => $fieldName,
-                    'oldValue' => $oldValue,
-                    'newValue' => $newValue,
-                ];
-
-                $conn->executeQuery($sql, $params);
-            }
-        }*/
     }
 
     /**
@@ -198,7 +151,7 @@ class DoctrineActivityListener
      */
     public function preRemove(PreRemoveEventArgs $args): void
     {
-        if ($this->needAproval()) {
+        if ($this->needApproval()) {
             return;
         }
 
@@ -222,7 +175,7 @@ class DoctrineActivityListener
     {
         $request = $this->requestStack->getCurrentRequest();
 
-        if (!$this->needAproval() || null === $request) {
+        if (!$this->needApproval() || null === $request) {
             return;
         }
 
@@ -359,8 +312,8 @@ class DoctrineActivityListener
         $description = str_replace('[entity]', $className, $description);
 
         $approval_message = $this->translator->trans('sonata-extra.approve.approval_message', [],'PartitechSonataExtraBundle');
-        $approvalStatus = $this->needAproval() ? 0 : 1;
-        if ($this->needAproval()) {
+        $approvalStatus = $this->needApproval() ? 0 : 1;
+        if ($this->needApproval()) {
             $description .= '.<br> '.$approval_message;
         }
 
@@ -370,24 +323,13 @@ class DoctrineActivityListener
         if ($hasToken) {
             $approvalStatus = 2; // if is a children of the main action then, status is 2
         }
-        //$entity->setType(null);
-        //$entity->setAccount(null);
-        //$entity->setAuthor(null);
-        //$entity->setContact(null);
-        //dd($entity);
-/*echo $this->serializer->serialize($entity, 'json');
-        die();*/
-        //$context = SerializationContext::create()->enableMaxDepthChecks();
+
         $json_data=$this->serializer->serialize($entity, 'json');
-        //$json_data='[]';
-        //dd($entity);
-        //dump($json_data);
 
         $sql = '
         INSERT INTO sonata_extra__admin_activity_log (date, action_type, resource, data, user_id, description, approval, token)
         VALUES (:date, :actionType, :resource, :data, :userId, :description, :approval, :token)
     ';
-        //dd($this->serializer->serialize($entity, 'json'));
         $stmt = $conn->prepare($sql);
         $stmt->execute([
             'date' => (new \DateTimeImmutable())->format('Y-m-d H:i:s'),
@@ -402,7 +344,7 @@ class DoctrineActivityListener
 
         $session = $this->requestStack->getCurrentRequest()->getSession();
         $session->getFlashBag()->clear();
-        if ($this->needAproval()) {
+        if ($this->needApproval()) {
             if ('create' == $actionType) {
                 $success_message = $this->translator->trans('sonata-extra.approve.success_message.create', [],'PartitechSonataExtraBundle');
                 $session->getFlashBag()->add('success', $success_message);
@@ -435,7 +377,7 @@ class DoctrineActivityListener
         return in_array(get_class($entity), $excludedEntities, true);
     }
 
-    private function needAproval():bool
+    private function needApproval():bool
     {
         if(!$this->isAdmin()){
             return false;
