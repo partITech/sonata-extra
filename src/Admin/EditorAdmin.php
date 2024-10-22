@@ -211,9 +211,12 @@ class EditorAdmin extends AbstractAdmin
                 'context' => 'default',
             ]);
         }
+
         if ('ckeditor' == $editor) {
             $form->add('content', CKEditorType::class, [
                 'label' => 'Content',
+                'attr' => [ 'class' => 'textarea-auto-resize'],
+                'required' => false,
             ]);
         }
 

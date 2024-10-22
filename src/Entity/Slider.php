@@ -41,6 +41,7 @@ class Slider
     public function __construct()
     {
         $this->slides = new ArrayCollection();
+        $this->id = null;
     }
 
     public function getId(): ?int
