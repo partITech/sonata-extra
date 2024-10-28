@@ -3,6 +3,7 @@
 namespace Partitech\SonataExtra\EventListener;
 
 use Doctrine\ORM\Event\PostPersistEventArgs;
+use Doctrine\ORM\Event\PostLoadEventArgs;
 use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 use Sonata\PageBundle\Model\SiteManagerInterface;
 use Sonata\PageBundle\Site\SiteSelectorInterface;
@@ -11,6 +12,7 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Partitech\SonataExtra\Routing\PageUrlGenerator;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Throwable;
+
 
 readonly class TranslationEntityListener
 {
@@ -24,7 +26,8 @@ readonly class TranslationEntityListener
     {
     }
 
-    public function postLoad(object $args): void
+
+    public function postLoad(PostLoadEventArgs $args): void
     {
 
         $locales = [];
@@ -148,6 +151,7 @@ readonly class TranslationEntityListener
         }
         return false;
     }
+
 
     public function postPersist(PostPersistEventArgs $args): void
     {
