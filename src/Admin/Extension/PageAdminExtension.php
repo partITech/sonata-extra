@@ -25,9 +25,8 @@ class PageAdminExtension extends AbstractAdminExtension
     private MediaManager $mediaManager;
     private ImageProvider $providerImage;
     private ParameterBagInterface $parameterBag;
+    private bool $seoProposal = false;
     private array $sites = [];
-    private bool $seoProposal;
-
 
     #[Required]
     public function autowireDependencies(
@@ -98,7 +97,12 @@ class PageAdminExtension extends AbstractAdminExtension
         $siteClass = $this->parameterBag->get('sonata.page.site.class');
 
         $qb = $this->entityManager->createQueryBuilder();
-        $this->sites = $qb->select('s')->from($siteClass, 's')->getQuery()->getResult();
+
+        try{
+            $this->sites = $qb->select('s')->from($siteClass, 's')->getQuery()->getResult();
+        }catch(\Throwable $e){
+            $this->sites = [];
+        }
 
         if (count($this->sites)) {
             $admin->setTemplates([

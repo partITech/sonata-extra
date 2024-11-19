@@ -27,7 +27,12 @@
             $siteUrl = getenv('SYMFONY_HTTP_CONTEXT_URL');
             
             if (!$siteUrl) {
-                $site = $this->siteManager->findOneBy(['isDefault'=> true]);
+                try{
+                    $site = $this->siteManager->findOneBy(['isDefault'=> true]);
+                }catch(\Throwable $e){
+                    $site=null;
+                }
+
                 if(empty($site)){
                     echo "\nDefault sonata page site is not yet configured\n";
                     return;
