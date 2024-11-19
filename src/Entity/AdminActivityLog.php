@@ -16,7 +16,9 @@ use phpDocumentor\Reflection\Types\Boolean;
 #[ORM\Table(name: 'sonata_extra__admin_activity_log')]
 class AdminActivityLog
 {
-    #[ORM\Id, ORM\GeneratedValue, ORM\Column(type: 'integer')]
+    #[ORM\Id]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
+    #[ORM\Column(type: 'integer')]
     private int $id;
 
     #[ORM\Column(type: Types::DATETIME_IMMUTABLE)]

@@ -9,8 +9,9 @@ use JMS\Serializer\Annotation as Serializer;
 #[ORM\Table(name: 'sonata_extra__admin_activity_change_log')]
 class AdminActivityEntityChangeLog
 {
+
     #[ORM\Id]
-    #[ORM\GeneratedValue]
+    #[ORM\GeneratedValue(strategy: 'IDENTITY')]
     #[ORM\Column(type: 'integer')]
     private int $id;
 

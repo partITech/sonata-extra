@@ -9,7 +9,7 @@ use Partitech\SonataExtra\Contract\MediaInterface;
 trait SonataExtraPagePageTrait
 {
     #[ORM\Column(type: 'integer', nullable: true)]
-    private ?int $translation_from_id;
+    private ?int $translation_from_id = null;
 
     #[ORM\Column(type: 'string', length: 255, nullable: true)]
     private ?string $ogTitle = null;
