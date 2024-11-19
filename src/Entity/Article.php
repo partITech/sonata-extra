@@ -44,7 +44,7 @@ class Article
     #[ORM\Column(name: "is_default", type: "boolean")]
     private bool $isDefault = false;
 
-    #[ORM\Column(type: 'text', nullable: true, options: ['charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'])]
+    #[ORM\Column(type: 'text', nullable: true)]
     #[Translatable]
     private ?string $content = "";
 
@@ -52,7 +52,7 @@ class Article
     #[Translatable]
     private string $title;
 
-    #[ORM\Column(type: 'text',  nullable: true, options: ['charset' => 'utf8mb4', 'collation' => 'utf8mb4_unicode_ci'])]
+    #[ORM\Column(type: 'text',  nullable: true)]
     #[Translatable]
     private ?string $excerpt;
 
