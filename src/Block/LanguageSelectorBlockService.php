@@ -31,6 +31,12 @@ class LanguageSelectorBlockService extends AbstractBlockService
     private CmsManagerSelectorInterface $cmsSelector;
     private AssetsHandler $assetsHandler;
     private CmsManagerInterface $cmsManager;
+    private RequestListener $requestListener;
+    private EntityManagerInterface $entityManager;
+    private ParameterBagInterface $parameterBag;
+    private MediaManager $mediaManager;
+    private ImageProvider $providerImage;
+    private RequestStack $requestStack;
 
     #[Required]
     public function autowireDependencies(

@@ -20,6 +20,7 @@ use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 use Partitech\SonataExtra\Attribute\Translatable;
 use League\CommonMark\GithubFlavoredMarkdownConverter;
 use League\CommonMark\MarkdownConverter;
+use League\CommonMark\Extension\Table\TableExtension;
 
 use League\CommonMark\CommonMarkConverter;
 use League\CommonMark\Environment\Environment;
@@ -169,6 +170,7 @@ class Article
             $environment = new Environment($config);
             $environment->addExtension(new CommonMarkCoreExtension());
             $environment->addExtension(new VideoLinkExtension());
+            $environment->addExtension(new TableExtension());
 
             $converter = new MarkdownConverter($environment);
 
