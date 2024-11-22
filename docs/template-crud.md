@@ -198,6 +198,35 @@ class YourAdmin extends AbstractAdmin
     }
 }
 ```
+Be aware that you first need to override the action's template before append a header template.
+```php
+class YourAdmin extends AbstractAdmin
+{
+    public function configure(): void
+    {
+        $templateRegistry = $this->getTemplateRegistry();
+        // Overriding default's Sonata Template.
+        $templateRegistry->setTemplate(name: 'list', template: '@PartitechSonataExtra/Admin/CRUD/list.html.twig');
+        // Add the list action's header template
+        $templateRegistry->setTemplate(name: 'list_append_page_content_header_template', template: 'Admin/resources_list_header.html.twig');
+    }
+}
+
+```
+or 
+```php
+class YourAdmin extends AbstractAdmin
+{
+    public function configure(): void
+    {
+        // Overriding default's Sonata Template.
+        $this->setTemplate(name: 'list', template: '@PartitechSonataExtra/Admin/CRUD/list.html.twig');
+        // Add the list action's header template
+        $this->setTemplate(name: 'list_append_page_content_header_template', template: 'Admin/resources_list_header.html.twig');
+    }
+}
+
+```
 
 - Twig template could look like bellow :
 ```twig
