@@ -1,6 +1,4 @@
-# Sonata Extra Bundle: Configuring Custom 404 and 500 Error
-
-## Introduction
+# Configuring Custom 404 and 500 Error
 
 Customizing error pages (404 - Not Found and 500 - Internal Server Error) in your application can enhance user experience during unexpected situations. This guide will walk you through the process of setting up custom error pages in the SonataExtraBundle.
 
@@ -13,9 +11,7 @@ Before proceeding, there are a few important things to note:
 - **Admin Session**: Ensure you are not logged in as an admin. It's recommended to use one session for admin and another (in private browsing) to test the error pages.
 
 
-## Configuration Steps
-
-### Step 1: Update SonataPage Configuration
+## Update SonataPage Configuration
 
 Firstly, add the following to your SonataPage configuration file:
 
@@ -30,14 +26,14 @@ sonata_admin:
 This configuration enables SonataPage to trigger an Exception listener and forward the response to `_page_internal_error_{key}` route. SonataPage intelligently links this to a designated page.
 
 
-### Step 2: Decorate Error Pages
+## Decorate Error Pages
 In the Sonata "Pages" admin panel, locate and check the "decorate" checkbox.
 
 ![pages_admin_index](./doc-sonata-extra-images/pages_admin_index.png)
 
 You'll see Page Internal Error Fatal and Page Internal Error Not Found options, which are crucial for the next steps.
 
-### Step 3: Translation and Customization
+## Translation and Customization
 All elements of the error pages are translatable, offering flexibility in different locales.
 
 ![custom_404_conf](./doc-sonata-extra-images/custom_404_conf.png)
@@ -46,7 +42,7 @@ After selecting "habillé" (decorate), save your changes and proceed to the “o
 
 ![custom_404_organise](./doc-sonata-extra-images/custom_404_organise.png)
 
-###  Step 4: Publishing the Custom Pages
+## Publishing the Custom Pages
 
 The final step involves publishing your customized pages. 
 Create a snapshot of your page by clicking on the publication pane.

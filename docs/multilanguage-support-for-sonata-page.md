@@ -1,31 +1,36 @@
-# Sonata Extra Bundle: Enabling multisite management with multilang on SonataPageBundle.
+# Enabling Multisite Management with Multilang
 
-## Overview
-The Sonata Extra Bundle enhances the SonataPageBundle by offering comprehensive multisite and multilanguage management capabilities. This feature allows tracking and switching between page translations in the front-end and supports a flexible multisite strategy.
+The **Sonata Extra Bundle** enhances the **SonataPageBundle** by offering comprehensive multisite and multilanguage management capabilities. This feature allows you to track and switch between page translations on the front-end while supporting a flexible multisite strategy.
 
-## Screens
-- List view :
+---
 
-![Activity_log_index.png](./doc-sonata-extra-images/page_multilangue_list.png)
+You can manage multiple locales (languages) under separate site configurations. Each site can be accessed via a unique URL, making it easier to organize content by language or region.
 
-- Detail view :
+## List view
+  ![Activity_log_index.png](./doc-sonata-extra-images/page_multilangue_list.png)
 
-![Activity_log_detail.png](./doc-sonata-extra-images/page_multilangue_view.png)
+## Detail view
+  ![Activity_log_detail.png](./doc-sonata-extra-images/page_multilangue_view.png)
 
+---
 
 ## Setting up Multisite with Multiple Languages
 
 ### Creating Multilanguage Sites
+
 Each site can support different locales. Use the following command to create the necessary sites:
+
 ```shell
 bin/console sonata:page:create-site
-
 ```
+
+---
 
 ### Quick Setup for Testing
 
 For testing purposes, you can set up multiple sites quickly using these commands:
-```sql
+
+```shell
 TRUNCATE `page__page`;
 TRUNCATE `page__site`;
 TRUNCATE `page__snapshot`;
@@ -36,21 +41,25 @@ bin/console  sonata:page:create-site --enabled --name="Sonata Extra ES" --locale
 bin/console  sonata:page:create-site --enabled --name="Sonata Extra IT" --locale=it --host=it.sonata-extra.localhost --relativePath=/it --enabledFrom=now --enabledTo=-
 bin/console  sonata:page:create-site --enabled --name="Sonata Extra VN" --locale=vn --host=vn.sonata-extra.localhost --relativePath=/vn --enabledFrom=now --enabledTo=-
 ```
-```
 
+> [!NOTE]
+> Make sure the `--locale` option reflects the language codes you intend to use.
+
+---
 
 ### Apache Virtual Host Configuration
-Configure your Apache virtual host as follows:
+
+Configure your Apache virtual host with multiple `ServerAlias` entries:
 
 ```apacheconf
 <VirtualHost *:80>
-ServerName sonata-extra.localhost
-ServerAlias fr.sonata-extra.localhost
-ServerAlias en.sonata-extra.localhost
-ServerAlias es.sonata-extra.localhost
-ServerAlias it.sonata-extra.localhost
-ServerAlias vn.sonata-extra.localhost
-DocumentRoot /var/www/sonata-extra/public
+    ServerName sonata-extra.localhost
+    ServerAlias fr.sonata-extra.localhost
+    ServerAlias en.sonata-extra.localhost
+    ServerAlias es.sonata-extra.localhost
+    ServerAlias it.sonata-extra.localhost
+    ServerAlias vn.sonata-extra.localhost
+    DocumentRoot /var/www/sonata-extra/public
 
     <Directory /var/www/sonata-extra/public>
         Options Indexes FollowSymLinks MultiViews
@@ -62,31 +71,35 @@ DocumentRoot /var/www/sonata-extra/public
     ErrorLog ${APACHE_LOG_DIR}/error.log
     CustomLog ${APACHE_LOG_DIR}/access.log combined
 </VirtualHost>
-
 ```
+---
 
 ## Accessing the Sites
 
-- **Admin Panel**: Access the main site's admin panel at `http://sonata-extra.localhost/admin/login`.
-- **Localized Sites**: View content at http://`[fr,en,es,it,vn]`.sonata-extra.localhost/`[fr,en,es,it,vn]`/. Admin login for each site is available at respective URLs.
+- **Admin Panel**: Access the main site’s admin panel at `http://sonata-extra.localhost/admin/login`.  
+- **Localized Sites**: View content at `http://[fr|en|es|it|vn].sonata-extra.localhost/[fr|en|es|it|vn]`. Admin login for each site is available at the corresponding domain and path.
+
+---
 
 ## Setting up Routes and Snapshots
-Run the following commands to create routes, fix them for Sonata Extra, and create snapshots:
-```
+
+Run the following commands to generate and fix routes, then create snapshots:
+
+```shell
 bin/console sonata:page:update-core-routes
 bin/console sonata:extra:page-fix-route
 bin/console sonata:page:create-snapshots
-
 ```
 
-## Setting up Routes and Snapshots
+---
 
-To enable the multilanguage support of Sonata Extra, modify the configurations as follows:
+## Enabling Multilanguage Support
 
-### `public/index.php` Changes
+### `public/index.php`
+
+Update your `public/index.php` to ensure **SonataPageBundle** recognizes the `host_with_path` strategy:
 
 ```php
-<?php
 use App\Kernel;
 use Sonata\PageBundle\Request\RequestFactory;
 
@@ -101,12 +114,20 @@ return function (array $context) {
 
 ### `sonata_page.yaml` Changes
 
-```
+```yaml
 # Configuration in sonata_page.yaml for multisite management
 sonata_page:
-multisite: host_with_path
-
+    multisite: host_with_path
 ```
 
+> [!NOTE]
+> You can switch to the new runtime configuration. Follow the official documentation for the new [Runtime](https://docs.sonata-project.org/projects/SonataPageBundle/en/4.x/reference/multisite/) with composer configuration.
+
+---
+
 ## Conclusion
-The multisite and multilanguage management features in the Sonata Extra Bundle provide a powerful and flexible approach for managing content across different locales and sites, aligning with the robust capabilities of the SonataPageBundle.
+
+By configuring host-based paths and linking them to specific locales, you can serve multiple languages and manage them easily via **SonataPageBundle**. The **Sonata Extra Bundle** optimizes this workflow, allowing your team to handle content across several locales and domains without hassle.
+
+> [!IMPORTANT]
+> Confirm each localized domain name resolves correctly before going live. Also, review security settings and any caching or proxy rules that may affect routing.

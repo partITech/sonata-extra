@@ -1,30 +1,33 @@
-# Sonata Extra Bundle: Multilanguage Support for User Admins
+# For User Admins
 
-This bundle facilitates multilanguage support for admin interfaces. It comprises a trait for admin classes to manage multilanguage interfaces, and a trait for entities to create necessary fields.
+The **Sonata Extra Bundle** provides an easy way to manage multilingual content in your admin interfaces. It offers traits for both admin classes and entities to handle language-specific fields, creating a seamless workflow for translations within the Sonata environment.
 
-The implementation will add icons for the locales `from sonata_page` sites, enabling linkages with the records and managing all site languages.
+> [!NOTE]
+> All locales come from the `sonata_page` configuration, allowing records to be linked and managed across different sites and languages.
 
-## Screen
-- List view of the translation in the selected language site
+---
+##  List view of the translation in the selected language site  
 ![Multilanguage_edit.png](./doc-sonata-extra-images/Multilanguage_edit.png)
-- Edit view of the translation in the selected language site
+
+##  Edit view of the translation in the selected language site
 ![Multilanguage_list.png](./doc-sonata-extra-images/Multilanguage_list.png)
-- Create a tranlsation from a local patern
+
+## Create a translation from a local pattern
 ![Multilanguage_create_translation.png](./doc-sonata-extra-images/Multilanguage_create_translation.png)
 
+---
 
 ## Implementation Example for a Simple Admin
 
 ### Entity File
 
-```php
-<?php
+Use the `EntityTranslationTrait` to add multilingual fields:
 
+```php
 namespace App\Entity;
 
 use App\Repository\SimpleTestRepository;
 use Doctrine\ORM\Mapping as ORM;
-
 use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 
 #[ORM\Entity(repositoryClass: SimpleTestRepository::class)]
@@ -41,11 +44,13 @@ class SimpleTest
 }
 ```
 
+---
+
 ### Admin File
 
-```php
-<?php
+Include `AdminTranslationTrait` in your Admin class. The `#[AsAdmin]` attribute simplifies Sonata Admin configuration:
 
+```php
 declare(strict_types=1);
 
 namespace App\Admin;
@@ -57,14 +62,13 @@ use Sonata\AdminBundle\Datagrid\DatagridMapper;
 use Sonata\AdminBundle\Datagrid\ListMapper;
 use Sonata\AdminBundle\Form\FormMapper;
 use Sonata\AdminBundle\Show\ShowMapper;
-
 use Partitech\SonataExtra\Controller\Admin\TranslationController;
 use Partitech\SonataExtra\Traits\AdminTranslationTrait;
 
 #[AsAdmin(
     manager_type: 'orm',
     label: 'Simple Entity',
-    model_class:  \App\Entity\SimpleTest::class,
+    model_class: \App\Entity\SimpleTest::class,
 )]
 final class SimpleTestAdmin extends AbstractAdmin
 {
@@ -74,23 +78,32 @@ final class SimpleTestAdmin extends AbstractAdmin
 }
 ```
 
-Note: Simply add the trait for both the admin and entity classes. Then run the following commands:
+> [!NOTE]
+> After adding these traits, run the following commands to update the schema and clear the cache:
+
 ```shell
 bin/console doctrine:schema:update --force
 bin/console cache:clear
 ```
 
-#### If you have allready a controller, just add the controller trait
+---
+
+### Using the Controller Trait
+
+If you already have a custom controller, add the `ControllerTranslationTrait`:
+
 ```php
 class MenuController extends Controller
 {
-use \Partitech\SonataExtra\Traits\ControllerTranslationTrait;
+    use \Partitech\SonataExtra\Traits\ControllerTranslationTrait;
+}
 ```
 
-You can also call the create translation action  by using the extended controller as a service
+You can also call the **create translation** action via the extended TranslationController:
 
 ```php
 use \Partitech\SonataExtra\Controller\Admin\TranslationController;
+
 class MenuController extends Controller
 {
     use \Partitech\SonataExtra\Traits\ControllerTranslationTrait;
@@ -101,7 +114,6 @@ class MenuController extends Controller
     public function autowireDependencies(
         TranslationController $TranslationController
     ): void {
-
         $this->TranslationController = $TranslationController;
     }
 
@@ -109,12 +121,15 @@ class MenuController extends Controller
     {
         return $this->TranslationController->createTranslationAction($id, $from_site, $to_site, $fqcn);
     }
+}
 ```
 
+---
 
+## Admin Configuration
 
-## Admin Configure
-The trait have its own configure. If you have a configure method in your admin, just be sure to call the trait configure as follows :
+The trait includes a `configureTrait()` method. If you have a custom `configure()` method in your admin, remember to call `configureTrait()`:
+
 ```php
 #[AsAdmin(
     manager_type: 'orm',
@@ -122,22 +137,24 @@ The trait have its own configure. If you have a configure method in your admin, 
     label: 'Test',
     model_class: \App\Entity\Test::class
 )]
-
 final class TestAdmin extends AbstractAdmin
 {
     use AdminTranslationTrait;
-    
+
     protected function configure(): void
     {
         $this->configureTrait();
         $this->setTemplate('edit', '@PartitechSonataMenu/CRUD/edit.html.twig');
     }
-
+}
 ```
+
+---
 
 ## Admin Route Configuration
 
-The trait adds its own route for creating translations. If users also add routes, they should configure their routes as follows:
+If you override `configureRoutes`, ensure you call `configureTraitRoutes` first:
+
 ```php
 #[AsAdmin(
     manager_type: 'orm',
@@ -153,73 +170,50 @@ final class TestAdmin extends AbstractAdmin
     {
         $this->configureTraitRoutes($collection);
         $collection->remove('show');
+        // ...
     }
-
-    // ...
 }
 ```
 
-Call `configureTraitRoutes` to force the creation of necessary routes, then continue configuring your own routes. This is only necessary if `configureRoutes` is implemented in the admin class.
+> [!IMPORTANT]
+> This step is only necessary if you override the `configureRoutes` method in your admin class.
+
+---
 
 ## Automatic Translation Compatibility
 
-The multilanguage feature is compatible with our automatic translation tool through the 'Translation API' (see [smart_service.md](translation_api.md)).
+The multilingual feature is compatible with the **automatic translation** tool from Sonata Extra.
+Add the `#[Translatable]` attribute to fields you wish to translate automatically:
 
-Add a `#[Translatable]` annotation to make a field eligible for automatic translation via the API, using the application's provider (see [smart_service.md](translation_api.md)).
 ```php
 use Partitech\SonataExtra\Attribute\Translatable;
 
-#[ORM\Column(type: 'text', nullable: true)]
-#[Translatable]
-private ?string $description=null;
-
-
-// ...
+    #[ORM\Column(type: 'text', nullable: true)]
+    #[Translatable]
+    private ?string $description = null;
 ```
-This feature is compatible with OneToMany relationships. In this case, add the annotation on both the entity relationship and the fields of the related entity.
+> [!NOTE]
+> For complex relationships, ensure the entity and any child entities also include the necessary traits and the `#[Translatable]` attribute where needed.
 
-Be aware that when a translation is done, process is to clone the object first, then translate it. The clone process can be done automatically for simple object, but the correct process should be to use the __clone strategy inside your entity.
-Menu tree can not be cloned without an internal clone function.
+### Handling Slug Fields
 
-### About Slug fields
-As slug need to be unique, during the clone process, it will check if there is an `$object->getSlug()` function. If the method exist, the process verify that the term has been translated or not.
-If the term is the same, it will prefix the value by its locale.
+During cloning, if the slug remains unchanged, it will automatically prefix the slug with the locale to maintain uniqueness:
+
 ```php
-    if (method_exists($clonedObject, 'setSlug') && $clonedObject->getSlug()==$object->getSlug()) {
-        $slugger = new AsciiSlugger();
-        $slug=$slugger->slug($this->site->getLocale().'-'.$clonedObject->getSlug())->lower();
-        $clonedObject->setSlug($slug);
-    }
+if (method_exists($clonedObject, 'setSlug') && $clonedObject->getSlug() == $object->getSlug()) {
+    $slugger = new AsciiSlugger();
+    $slug = $slugger->slug($this->site->getLocale().'-'.$clonedObject->getSlug())->lower();
+    $clonedObject->setSlug($slug);
+}
 ```
 
-## Sonata Classification multilang integration
-Due to the specific integration of sonataTag and SonataCategory you will have to use our forked admin.
+---
 
-In sonata_classification.yaml configuration, keep your configuration as bellow :
+## Sonata Classification Multilang Integration
 
-```yaml
-sonata_classification:
-    class:
-        category: App\Entity\SonataClassificationCategory
-        collection: App\Entity\SonataClassificationCollection
-        context: App\Entity\SonataClassificationContext
-        tag: App\Entity\SonataClassificationTag
-```
+For **Sonata Classification** (Tag and Category entities), use the bundle’s forked admin and add the `EntityTranslationTrait` to your custom entities:
 
-In your entity, make sure to add the trait :
-- SonataClassificationTag.php
 ```php
-<?php
-
-declare(strict_types=1);
-
-namespace App\Entity;
-
-use Doctrine\ORM\Mapping as ORM;
-use Doctrine\DBAL\Types\Types;
-use App\Repository\SonataClassificationTagRepository;
-use Sonata\ClassificationBundle\Entity\BaseTag;
-use Partitech\SonataExtra\Traits\EntityTranslationTrait;
 #[ORM\Entity(repositoryClass: SonataClassificationTagRepository::class)]
 #[ORM\Table(name: 'classification__tag')]
 #[ORM\HasLifecycleCallbacks]
@@ -237,53 +231,32 @@ class SonataClassificationTag extends BaseTag
         return $this->id;
     }
 }
-
 ```
 
-- SonataClassificationCategory.php
+Make sure to reference the **Partitech Sonata Extra** admin classes instead of the default Sonata Classification admins:
 
-```php
-<?php
-namespace App\Entity;
-
-use Doctrine\DBAL\Types\Types;
-use Doctrine\ORM\Mapping as ORM;
-use Sonata\ClassificationBundle\Entity\BaseCategory;
-use Partitech\SonataExtra\Traits\EntityTranslationTrait;
-
-#[ORM\Entity]
-#[ORM\Table(name: 'classification__category')]
-class SonataClassificationCategory extends BaseCategory
-{
-    use EntityTranslationTrait;
-    #[ORM\Id]
-    #[ORM\Column(type: Types::INTEGER)]
-    #[ORM\GeneratedValue]
-    protected ?int $id = null;
-
-    public function getId(): ?int
-    {
-        return $this->id;
-    }
-}
-```
-
-Use sonata-extra tag and category admin.
-**DO NOT USE tag and category admin from sonataClassification package. **
-It wont have the tracking fields required for multilanguage.
-
-- sonata_admin.yaml
 ```yaml
-            cms:
-                icon: fa fa-pencil
-                label: CMS
-                keep_open: true
-                items:
-                    - Partitech\SonataExtra\Admin\ArticleAdmin
-                    - sonata.page.admin.page
-                    - sonata.page.admin.shared_block
-                    - Partitech\SonataExtra\Admin\SliderAdmin
-                    - Partitech\SonataExtra\Admin\FaqCategoryAdmin
-                    - Partitech\SonataExtra\Admin\TagAdmin
-                    - Partitech\SonataExtra\Admin\CategoryAdmin
+sonata_admin:
+# ...
+    cms:
+    icon: fa fa-pencil
+    label: CMS
+    keep_open: true
+    items:
+        - Partitech\SonataExtra\Admin\ArticleAdmin
+        - sonata.page.admin.page
+        - sonata.page.admin.shared_block
+        - Partitech\SonataExtra\Admin\SliderAdmin
+        - Partitech\SonataExtra\Admin\FaqCategoryAdmin
+        - Partitech\SonataExtra\Admin\TagAdmin
+        - Partitech\SonataExtra\Admin\CategoryAdmin
 ```
+
+> [!CAUTION]
+> Using the default Sonata Classification Admin for tags and categories may break multilingual features. Always use the admin classes provided by Sonata Extra.
+
+---
+
+## Conclusion
+
+By adding these traits and configurations, you enable powerful **multilanguage support** for user admins in Sonata. The **Sonata Extra Bundle** streamlines translations, content cloning, and slug management, ensuring a smooth experience when managing records across multiple locales.

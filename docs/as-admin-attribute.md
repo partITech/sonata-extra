@@ -1,27 +1,36 @@
-## SonataExtra AsAdmin() attribute
+# AsAdmin()
 
-Thanks to php attributes; exit the old 15kms long services.yaml config file with a quick per class configuration.
+The **SonataExtra `AsAdmin()` attribute** allows you to configure your Admin classes quickly, eliminating the need for lengthy YAML configuration. It leverages PHP attributes and autowiring to streamline admin setup.
 
-old type was :
+
+This approach reduces boilerplate by embedding configuration details directly into your Admin class.
+
+---
+
+## Old-Style Configuration (YAML)
+
+An example of the traditional service configuration:
 
 ```yaml
 app.admin.article:
-       class: App\Admin\MyEntityAdmin
-       arguments: [~, App\Entity\MyEntity, ~]
-       tags:
-           - { name: sonata.admin, manager_type: orm, label: "My Entity Admin" }
-       calls:
-           - [ setTranslationDomain, [partitech]]
+    class: App\Admin\MyEntityAdmin
+    arguments: [~, App\Entity\MyEntity, ~]
+    tags:
+        - { name: sonata.admin, manager_type: orm, label: "My Entity Admin" }
+    calls:
+        - [ setTranslationDomain, [partitech]]
 ```
 
-Thanks to autowiring "Arguments" is no more needed. 
+> [!NOTE]
+> With **autowiring**, the `arguments` section is no longer required, simplifying the setup.
 
+---
 
+## New-Style Configuration (Attribute)
 
-here is a basic AsAdmin() configuration : 
+Below is a basic usage of the `AsAdmin()` attribute:
 
 ```php
-
 use Partitech\SonataExtra\Attribute\AsAdmin;
 use Symfony\Contracts\Service\Attribute\Required;
 
@@ -40,7 +49,7 @@ class MyEntityAdmin extends AbstractAdmin
 {
     private MyRequiredService $myRequiredService;
     private MyAttributeCallService $myAttributeCallService;
-    
+
     #[Required]
     public function setMyRequeredService(MyRequiredService $myRequiredService): void
     {
@@ -52,17 +61,18 @@ class MyEntityAdmin extends AbstractAdmin
         $this->myAttributeCallService = $myAttributeCallService;
     }
     
-    .....
+    // ...
 }
 ```
 
+> [!IMPORTANT]
+> Use `#[Required]` for autowired dependencies, or leverage the `calls` array in the `AsAdmin` attribute if further initialization is needed.
 
+---
 
-If you need some more services in your Admin class, user the #[required] method annotation to mirror the construct autowiring, or set calls in the AsAdmin() attribute.
+## Registering Admin Classes as Services
 
-**Be aware that your Admins Classes have to be in the Services registration in your yaml file s either**
-
-- globally like  :
+Ensure your Admin classes are registered in the service container. For instance:
 
 ```yaml
 services:
@@ -76,28 +86,33 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
-
 ```
 
-Your src/Admin/ directory must not be exclude.
+Your `src/Admin/` directory should **not** be excluded.
 
-- one line Service declaration : 
-
-  ```yaml
-  App\SecondAdminDirectory\MyGreatAdmin: ~
-  ```
-
-  
-
-If you use fancy automatic declaration based on Instance like this, this will not work: 
+Alternatively, declare each Admin service individually:
 
 ```yaml
 services:
-  _defaults:
-    autowire: true
-    autoconfigure: true
-  _instanceof:
-    Sonata\AdminBundle\Admin\AbstractAdmin:
-      tags: { name: sonata.admin }
+    App\SecondAdminDirectory\MyGreatAdmin: ~
 ```
 
+> [!NOTE]
+> If you rely on `_instanceof` auto-registration like below, it **will not** work with `AsAdmin()` since it bypasses the extra attribute logic:
+
+```yaml
+services:
+    _defaults:
+        autowire: true
+        autoconfigure: true
+    _instanceof:
+        Sonata\AdminBundle\Admin\AbstractAdmin:
+            tags: { name: sonata.admin }
+```
+
+---
+
+## Conclusion
+
+The `AsAdmin()` attribute simplifies Admin configuration by embedding key settings directly in your class. With a bit of autowiring and the right service registration, you can drastically reduce your Sonata admin YAML definitions and keep your code more readable and maintainable.
+```
