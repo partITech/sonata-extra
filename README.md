@@ -1,5 +1,9 @@
 # Sonata Extra Bundle
 
+> [!TIP]
+> For more detailed information and comprehensive guides, please visit our [official documentation](https://automarkdoc.partitech.com/)
+
+
 **An advanced extension for the Sonata Admin Bundle, empowering your Symfony projects with enhanced functionality and ease of use.**
 
 ---
@@ -58,5 +62,5 @@ bin/console asset:install
 
 Detailed setup instructions, feature guides, and practical examples can be found on our official documentation site:
 
-**[🔗 sonata-xtra.partitech.com](https://sonata-xtra.partitech.com)**
+**[🔗 sonata-extra.partitech.com](https://sonata-extra.partitech.com)**
 
