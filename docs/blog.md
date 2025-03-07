@@ -1,75 +1,89 @@
-# Sonata Extra Bundle:  Blog Feature Documentation
+# Blog Feature Documentation
 
-Enhance your Sonata project with the integrated blog feature from Sonata Extra Bundle.
+Enhance your Sonata project with the integrated **blog feature** from the Sonata Extra Bundle. This component provides a straightforward way to manage articles, categories, and tags, complete with SEO-friendly URLs and customizable templates.
+
+> [!TIP]
+> Use these instructions along with the SonataPageBundle documentation for a fully featured blog experience in your application.
+
+---
 
 ## Core Routes Integration
+
 ### Updating Blog Core Routes
 
-Integrate your site's pages with the blog controller by executing the `update-core-route` command:
+Synchronize Sonata Page with blog-specific controllers by running the following command:
 
 ```shell
 php bin/console sonata:page:update-core-routes --site={id}
 ```
 
-Executing this command synchronizes the Sonata Page with the following hybrid routes:
+This operation sets up the following hybrid routes:
 
-- Blog Category  : `/blog-category/{category}`
-- Blog Tag : `/blog-tag/{tag}`
-- Blog Article : `/blog-article/{article}`
+- **Blog Category**: `/blog-category/{category}`
+- **Blog Tag**: `/blog-tag/{tag}`
+- **Blog Article**: `/blog-article/{article}`
 
-These routes correspond to dynamically generated pages that are linked to their respective controllers.
+These routes are dynamically generated and linked to their respective controllers within the Sonata Extra Bundle.
+
+---
 
 ### Route Customization
-Customize default route patterns to localize or modify your URL structure while preserving controller linkage by editing the page details:
 
-- An event listener on routing.loader is automatically added.
-- A new route is created with your custom pattern from the custom_url field.
+You can rename or localize the default route patterns while preserving controller linkage by editing the page details in the Sonata admin:
 
-![Blog_CustomUrl.png](./images/Blog_CustomUrl.png)
+- An event listener on `routing.loader` automatically updates these routes.
+- A custom URL field (`custom_url`) lets you define alternate paths.
 
+![Blog_CustomUrl.png](./doc-sonata-extra-images/Blog_CustomUrl.png)  
 ![Blog_ServiceType.png](./doc-sonata-extra-images/Blog_ServiceType.png)
-![Blog_CustomUrl.png](./doc-sonata-extra-images/Blog_CustomUrl.png)
 
+Use the following template references in your Twig code to generate links:
 
-Refer to the following template for generating URL paths within Twig:
-```php
-{{  path('sonata_extra_blog_category', {'category': category.getSlug()}) }}
-{{  path('sonata_extra_blog_tag', {'tag': tag.getSlug()}) }}
-{{  path('sonata_extra_blog_article', {'article': article.getSlug()}) }}
+```twig
+{{ path('sonata_extra_blog_category', {'category': category.getSlug()}) }}
+{{ path('sonata_extra_blog_tag', {'tag': tag.getSlug()}) }}
+{{ path('sonata_extra_blog_article', {'article': article.getSlug()}) }}
 ```
 
+---
 
 ## Templating
 
-Link your blog's content output to your template configuration by utilizing the `Blog page type`. This page type service is explained in detail within the [SonataPageBundle documentation](https://docs.sonata-project.org/projects/SonataPageBundle/en/5.x/reference/page_services/).
+Connect your blog output to a dedicated template using the **Blog page type** service. Refer to the SonataPageBundle documentation for in-depth guidance on creating and configuring page services.
+
+---
 
 ## Available Template Variables
 
-The `Blog page` service provides the following variables to your template for a seamless integration:
+When using the `Blog page` service, the following variables are made available to your Twig template:
 
-![Blog_ServiceType.png](images%2FBlog_ServiceType.png)
+- `content`: The HTML content of your blog.
+- `page`: The `SonataPagePage` entity.
+- `site`: The `SonataPageSite` entity.
 
-- `content` : The HTML content of your blog.
-- `page` : The `SonataPagePage` entity instance.
-- `site` : The `SonataPageSite` entity instance.
+Display the main content in Twig with:
 
-Display your blog content within your Twig template as follows:
-
-```php
+```twig
 {{ content|raw }}
 ```
 
-For page article, category and tags, the service will also make availlable seo parameters :
+---
+
+### SEO Parameters
+
+For articles, categories, and tags, the service also injects SEO-related variables:
+
 - `ogTitle`
 - `ogDescription`
-- `ogImage` : The image path will be allready calculated. Be sure to have an image format named `og_image`  otherwise `reference` will be used. As social networks have a max width/height, it is not recommended to use the `reference` format.
+- `ogImage`  
+  Points to the path of the chosen image format. If `og_image` format does not exist, `reference` is used.
 - `seoTitle`
 - `seoKeyword`
 - `seoDescription`
 
-In your template you can use it like this
+A sample usage in your Twig template:
 
-```php
+```twig
 {% block sonata_seo_title %}
     {% apply spaceless %}
         <title>{{ seoTitle|default('Titre par défaut') }}</title>
@@ -102,22 +116,28 @@ In your template you can use it like this
     {% endapply %}
 {% endblock %}
 ```
-and in your base template
-```php
-    {% block sonata_seo_title %}
-        {{ sonata_seo_title() }}
-    {% endblock %}
-    {% block sonata_seo_metadatas %}
-        {{ sonata_seo_metadatas() }}
-    {% endblock %}
-    {% block app_og_metadatas %}
-        {{ app_og_metadatas() }}
-    {% endblock %}
+
+Then, in your base layout:
+
+```twig
+{% block sonata_seo_title %}
+    {{ sonata_seo_title() }}
+{% endblock %}
+{% block sonata_seo_metadatas %}
+    {{ sonata_seo_metadatas() }}
+{% endblock %}
+{% block app_og_metadatas %}
+    {{ app_og_metadatas() }}
+{% endblock %}
 ```
 
-Category and Tag entity should have the referal fields
+---
 
-- App\Entyty\SonataClassificationCategory.php :
+## Category and Tag Entities
+
+### Sonata Classification Category
+
+Below is an example of how to define a category entity with SEO fields:
 
 ```php
 <?php
@@ -235,7 +255,13 @@ class SonataClassificationCategory extends BaseCategory
     }
 }
 ```
-- App\Entyty\SonataClassificationTag :
+
+---
+
+### Sonata Classification Tag
+
+Similarly, for tags:
+
 ```php
 <?php
 
@@ -358,5 +384,9 @@ class SonataClassificationTag extends BaseTag
         return $this;
     }
 }
-
 ```
+
+---
+
+> [!IMPORTANT]
+> Ensure each entity’s SEO fields are updated to reflect the content you want to display in meta tags or OG properties. This allows for rich previews on social platforms and optimized search engine visibility.

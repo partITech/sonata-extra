@@ -1,79 +1,81 @@
-# Partitech Sonata Extra Bundle
+# Introduction
 
-The Partitech Sonata Extra Bundle enhances your Symfony application with a range of additional features, making your admin panel more powerful and user-friendly. Below is an overview of the key functionalities included in this bundle.
+The **Partitech Sonata Extra Bundle** is an extension for Symfony projects using Sonata. It provides advanced tools to improve and streamline your back-office management (security, multilingual support, AI integrations, WordPress import, publication approvals, and more).
 
-## Features
+> [!TIP]
+> The following overview is just a summary. For complete details, please refer to the official documentation and the project's GitHub repository.
 
-### AsAdmin() PHP Attribute Configuration
-Introduces a new configuration type in the Admin class for more streamlined admin configurations.
+---
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-as-admin-attribute)
+## Security and Activity Tracking
 
+Strengthen your application’s security with a comprehensive Activity Log and Content Security Policy. The **Workflow Approval** feature helps you validate critical actions before they go live.
 
-### Activity Log in Admin
-Monitors and logs all activities within the admin site, with detailed views and undo functionality.
+> [!IMPORTANT]
+> Implementing a **Content Security Policy (CSP)** significantly reduces the risk of XSS and data injection attacks.
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-activity-log)
+---
 
+## Multilingual and Multisite
 
-### Activity Approval Workflow
-Logs actions within the admin site and requires validation for actions by users with ROLE_APPROVE.
+Seamlessly handle multiple languages and multiple sites simultaneously. You can configure multilingual URLs, set up content blocks, and manage multilingual publishing without adding unnecessary complexity.
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-approval-workflow)
+> [!NOTE]
+> Specific integrations are available for SonataPageBundle and user Admin setups to further simplify multi-language management.
 
+---
 
-### Assets Management
-Manage CSS and JavaScript assets in Sonata blocks efficiently, including external and inline styles/scripts.
+## AI Integrations (Smart Services)
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-assets-handler)
+Automate key processes **like translations and content generation** through built-in **AI-powered services**. These features can help you speed up repetitive tasks and optimize your workflow.
 
+---
 
-### Integrated Blog Feature
-Enhances your Sonata project with multilanguage custom URLs and service types for blogs.
+## WordPress Import
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-blog)
+Easily import existing WordPress content and manage it directly within Sonata, benefiting from all the advanced features of this bundle.
 
-### Content Security Policy (CSP)
-Implements CSP in your application to prevent attacks like XSS and data injection.
+---
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-content-security-policy)
+## AsAdmin() Attribute
 
-### Header Redirect Manager
-Manage all your header redirections with ease, including list and detailed views.
+Simplify your Admin class configurations by using the `AsAdmin()` attribute. This approach offers a concise, readable way to declare Sonata settings.
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-header-redirect)
+> [!NOTE]
+> The *AsAdmin()* attribute can significantly reduce the boilerplate code needed to configure an entity in Sonata.
 
+---
 
-### Multilanguage Support
-Provides comprehensive multisite and multilanguage management capabilities for SonataPageBundle and User Admins.
+## Advanced Asset Management
 
-- [More Info for SonataPageBundle](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-multilanguage-support-for-sonata-page)
-- [More Info for User Admins](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-multilanguage-support-for-users-admins)
+Centralize and optimize the inclusion of your CSS and JavaScript resources, whether external or inline, to keep your codebase organized and efficient.
 
+---
 
-### Integration with PrestaSitemapBundle
-Automatically generates a sitemap.xml file, covering all aspects of your application.
+## Blog and Enhanced Layout
 
-- [More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-sitemap)
+Quickly set up a blog with multilingual URLs and reusable blocks (Slider, FAQ, Cookie Consent, etc.). An integrated Gutenberg editor is also available to enrich content creation and presentation.
 
+---
 
-### Smart Services (AI-Powered)
-Includes AI-powered translation services and automation commands for enhanced functionality.
+## Content Validation and Publishing
 
-- [More Info on Translation Services](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-smart-service)
-- [More Info on Translation Commands](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-translation-cmd)
+Require approval before publishing to ensure better quality and consistency. The **Approval Workflow** adds a control layer to critical changes and actions in the admin panel.
 
-### WordPress Import
-Facilitates importing content from WordPress with ease.
+---
 
-[More Info](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-wordPress-import)
+## Sitemap and Redirects
 
-### Additional Features
-- Cookie Consent Block (GDPR Compliance)
-- Gutenberg Editor Integration
-- Slider, FAQ, and Block Managers for Sonata Page
-- Enhanced CKEditor Gallery View
-- [And More](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-features)
+Automate the generation of a `sitemap.xml` file and conveniently manage all your HTTP redirects from the admin interface.
 
-## Installation
-Please refer to our [installation guide](https://www.partitech.com/fr/blog-technique/partitech-sonata-extra-installation) for detailed instructions on how to install and configure the Partitech Sonata Extra Bundle.
+> [!CAUTION]
+> Combine these features to build a robust back-office suitable for projects of any size, encompassing a wide range of needs (GDPR, multilingual, SEO, etc.).
+
+---
+
+## Documentation
+
+For detailed information on installation, configuration, and usage, please consult the official documentation. You will find step-by-step guides and tutorials covering each of the features mentioned above.
+
+> [!IMPORTANT]
+> Always confirm that your Symfony / Sonata versions are compatible before installing this bundle.

@@ -1,25 +1,40 @@
-# SonataExtra Bundle - Assets Management Documentation
+# Assets Management
 
-# Overview
+The **SonataExtra Bundle** offers a flexible and powerful way to manage **CSS** and **JavaScript** assets in your Sonata blocks. By only loading assets when they are needed, it optimizes page performance and streamlines resource management.
 
-The SonataExtra bundle introduces a flexible and powerful way to manage CSS and JavaScript assets in Sonata blocks. This feature allows developers to include external CSS and JS files, as well as inline styles and scripts, with ease and efficiency.
+> [!TIP]
+> You can include both external and inline assets, and even group them with custom indexes for advanced configuration.
 
-## Integration
+---
 
-###  Loading Efficiency: 
-The assets (CSS/JS) are loaded into the page only if the corresponding block is being used. This ensures efficient loading and avoids unnecessary overhead, particularly beneficial for performance optimization.
+## Overview
 
-### AssetsHandler Service
+**Key advantages**:
+- Load assets only for active blocks, **improving** page load times.
+- Support for **external** (linked) and **inline** CSS/JS.
+- Custom **indexes** for grouping assets.
 
-The AssetsHandler service is at the core of this feature. It is responsible for handling the addition of CSS and JS assets to your Sonata blocks. This service supports adding both linked and inline assets and allows specifying custom indexes for asset grouping.
+---
 
-### Including Assets in Blocks
+## AssetsHandler Service
 
-To use the AssetsHandler service in your blocks, follow these steps:
+At the heart of this feature is the `AssetsHandler` service. It provides methods to add assets in a variety of ways:
 
-1. Inject Dependencies:
+- **`addCss()`** – Link an external CSS file.
+- **`addJs()`** – Link an external JS file (with an optional `defer` parameter).
+- **`addCssInline()`** – Embed inline CSS.
+- **`addJsInline()`** – Embed inline JavaScript.
 
-Inject the `AssetsHandler` and `Environment` services into your block service using the `autowireDependencies` method.
+> [!NOTE]
+> You can specify an index (e.g., `'default'`) to organize and retrieve these assets in different parts of your application.
+
+---
+
+## Integration Steps
+
+### 1. Inject Dependencies
+
+Add the `AssetsHandler` and `Environment` services to your block service class:
 
 ```php
 use Partitech\SonataExtra\Service\AssetsHandler;
@@ -29,51 +44,81 @@ use Symfony\Contracts\Service\Attribute\Required;
 private $assetsHandler;
 
 #[Required]
-public function autowireDependencies(Environment $twig, AssetsHandler $assetsHandler): void {
+public function autowireDependencies(Environment $twig, AssetsHandler $assetsHandler): void
+{
     parent::__construct($twig);
-    $this->assetsHandler = $assetsHandler;
-}
+        $this->assetsHandler = $assetsHandler;
+    }
 ```
 
-2. Add Assets in the execute Method:
+### 2. Add Assets in the `execute()` Method
 
-Use the `addCss`, `addJs`, `addJsInline`, and `addCssInline` methods to add assets to your block.
+Within your block’s `execute()` method, call the appropriate methods to register assets:
 
 ```php
 public function execute(BlockContextInterface $blockContext, Response $response = null)
 {
-    // Adding external CSS
-    $this->assetsHandler->addCss('https://unpkg.com/library@latest/dist/style.css', 'default');
+    // External CSS
+    $this->assetsHandler->addCss(
+        'https://unpkg.com/library@latest/dist/style.css',
+        'default'
+    );
 
-    // Adding external JS with @bool defer parameter (default false)
-    $this->assetsHandler->addJs('https://unpkg.com/library@latest/dist/script.js', true, 'default');
+    // External JS (with defer set to true)
+    $this->assetsHandler->addJs(
+        'https://unpkg.com/library@latest/dist/script.js',
+        true,
+        'default'
+    );
 
-    // Adding inline JS 
-    $this->assetsHandler->addJsInline('console.log(window)', true, 'default');
+    // Inline JS
+    $this->assetsHandler->addJsInline(
+        'console.log(window)',
+        true,
+        'default'
+    );
 
-    // Adding inline CSS
-    $this->assetsHandler->addCssInline('.class{ }', 'default');
+    // Inline CSS
+    $this->assetsHandler->addCssInline(
+        '.class { color: red; }',
+        'default'
+    );
 
-    // ... rest of the execute method ...
+    // Remainder of the method ...
 }
 ```
 
-### Rendering Assets in Templates
+> [!TIP]
+> The second parameter of `addJs()` is a boolean controlling `defer`. Set it to `true` to defer script loading.
 
-To render the assets in your Twig templates, use the following Twig functions provided by the SonataExtra bundle:
+---
 
-```php
+## Rendering Assets in Twig
+
+Insert the loaded assets in your Twig templates using these functions:
+
+```twig
 {{ sonata_extra_get_blocks_css('default')|raw }}
 {{ sonata_extra_get_blocks_css_inline('default', true)|raw }}
 {{ sonata_extra_get_blocks_js('default')|raw }}
 {{ sonata_extra_get_blocks_js_inline('default', true)|raw }}
 ```
 
-- `'default'` index is used by default if the value is not set, but custom indexes can be specified when developing custom blocks.
-- The `|raw` filter is used to ensure the proper rendering of HTML tags.
-- You can use compression parameter (bool default false) to render compressed `sonata_extra_get_blocks_css_inline` and `sonata_extra_get_blocks_js_inline`
-  
+**Parameters**:
+- **index** (e.g., `'default'`): Matches the index used in your block code.
+- The second parameter in the inline functions (`true` in the example) **compresses** the inline code if desired.
 
-### Customization
+> [!NOTE]
+> Ensure you use the `|raw` filter for proper HTML rendering.
 
-Developers can create custom indexes for grouping assets when developing their blocks. This provides flexibility in managing assets across different parts of the application.
+---
+
+## Customization
+
+You can define your **own indexes** in `addCss()` or `addJs()` calls, then render them by passing the same index to the Twig functions. This approach provides **granular control** over asset grouping and loading, especially useful for large or multi-faceted applications.
+
+---
+
+## Conclusion
+
+By leveraging the **AssetsHandler service** in the SonataExtra Bundle, you can maintain a clean and **efficient** method for handling your project’s CSS and JavaScript assets. This selective approach ensures that each block only loads the resources it truly requires, leading to better **performance** and a more organized codebase.

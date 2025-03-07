@@ -1,207 +1,292 @@
-* # Partitech Sonata Extra Bundle : Features
-* 
-* ### AsAdmin() php attribute configuration
-* 
-* - Add another configuration type directly in the Admin class
-* - Documentation : [as-admin-attribute.md](./as-admin-attribute.md)
-* - Code Preview: ![AsAdmin.png](./doc-sonata-extra-images/AsAdmin.png)
-* 
-* ### Activity Log in Admin
-* The Activity Log feature in the Sonata Extra Bundle is designed to monitor and log all activities within the admin site. It provides a comprehensive view of actions taken, resources involved, descriptions of activities, and the users who performed them.
-* 
-* - **Action Type Display**: Shows the type of action performed (e.g., create, update, delete).
-* - **Resource Tracking**: Identifies the resource that was affected by the action.
-* - **Action Description**: Provides a detailed description of the activity.
-* - **User Identification**: Displays the user who performed the action.
-* - **Detailed View**: Offers an in-depth view of the modified elements in each activity.
-* - **Undo Functionality**: Includes a feature to reverse modifications when possible.
-* 
-* - List view :
-* 
-* ![Activity_log_index.png](./doc-sonata-extra-images/Activity_log_index.png)
-* 
-* - Detail view :
-* 
-* ![Activity_log_detail.png](./doc-sonata-extra-images/Activity_log_detail.png)
-* 
-* ### Activity Approval
-* The SonataExtra Approval Workflow is designed to log all actions within the admin site, providing a comprehensive overview of activities, resources involved, descriptions, and users. This feature ensures that actions are logged but not applied immediately. Instead, they require validation by a user with the `ROLE_APPROVE` permission.
-* 
-* - **Action Logging**: Logs every action but does not apply changes instantly.
-* - **Role-Based Approval**: Actions need approval from a user with `ROLE_APPROVE`.
-* - **Pending Modifications Alert**: A red notification badge in the admin interface alerts administrators of modifications awaiting approval.
-* - **Detailed Action View**: Displays action type, resource, description, user, and date in the list view.
-* - **Approval and Detail Buttons**: Allows administrators to approve modifications or view detailed information.
-* - **Purge Functionality**: An option to purge pending modifications.
-* - **Detailed Modification View**: Shows impacted fields and values for each action.
-* 
-* - Documentation : [approval-workflow.md](./approval-workflow.md)
-* - Editor action :
-* ![approval_editor_action.png](./doc-sonata-extra-images/approval_editor_action.png)
-* - Admin notification :
-* ![approval_admin_notification.png](./doc-sonata-extra-images/approval_admin_notification.png)
-* - List view :
-* ![approval_admin_list.png](./doc-sonata-extra-images/approval_admin_list.png)
-* - Detail view :
-* ![approval_admin_detail.png](doc-sonata-extra-images/approval_admin_detail.png)
-* 
-* ### ASSETS MANAGEMENT
-* flexible and powerful way to manage CSS and JavaScript assets in Sonata blocks. This feature allows developers to include external CSS and JS files, as well as inline styles and scripts, with ease and efficiency.
-* - Documentation : [assets-handler.md](./assets-handler.md)
-* ```
-* {{ sonata_extra_get_blocks_css('default')|raw }}
-* {{ sonata_extra_get_blocks_css_inline('default', true)|raw }}
-* {{ sonata_extra_get_blocks_js('default')|raw }}
-* {{ sonata_extra_get_blocks_js_inline('default', true)|raw }}
-* ```
-* ### Blog
-* Enhance your Sonata project with the integrated blog feature from Sonata Extra Bundle.
-* - Documentation : [blog.md](blog.md)
-* - Multilanguage custom urls :
-* ![Blog_CustomUrl.png](./doc-sonata-extra-images/Blog_CustomUrl.png)
-* - Blog service type :
-* ![Blog_ServiceType.png](./doc-sonata-extra-images/Blog_ServiceType.png)
-* 
-* ### Content Security Policy
-* 
-* Content Security Policy (CSP) is a crucial security feature in web development, helping to prevent various types of attacks, such as Cross-Site Scripting (XSS) and data injection attacks. The Sonata-Extra bundle for Symfony provides an efficient way to implement and manage CSP in your application.
-* - Documentation : [content-security-policy.md](./content-security-policy.md)
-* - Code Preview:
-* 
-* ![config_security_policy.png](./doc-sonata-extra-images/config_security_policy.png)
-* - Rendered header:
-* 
-* ![result_security_policy.png](./doc-sonata-extra-images/result_security_policy.png)
-* 
-* ### Header Redirect Manager
-* Manage all your header redirections
-* - Documentation : [header-redirect.md](header-redirect.md)
-* - List view :
-* ![Activity_log_index.png](./doc-sonata-extra-images/header-redirect-list.png)
-* - Detail view :
-* ![Activity_log_detail.png](./doc-sonata-extra-images/header-redirect-detail.png)
-* 
-* ### Language-switcher
-* The Sonata Extra Bundle provides a feature-rich language switcher compatible with hybrid pages.
-* - Documentation : [language-switcher.md](language-switcher.md)
-* - Front view :
-* ![Activity_log_index.png](./doc-sonata-extra-images/language_switcher.png)
-* 
-* ### multilang on SonataPageBundle
-* The Sonata Extra Bundle enhances the SonataPageBundle by offering comprehensive multisite and multilanguage management capabilities. This feature allows tracking and switching between page translations in the front-end and supports a flexible multisite strategy.
-* - Documentation : [multilanguage-support-for-sonata-page.md](multilanguage-support-for-sonata-page.md)
-* - List view :
-* ![Activity_log_index.png](./doc-sonata-extra-images/page_multilangue_list.png)
-* - Detail view :
-* ![Activity_log_detail.png](./doc-sonata-extra-images/page_multilangue_view.png)
-* 
-* 
-* ### Multilanguage Support for User Admins
-* 
-* Multilanguage support for admin interfaces. It comprises a trait for admin classes to manage multilanguage interfaces, and a trait for entities to create necessary fields.
-* The implementation will add icons for the locales `from sonata_page` sites, enabling linkages with the records and managing all site languages.
-* - Documentation : [multilanguage-support-for-users-admins.md](multilanguage-support-for-users-admins.md)
-* - List view of the translation in the selected language site
-* ![Multilanguage_edit.png](./doc-sonata-extra-images/Multilanguage_edit.png)
-* - Edit view of the translation in the selected language site
-* ![Multilanguage_list.png](./doc-sonata-extra-images/Multilanguage_list.png)
-* - Create a tranlsation from a local patern
-* ![Multilanguage_create_translation.png](./doc-sonata-extra-images/Multilanguage_create_translation.png)
-* 
-* ### Firewall
-* Provides an enhanced set of functionalities for managing firewall rules within the Sonata Admin environment. This bundle allows administrators to create and manage rules for filtering requests based on various criteria like stop words, IP addresses, and User Agents.
-* - Documentation : [firewall.md](./firewall.md)
-* 
-* ### Integration with PrestaSitemapBundle
-* Our application automatically integrates with the "PrestaSitemapBundle" to generate a `sitemap.xml` file. This feature encompasses all image assets, article modules, and content pages within the application. The process is entirely automated and includes support for multilingual links.
-* - Documentation : [sitemap.md](./sitemap.md)
-* 
-* ## Smart services (AI-powered services)
-* ### Translation
-* The Sonata Extra Bundle provides a powerful feature for automatic translation through its [Smart service](smart-service.md) functionality. This feature allows users to effortlessly translate text between different languages using AI-powered translation providers.
-* - Documentation : [smart-service.md](./smart-service.md)
-* ### Translation CMD
-* A command to automate the translation of a selected language for an admin object.
-* - Documentation : [translation-cmd.md](./translation-cmd.md)
-* ### Translation template
-* - Documentation : [translation-cmd-create-template.md](./translation-cmd-create-template.md)
-* 
-* ## WORDPRESS-IMPORT
-* The sonata-extra:wordpress-importer command is designed for importing images, categories, posts, and tags from a WordPress site into your application. This command is key for integrating WordPress content with ease.
-* - Documentation : [wordPress-import.md](./wordPress-import.md)
-* - Import cmd :
-* ![wordpress_import.png](./doc-sonata-extra-images/wordpress_import.png)
-* 
-* ## Blocks
-* ### Cookie Consent Block (GDPR)
-* The Cookie Consent Block is a customizable solution integrated into the Sonata Extra Bundle to manage user consent for cookies in compliance with GDPR regulations. It offers a flexible and user-friendly interface for cookie consent management.
-* - Documentation : [cookie-consent-block.md](./cookie-consent-block.md)
-* ![cookie-consent-block.png](./doc-sonata-extra-images/cookie-consent-block.png)
-* ![cookie-consent-block_btn.png](./doc-sonata-extra-images/cookie-consent-block_btn.png)
-* 
-* ## Form types
-* ### GUTENBERG EDITOR
-* Integrating the Gutenberg editor into Sonata involves using the 'Automatic Isolated block editor' library. This guide details the steps needed to install and configure the Gutenberg editor in your Sonata application.
-* - Documentation : [form-type-gutenberg.md](./form-type-gutenberg.md)
-* ![Gutenberg_FormType_1.png](./doc-sonata-extra-images/Gutenberg_FormType_1.png)
-* ![Gutenberg_FormType_2.png](./doc-sonata-extra-images/Gutenberg_FormType_2.png)
-* ![Gutenberg_FormType_3.png](./doc-sonata-extra-images/Gutenberg_FormType_3.png)
-* ![Gutenberg_FormType_4.png](./doc-sonata-extra-images/Gutenberg_FormType_4.png)
-* ![Gutenberg_FormType_5.png](./doc-sonata-extra-images/Gutenberg_FormType_5.png)
-* ![Gutenberg_FormType_6.png](./doc-sonata-extra-images/Gutenberg_FormType_6.png)
-* ![Gutenberg_FormType_7.png](./doc-sonata-extra-images/Gutenberg_FormType_7.png)
-* 
-* ### Slider Manager with Sonata Page Block
-* - **Preview**: ![Slider Manager Preview](./doc-sonata-extra-images/slider-manager-preview.png)
-* - Add sliders to Sonata Page with customizable blocks
-* 
-* ### FAQ Manager with Sonata Page Block
-* - Easily integrate FAQs into your Sonata Pages
-* - **FAQ list**: ![faq_list.png](./doc-sonata-extra-images/faq_list.png)
-* - **Questions**: ![faq_questions.png](./doc-sonata-extra-images/faq_questions.png)
-* - **Block**: ![faq_block.png](./doc-sonata-extra-images/faq_block.png)
-* - **Page edition**: ![faq_page.png](./doc-sonata-extra-images/faq_page.png)
-* 
-* 
-* 
-* 
-* ### Sonata Page Block Manager
-* - Hide undesired blocks in Sonata Page block manager
-* - **Preview**: ![Block Manager Preview](./doc-sonata-extra-images/block-manager-preview.png)
-* 
-* 
-* ### Article Manager with Gutenberg Editor
-* - Write articles using the Gutenberg editor
-* - **Gutemberg editor**: ![article_editor_gutemberg.png](./doc-sonata-extra-images/article_editor_gutemberg.png)
-* - **Editor selector**: ![article_editor_selector.png](./doc-sonata-extra-images/article_editor_selector.png)
-* 
-* 
-* ### Sonata Admin FormTypes
-* - Additional FormTypes for Sonata Admin
-* - **Gutemberg Editor**: ![article_editor_gutemberg.png](./doc-sonata-extra-images/article_editor_gutemberg.png)
-* - **Markdown editor**: ![Markdown_editor.png](./doc-sonata-extra-images/Markdown_editor.png)
-* 
-* ### Gutenberg Editor with Advanced Features
-* - WordPress's Gutenberg editor with file upload, custom patterns, and SonataMedia gallery
-* - Editor view :![Gutenberg Preview](./doc-sonata-extra-images/Gutenberg_FormType_7.png)
-* - Blocks selection : ![Gutenberg Preview](./doc-sonata-extra-images/Gutenberg_FormType_1.png)
-* - Patterns selection : ![Gutenberg Preview](./doc-sonata-extra-images/Gutenberg_FormType_5.png)
-* - Media library : ![Gutenberg Preview](./doc-sonata-extra-images/Gutenberg_FormType_3.png)
-* - Media library expended view: ![Gutenberg Preview](./doc-sonata-extra-images/Gutenberg_FormType_4.png)
-* 
-* 
-* 
-* ### CKEditor Gallery View
-* 
-* - View galleries in CKEditor with improved UI
-* - Select media  :![Gutenberg Preview](./doc-sonata-extra-images/CkEditor_2.png)
-* - Media brwoser window : ![Gutenberg Preview](./doc-sonata-extra-images/CkEditor_1.png)
-* - **Preview**: ![CKEditor Gallery View Preview](./doc-sonata-extra-images/CkEditor_2.png)
-* 
-* ### Automatic WordPress Importer
-* - **Code Preview**: ![Wordpress_import.png](./doc-sonata-extra-images/wordpress_import.png)
-* - documentation : [wordPress_import.md](WordPress_import.md)
-* 
-* 
-* 
-* ---
+# Features
+
+**The Partitech Sonata Extra Bundle** extends your Sonata application with a broad range of advanced features. This document covers the key functionalities provided by the bundle, including configuration attributes, activity logging, approval workflows, asset management, blogging, security enhancements, multilingual support, AI services, WordPress importing, block management, form types, and more.
+
+> [!TIP]
+> Refer to each feature’s dedicated documentation file for details on usage, configuration, and best practices.
+
+---
+
+## AsAdmin() PHP Attribute Configuration
+
+Add a new configuration type directly in the Admin class for simpler, more concise administration.
+
+```php
+use Partitech\SonataExtra\Attribute\AsAdmin;
+
+#[AsAdmin(
+    manager_type: 'orm',
+    group: 'Admin',
+    label: 'My Entity Admin',
+    model_class: \Partitech\SonataExtra\Entity\Article::class,
+    controller: \Partitech\SonataExtra\Controller\Admin\ArticleController::class,
+    calls: [
+        ['addChild', \Partitech\SonataExtra\Admin\ArticleRevisionAdmin::class, 'article'],
+    ]
+)]
+class ArticleAdmin extends AbstractAdmin
+{
+    use AdminTranslationTrait;
+    protected $baseRoutePattern = 'article';
+
+```
+
+---
+
+## Activity Log in Admin
+
+Monitor and log all activities within the admin site. This feature offers a complete overview of actions taken, the resources affected, action descriptions, and the user who performed them.
+
+- **Action Type Display**: Shows the type of action performed (e.g., create, update, delete).
+- **Resource Tracking**: Identifies which resource was affected.
+- **Detailed View**: Offers an in-depth look at the changes made.
+- **Undo Functionality**: Allows reversing modifications when possible.
+
+**List view**:  
+![Activity_log_index.png](./doc-sonata-extra-images/Activity_log_index.png)
+
+**Detail view**:  
+![Activity_log_detail.png](./doc-sonata-extra-images/Activity_log_detail.png)
+
+---
+
+## Activity Approval
+
+Require a user with `ROLE_APPROVE` to validate certain actions before they take effect. This workflow logs every action, offering a comprehensive overview but applies changes only once they’re approved.
+
+- **Role-Based Approval**: Pending actions need a user with `ROLE_APPROVE` for validation.
+- **Visual Notifications**: A red notification badge alerts admins of pending modifications.
+- **Detailed Action View**: Showcases the modified fields and values.
+- **Purge Functionality**: Allows purging of pending modifications.
+
+**Editor action**:  
+![approval_editor_action.png](./doc-sonata-extra-images/approval_editor_action.png)
+
+**Admin notification**:  
+![approval_admin_notification.png](./doc-sonata-extra-images/approval_admin_notification.png)
+
+**List view**:  
+![approval_admin_list.png](./doc-sonata-extra-images/approval_admin_list.png)
+
+**Detail view**:  
+![approval_admin_detail.png](doc-sonata-extra-images/approval_admin_detail.png)
+
+---
+
+## Assets Management
+
+Manage CSS and JavaScript assets in Sonata blocks with ease. Include external files and inline scripts or styles efficiently.
+
+```twig
+{{ sonata_extra_get_blocks_css('default')|raw }}
+{{ sonata_extra_get_blocks_css_inline('default', true)|raw }}
+{{ sonata_extra_get_blocks_js('default')|raw }}
+{{ sonata_extra_get_blocks_js_inline('default', true)|raw }}
+```
+
+---
+
+## Blog
+
+Enhance your Sonata project with an integrated blog system. It supports multilingual URLs, custom routes, and more.
+
+**Multilanguage custom URLs**:  
+![Blog_CustomUrl.png](./doc-sonata-extra-images/Blog_CustomUrl.png)
+
+**Blog service type**:  
+![Blog_ServiceType.png](./doc-sonata-extra-images/Blog_ServiceType.png)
+
+---
+
+## Content Security Policy (CSP)
+
+Implement and manage CSP to protect against common security threats like XSS or data injection. This ensures safer content handling across your application.
+
+**Code Preview**:  
+```yaml
+content_security_policy:
+    object-src:
+      - 'none'
+    script-src:
+      - "'self'"
+      - "'unsafe-inline'"
+      - "'unsafe-eval'"
+      - 'https://cdnjs.cloudflare.com/ajax/libs/js-beautify/1.14.11/beautify-html.js'
+      - 'https://unpkg.com/@popperjs/core@2'
+      - 'https://unpkg.com/tippy.js@6'
+    style-src:
+      - "'self'"
+      - "'unsafe-inline'"
+      - 'fonts.googleapis.com'
+      - 'https://cdnjs.cloudflare.com/ajax/libs/bootstrap-toaster/5.1.0/css/bootstrap-toaster.min.css'
+      - 'https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.css'
+
+```
+
+**Rendered header**:  
+![result_security_policy.png](./doc-sonata-extra-images/result_security_policy.png)
+
+---
+
+## Header Redirect Manager
+
+Manage all header redirections in a single interface, complete with list and detail views for easy oversight.
+
+**List view**:  
+![Activity_log_index.png](./doc-sonata-extra-images/header-redirect-list.png)
+
+**Detail view**:  
+![Activity_log_detail.png](./doc-sonata-extra-images/header-redirect-detail.png)
+
+---
+
+## Language-Switcher
+
+A user-friendly language switcher for hybrid pages. Easily toggle between locales directly in the interface.
+
+**Front view**:  
+![Activity_log_index.png](./doc-sonata-extra-images/language_switcher.png)
+
+---
+
+## Multilanguage on SonataPageBundle
+
+Comprehensive multisite and multilingual management for SonataPageBundle. Quickly switch between translations on the front-end and handle multiple site setups seamlessly.
+
+**List view**:  
+![Activity_log_index.png](./doc-sonata-extra-images/page_multilangue_list.png)
+
+**Detail view**:  
+![Activity_log_detail.png](./doc-sonata-extra-images/page_multilangue_view.png)
+
+---
+
+## Multilanguage Support for User Admins
+
+Enable multilingual functionality in the admin interface. Includes traits for admin classes and entities, plus locale icons from SonataPage to link records and manage languages.
+
+**List view**  
+![Multilanguage_edit.png](./doc-sonata-extra-images/Multilanguage_edit.png)
+
+**Edit view**  
+![Multilanguage_list.png](./doc-sonata-extra-images/Multilanguage_list.png)
+
+**Create translation**  
+![Multilanguage_create_translation.png](./doc-sonata-extra-images/Multilanguage_create_translation.png)
+
+---
+
+## Firewall
+
+Configure and manage firewall rules from the Sonata Admin environment. Create rules to filter incoming requests based on IP addresses, user agents, or specific stop words.
+
+---
+
+## Integration with PrestaSitemapBundle
+
+Automatically generate a `sitemap.xml` file encompassing images, articles, and pages. This feature also supports multilingual links for seamless SEO integration.
+
+---
+
+## Smart Services (AI-Powered Services)
+
+### Translation
+
+Use built-in AI-powered translation to translate text between languages efficiently.
+
+### Translation CMD
+
+Automate the translation of a selected language for any admin object using a command-line tool.
+
+### Translation Template
+
+Generate custom translation templates effortlessly.
+
+---
+
+## WordPress-Import
+
+Easily import images, categories, posts, and tags from a WordPress site. This tool is key for integrating WordPress content into your Sonata application.
+
+**Import command**:  
+![wordpress_import.png](./doc-sonata-extra-images/wordpress_import.png)
+
+---
+
+## Blocks
+
+### Cookie Consent Block (GDPR)
+
+Manage user consent for cookies with a flexible, GDPR-compliant block.
+
+![cookie-consent-block.png](./doc-sonata-extra-images/cookie-consent-block.png)  
+![cookie-consent-block_btn.png](./doc-sonata-extra-images/cookie-consent-block_btn.png)
+
+---
+
+## Form Types
+
+### Gutenberg Editor
+
+Leverage the WordPress Gutenberg editor for an advanced, block-based editing experience within Sonata.
+
+![Gutenberg_FormType_1.png](./doc-sonata-extra-images/Gutenberg_FormType_1.png)
+
+### Slider Manager with Sonata Page Block
+
+Add fully customizable sliders to your Sonata Pages.
+
+![Slider Manager Preview](./doc-sonata-extra-images/slider-manager-preview.png)
+
+### FAQ Manager with Sonata Page Block
+
+Integrate FAQs into your Sonata Pages easily.
+
+![faq_list.png](./doc-sonata-extra-images/faq_list.png)  
+![faq_questions.png](./doc-sonata-extra-images/faq_questions.png)  
+![faq_block.png](./doc-sonata-extra-images/faq_block.png)  
+![faq_page.png](./doc-sonata-extra-images/faq_page.png)
+
+### Sonata Page Block Manager
+
+Hide unwanted blocks and manage visible blocks within Sonata Page.
+
+![Block Manager Preview](./doc-sonata-extra-images/block-manager-preview.png)
+
+### Article Manager with Gutenberg Editor
+
+Write articles using a block-based interface. Choose between Gutenberg and other editors.
+
+![article_editor_gutemberg.png](./doc-sonata-extra-images/article_editor_gutemberg.png)  
+![article_editor_selector.png](./doc-sonata-extra-images/article_editor_selector.png)
+
+### Sonata Admin FormTypes
+
+Additional FormTypes for Sonata Admin, including Markdown and Gutenberg editors.
+
+![Markdown_editor.png](./doc-sonata-extra-images/Markdown_editor.png)
+
+### Gutenberg Editor with Advanced Features
+
+Add file uploads, custom patterns, and SonataMedia galleries to Gutenberg for a richer editing experience.
+
+![Gutenberg_FormType_5.png](./doc-sonata-extra-images/Gutenberg_FormType_5.png)  
+![Gutenberg_FormType_3.png](./doc-sonata-extra-images/Gutenberg_FormType_3.png)
+
+### CKEditor Gallery View
+
+Enable improved gallery viewing directly within CKEditor.
+
+![CkEditor_2.png](./doc-sonata-extra-images/CkEditor_2.png)  
+![CkEditor_1.png](./doc-sonata-extra-images/CkEditor_1.png)
+
+### Automatic WordPress Importer
+
+A dedicated command to import WordPress data into your Sonata application.
+
+![Wordpress_import.png](./doc-sonata-extra-images/wordpress_import.png)
+
+---
+
+> [!CAUTION]
+> Review each feature’s documentation for comprehensive setup steps, configuration details, and usage notes.
