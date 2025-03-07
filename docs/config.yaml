@@ -1,0 +1,24 @@
+projectName: "Sonata Extra"
+defaultDoc: "index.md"
+logoUrl: "/images/logo.svg"
+projectSource: "https://github.com/partITech/sonata-extra"
+jumbotronSourceLinkCodeLink: "https://github.com/partITech/sonata-extra"
+enableSearch: true
+jumbotron: true
+jumbotronHeader: "Symfony Sonata application with a range of additional features"
+jumbotronTextLine: "Make your admin panel more powerful and user-friendly"
+jumbotronGetStartedLabel: "Get started"
+jumbotronGetStartedLink: "#main-content"
+jumbotronSourceLinkCodeLabel: "View on GitHub"
+jumbotronCodeLang: "php"
+jumbotronCodeContent: |
+  #[AsAdmin(
+      manager_type: 'orm',
+      group: 'Admin',
+      label: 'My Entity Admin',
+      model_class: Article::class,
+      controller: ArticleController::class,
+      calls: [
+        ['addChild', ArticleRevisionAdmin::class, 'article'],
+      ]
+  )]

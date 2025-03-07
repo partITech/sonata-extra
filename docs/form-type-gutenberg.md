@@ -1,6 +1,4 @@
-# Sonata Extra Bundle: Integrating Gutenberg Editor
-
-## Introduction
+# Integrating Gutenberg Editor
 
 Integrating the Gutenberg editor into Sonata involves using the 'Automatic Isolated block editor' library. This guide details the steps needed to install and configure the Gutenberg editor in your Sonata application.
 
@@ -20,9 +18,9 @@ The Gutenberg editor relies on a library from 'Automatic Isolated Block Editor'.
 
 
 
-## Installation Steps
+# Installation Steps
 
-1. **Download and Install the Library**:
+##  Download and Install the Library
 
 Use the command line to download and install the Gutenberg library assets:
 
@@ -33,7 +31,7 @@ bin/console assets:install
 
 
 
-2. **Add Gutenberg Widget Field in Twig Form Themes**:
+## Add Gutenberg Widget Field in Twig Form Themes
 
 Update your `twig.yaml` configuration to include the Gutenberg widget field:
 
@@ -240,14 +238,14 @@ Inside the patterns directory, create your own pattern library:
 
 Each pattern file should contain a PHP header and the Gutenberg block code. Here's an example header and block layout:
 
-```php
-<?php
+```html
+
 /**
  * Title: My Test Pattern 1
  * Description: Example of a custom pattern
  * Categories: test
  */
-?>
+
 <!-- wp:group {"layout":{"type":"constrained","contentSize":"400px"}} -->
 <div class="wp-block-group">
     <!-- wp:cover {"url":"[Image URL]","dimRatio":0,"isDark":false,"style":{"border":{"radius":"10px"}},"layout":{"type":"constrained"}} -->
@@ -262,12 +260,12 @@ Each pattern file should contain a PHP header and the Gutenberg block code. Here
 
 Finaly, the structure should look like this :
 
-```
---config<br>
------patterns<br>
---------my-library<br>
------------------patern1.php<br>
------------------patern2.php<br>
+```text
+--config
+-----patterns
+--------my-library
+-----------------patern1.php
+-----------------patern2.php
 ``` 
 
 ### Step 4: Configure FormType
@@ -276,7 +274,7 @@ Finaly, the structure should look like this :
 
 Import the `GutenbergPatternsService` in your admin class.
 
-```
+```php 
 use App\Service\GutenbergPatternsService;
 ``` 
 
@@ -284,7 +282,7 @@ use App\Service\GutenbergPatternsService;
 
 Use the `#[Required]` attribute to inject the `GutenbergPatternsService`:
 
-```
+```php
 #[Required]
 public function required(GutenbergPatternsService $gutenbergPatterns): void {
     $this->gutenbergPatterns = $gutenbergPatterns;
@@ -295,7 +293,7 @@ public function required(GutenbergPatternsService $gutenbergPatterns): void {
 
 Retrieve the patterns and configure them in the `FormMapper`:
 
-```
+```php 
 $patterns = $this->gutenbergPatterns->getPatterns(['my-library']);
 
 $formMapper

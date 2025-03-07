@@ -1,7 +1,5 @@
-# Sonata Extra Bundle: Approval workflow
+# Approval workflow
 
-
-## Overview
 The SonataExtra Approval Workflow is designed to log all actions within the admin site, providing a comprehensive overview of activities, resources involved, descriptions, and users. This feature ensures that actions are logged but not applied immediately. Instead, they require validation by a user with the `ROLE_APPROVE` permission.
 
 ## Features
@@ -13,18 +11,16 @@ The SonataExtra Approval Workflow is designed to log all actions within the admi
 - **Purge Functionality**: An option to purge pending modifications.
 - **Detailed Modification View**: Shows impacted fields and values for each action.
 
-## Screens
-
-- Editor action :
+## Editor action
 ![approval_editor_action.png](./doc-sonata-extra-images/approval_editor_action.png)
 
-- Admin notification :
+## Admin notification
 ![approval_admin_notification.png](./doc-sonata-extra-images/approval_admin_notification.png)
 
-- List view :
+## List view
 ![approval_admin_list.png](./doc-sonata-extra-images/approval_admin_list.png)
 
-- Detail view :
+## Detail view
 ![approval_admin_detail.png](./doc-sonata-extra-images/approval_admin_detail.png)
 
 ## Configuration Steps

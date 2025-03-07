@@ -1,8 +1,10 @@
-# Sonata Extra Bundle: Translate Content Command Documentation
+# Translate Content Command Documentation
 
 ## Command Name
 
-`sonata:extra:translate-content`
+```bash
+sonata:extra:translate-content
+````
 
 ## Description
 

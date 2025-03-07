@@ -1,23 +1,20 @@
-# Sonata Extra Bundle:  Using the creation and import of translations command.
-
-
-## Overview
+# Using the creation and import of translations command.
 
 PartitechSonataExtraBundle provides a convenient way to manage translations in Sonata Admin. This bundle includes two primary commands: `sonata:extra:translation-create-template` and `sonata:extra:translation-import-template`. These commands facilitate the creation and import of translations, optimizing the process and integrating with Chat GPT for efficient translation handling.
 
 
-## Commands
+## Create template
 
-### sonata:extra:translation-create-template
-
-#### Description
+```shell
+sonata:extra:translation-create-template
+```
+### Description
 
 This command prepares your content for translation. It creates a directory structure with files containing the text to be translated.
 
-#### Usage
-```
+### Usage
+```shell
 bin/console sonata:extra:translation-create-template --site=[SITE_ID] --reference-site=[REFERENCE_SITE_ID] --service="[ADMIN_SERVICE]"
-
 ```
 
 - `--site`: The site ID for which translations are to be created.
@@ -25,7 +22,7 @@ bin/console sonata:extra:translation-create-template --site=[SITE_ID] --referenc
 - `--service`: The admin service for which translations are needed.
 
 
-#### Output
+### Output
 
 The command generates a set of directories and files under `var/cache/translation/YourService/`. 
 For each item ID, you'll find files like:
@@ -34,23 +31,21 @@ For each item ID, you'll find files like:
 - `payloadArray_translated.json`: For storing the translated content.
 - Other files for handling structured content like HTML.
 
+---
 
+## Import template
 
+```shell
+sonata:extra:translation-import-template
+```
 
-
-
-
-
-
-### sonata:extra:translation-import-template
-
-#### Description
+### Description
 
 This command imports the translated content back into your database, reconstructing the HTML structure.
 
-#### Usage
+### Usage
 After translating the content, run:
-```
+```shell
 bin/console sonata:extra:translation-import-template --service="[ADMIN_SERVICE]"
 ```
 
@@ -63,7 +58,7 @@ bin/console sonata:extra:translation-import-template --service="[ADMIN_SERVICE]"
 5. Import Translations: Run the sonata:extra:translation-import-template command to update your content with the new translations.
 
 ### Example
-```
+```shell
 # Creating translation templates
 bin/console sonata:extra:translation-create-template --site=5 --reference-site=2 --service="Partitech\SonataExtra\Admin\ArticleAdmin"
 

@@ -36,12 +36,12 @@
         {
             "name": "Thomas Bourdin",
             "email": "tbourdin@partitech.com",
-            "homepage": "https://thomasbourdinwebsite.com"
+            "homepage": "https://www.partitech.com/fr"
         },
         {
             "name": "Géraud Bourdin",
             "email": "gbourdin@partitech.com",
-            "homepage": "https://thomasbourdinwebsite.com"
+            "homepage": "https://www.partitech.com/fr"
         }
     ],
     "require-dev": {
