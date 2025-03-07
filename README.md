@@ -1,7 +1,7 @@
 # Sonata Extra Bundle
 
 > [!TIP]
-> For more detailed information and comprehensive guides, please visit our [official documentation](https://automarkdoc.partitech.com/)
+> For more detailed information and comprehensive guides, please visit our [official documentation](https://sonata-extra.partitech.com)
 
 
 **An advanced extension for the Sonata Admin Bundle, empowering your Symfony projects with enhanced functionality and ease of use.**
