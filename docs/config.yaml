@@ -1,6 +1,7 @@
 projectName: "Sonata Extra"
 defaultDoc: "index.md"
 logoUrl: "/images/logo.svg"
+logoHref: "https://www.partitech.com/"
 projectSource: "https://github.com/partITech/sonata-extra"
 jumbotronSourceLinkCodeLink: "https://github.com/partITech/sonata-extra"
 enableSearch: true
