@@ -45,7 +45,7 @@ class BlogPageService implements PageServiceInterface
         return 'Blog page';
     }
 
-    public function execute(PageInterface $page, Request $request, array $parameters = [], Response $response = null): Response
+    public function execute(PageInterface $page, Request $request, array $parameters = [], ?Response $response = null): Response
     {
         $seoParameters = [
             'ogTitle' => $response->headers->get('X-Custom-Header-ogTitle'),
